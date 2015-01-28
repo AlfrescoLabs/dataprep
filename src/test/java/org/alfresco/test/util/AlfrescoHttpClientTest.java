@@ -28,13 +28,22 @@ public class AlfrescoHttpClientTest
     @Test
     public void getClientWithAuth()
     {
-        HttpClient client = AlfrescoHttpClient.getHttpClientWithBasicAuth("admin", "password");
+        HttpClient client = AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost","admin", "password");
         Assert.assertNotNull(client);
     }
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void getClientWithInvalidParam()
     {
-        HttpClient client = AlfrescoHttpClient.getHttpClientWithBasicAuth(null, null);
-        Assert.assertNotNull(client);
+        AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost",null, "pass");
+    }
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void getClientWithInvalidPassword()
+    {
+        AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost","michael", null);
+    }
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void getClientWithInvalidUrlParam()
+    {
+        AlfrescoHttpClient.getHttpClientWithBasicAuth(null,"test", "test");
     }
 }

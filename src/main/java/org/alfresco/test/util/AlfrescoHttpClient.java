@@ -35,17 +35,21 @@ public class AlfrescoHttpClient
      * @param password String user password
      * @return {@link HttpClient} client
      */
-    public static HttpClient getHttpClientWithBasicAuth(String username, String password)
+    public static HttpClient getHttpClientWithBasicAuth(String url, String username, String password)
     {
         if(StringUtils.isEmpty(username)||StringUtils.isEmpty(password))
         {
             throw new IllegalArgumentException(
                     String.format("Input required username was %s and password %s",username,password));
         }
-        
+        if(StringUtils.isEmpty(url))
+        {
+            
+            throw new IllegalArgumentException("API URL is required");
+        }
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                new AuthScope("localhost", 443),
+                new AuthScope(url, 443),
                 new UsernamePasswordCredentials(username, password));
         CloseableHttpClient httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
