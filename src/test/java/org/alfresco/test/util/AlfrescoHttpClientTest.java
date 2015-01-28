@@ -30,6 +30,8 @@ public class AlfrescoHttpClientTest
     {
         HttpClient client = AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost","admin", "password");
         Assert.assertNotNull(client);
+        client = AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost",442,"admin", "password");
+        Assert.assertNotNull(client);
     }
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void getClientWithInvalidParam()

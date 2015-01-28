@@ -30,12 +30,25 @@ import org.apache.http.impl.client.HttpClients;
 public class AlfrescoHttpClient
 {
     /**
-     * Provides an http client with basic authentication.
+     * Provides an http client with basic authentication based on port 443.
+     * @param url API url location
      * @param username String user identifier 
      * @param password String user password
      * @return {@link HttpClient} client
      */
     public static HttpClient getHttpClientWithBasicAuth(String url, String username, String password)
+    {
+        return getHttpClientWithBasicAuth(url, 443, username, password);
+    }
+    /**
+     * Provides an http client with basic authentication.
+     * @param url API url location
+     * @param port int port number
+     * @param username String user identifier 
+     * @param password String user password
+     * @return {@link HttpClient} client
+     */
+    public static HttpClient getHttpClientWithBasicAuth(String url,int port, String username, String password)
     {
         if(StringUtils.isEmpty(username)||StringUtils.isEmpty(password))
         {
@@ -49,7 +62,7 @@ public class AlfrescoHttpClient
         }
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                new AuthScope(url, 443),
+                new AuthScope(url, port),
                 new UsernamePasswordCredentials(username, password));
         CloseableHttpClient httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
