@@ -14,7 +14,7 @@
  */
 package org.alfresco.test.util;
 /**
- * Create user helper class, creates an Alfresco user using public api.
+ * Create user helper class, creates an Alfresco user using public API.
  * @author Michael Suzuki
  * @author Bocancea Bogdan
  */
