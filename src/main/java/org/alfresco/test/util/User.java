@@ -19,9 +19,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONObject;
 
 /**
@@ -61,48 +60,48 @@ public class User
         String firstName = userName;
         String defaultLastName = "lastName";
         JSONObject body = encode(userName, password, firstName, defaultLastName, email);
+        AlfrescoHttpClient client = new AlfrescoHttpClient();
 
         String apiUrl = shareUrl.replaceFirst("share", AlfrescoHttpClient.ALFRESCO_API_PATH);
-        String reqURL = apiUrl + "people?alf_ticket=" + AlfrescoHttpClient.getAlfTicket(apiUrl, adminUser, adminPass);
+        String reqURL = apiUrl + "people?alf_ticket=" + client.getAlfTicket(apiUrl, adminUser, adminPass);
         if(logger.isTraceEnabled())
         {
             logger.trace("Using Url - " + reqURL);
         }
-        // Create the http client 
-        HttpClient client = HttpClientBuilder.create().build();
         HttpPost request = null;
         HttpResponse response = null;
         try
         {
-            request = AlfrescoHttpClient.generatePostRequest(reqURL, body);
-            response = AlfrescoHttpClient.executeRequest(client, request);
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+            request = client.generatePostRequest(reqURL, body);
+            response = client.executeRequest(request);
+            switch (response.getStatusLine().getStatusCode())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("User created successfully: " + userName);
-                }
-                return true;
-            }
-            else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT)
-            {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("User: " + userName + " alreary created");
-                }
-                return false;
-            }
-            else
-            {
-                logger.error("Unable to create user: " + response.toString());
-                return false;
+                case HttpStatus.SC_OK:
+                    if(logger.isTraceEnabled())
+                    {
+                        logger.trace("User created successfully: " + userName);
+                    }
+                    return true;
+                case HttpStatus.SC_CONFLICT:
+                    if(logger.isTraceEnabled())
+                    {
+                        logger.trace("User: " + userName + " alreary created");
+                    }
+                    
+                    break;
+                default:
+                    logger.error("Unable to create user: " + response.toString());
+                    break;
             }
         }
         finally
         {
             request.releaseConnection();
+            client.close();
         }
+        return false;
     }
+    
     /**
      * Builds a json object representing the user data.
      * @param userName
@@ -126,5 +125,35 @@ public class User
         body.put("password", password);
         body.put("email", email);
         return body;
+    }
+    /**
+     * Checks if user already exists.
+     * @param shareUrl
+     * @param username
+     * @return
+     * @throws Exception
+     */
+    public static boolean userExists(final String shareUrl, 
+                                     final String adminUser,
+                                     final String adminPass,
+                                     final String username) throws Exception
+    {
+        AlfrescoHttpClient client = new AlfrescoHttpClient();
+        String ticket = client.getAlfTicket(shareUrl, adminUser, adminPass);
+        String url = client.parsePath(shareUrl) + "people/" + username +"?alf_ticket=" + ticket; 
+        HttpGet get = new HttpGet(url);
+        try
+        {
+            HttpResponse response = client.executeRequest(get);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+        }
+        finally
+        {
+            client.close();
+        }
+        return false;
     }
 }

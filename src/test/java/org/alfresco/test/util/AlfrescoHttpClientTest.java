@@ -16,9 +16,10 @@ package org.alfresco.test.util;
 
 import java.io.IOException;
 
-import org.apache.http.client.HttpClient;
 import org.json.simple.parser.ParseException;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -28,46 +29,22 @@ import org.testng.annotations.Test;
  */
 public class AlfrescoHttpClientTest
 {
-    @Test
-    public void getClientWithAuth()
+    AlfrescoHttpClient client;
+    @BeforeMethod
+    public void init()
     {
-        HttpClient client = AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost", "admin", "password");
-        Assert.assertNotNull(client);
-        client = AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost", 442, "admin", "password");
-        Assert.assertNotNull(client);
+        client = new AlfrescoHttpClient();
     }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void getClientWithInvalidParam()
+    @AfterMethod
+    public void tearDown() throws IOException
     {
-        AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost", null, "pass");
+        client.close();
     }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void getClientWithInvalidPassword()
-    {
-        AlfrescoHttpClient.getHttpClientWithBasicAuth("localhost", "michael", null);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void getClientWithInvalidUrlParam()
-    {
-        AlfrescoHttpClient.getHttpClientWithBasicAuth(null, "test", "test");
-    }
-
-    @Test
-    public void getAlfrescoTicket() throws IOException, ParseException
-    {
-        String apiUrl = "http://127.0.0.1:8080/alfresco/service/api/";
-        String ticket = AlfrescoHttpClient.getAlfTicket(apiUrl, "admin", "admin");
-        Assert.assertNotNull(ticket);
-    }
-
     @Test
     public void getAlfTicketBadUrl() throws IOException, ParseException
     {
         String apiUrl = "http://127.0.0.1:8080/badUrl/";
-        String ticket = AlfrescoHttpClient.getAlfTicket(apiUrl, "admin", "admin");
+        String ticket = client.getAlfTicket(apiUrl, "admin", "admin");
         Assert.assertEquals(ticket, "");
     }
     
@@ -75,7 +52,7 @@ public class AlfrescoHttpClientTest
     public void getAlfTicketBadUser() throws IOException, ParseException
     {
         String apiUrl = "http://127.0.0.1:8080/alfresco/service/api/";
-        String ticket = AlfrescoHttpClient.getAlfTicket(apiUrl, "someUser", "wrongPassword");
+        String ticket = client.getAlfTicket(apiUrl, "someUser", "wrongPassword");
         Assert.assertEquals(ticket, "");
     }
 

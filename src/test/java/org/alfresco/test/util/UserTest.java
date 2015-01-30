@@ -33,8 +33,13 @@ public class UserTest
     {
         boolean result = User.create(shareUrl, "admin", "admin", userName, password, email);
         Assert.assertTrue(result);
+        Assert.assertTrue(User.userExists(shareUrl, "admin", "admin", userName));
     }
-
+    @Test
+    public void checkUserExistsWhenHeDoesnt() throws Exception
+    {
+        Assert.assertFalse(User.userExists(shareUrl, "admin", "admin", "booo"));
+    }
     @Test
     public void createSameEnterpriseUser() throws Exception
     {
