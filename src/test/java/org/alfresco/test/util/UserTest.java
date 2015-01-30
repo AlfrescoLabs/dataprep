@@ -3,7 +3,7 @@ package org.alfresco.test.util;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class CreateUserTest
+public class UserTest
 {
     String userName = System.currentTimeMillis() + "@test.com";
     String password = "password";

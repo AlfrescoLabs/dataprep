@@ -17,7 +17,7 @@ package org.alfresco.test.util;
 import java.io.IOException;
 
 import org.apache.http.client.HttpClient;
-import org.json.JSONException;
+import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -56,7 +56,7 @@ public class AlfrescoHttpClientTest
     }
 
     @Test
-    public void getAlfrescoTicket() throws IOException, JSONException
+    public void getAlfrescoTicket() throws IOException, ParseException
     {
         String apiUrl = "http://127.0.0.1:8080/alfresco/service/api/";
         String ticket = AlfrescoHttpClient.getAlfTicket(apiUrl, "admin", "admin");
@@ -64,7 +64,7 @@ public class AlfrescoHttpClientTest
     }
 
     @Test
-    public void getAlfTicketBadUrl() throws IOException, JSONException
+    public void getAlfTicketBadUrl() throws IOException, ParseException
     {
         String apiUrl = "http://127.0.0.1:8080/badUrl/";
         String ticket = AlfrescoHttpClient.getAlfTicket(apiUrl, "admin", "admin");
@@ -72,7 +72,7 @@ public class AlfrescoHttpClientTest
     }
     
     @Test
-    public void getAlfTicketBadUser() throws IOException, JSONException
+    public void getAlfTicketBadUser() throws IOException, ParseException
     {
         String apiUrl = "http://127.0.0.1:8080/alfresco/service/api/";
         String ticket = AlfrescoHttpClient.getAlfTicket(apiUrl, "someUser", "wrongPassword");

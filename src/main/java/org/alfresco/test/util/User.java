@@ -22,6 +22,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.simple.JSONObject;
 
 /**
  * Create user helper class, creates an Alfresco user using public API.
@@ -33,32 +34,47 @@ public class User
 {
     private static Log logger = LogFactory.getLog(User.class);
 
-    public static boolean create(String shareUrl, String adminUser, String adminPass, String userName, String password, String email)
-            throws Exception
+    /**
+     * Create an Alfresco user.
+     * @param shareUrl
+     * @param adminUser
+     * @param adminPass
+     * @param userName
+     * @param password
+     * @param email
+     * @return true if successful
+     * @throws Exception if error
+     */
+    public static boolean create(final String shareUrl,
+                                 final String adminUser,
+                                 final String adminPass,
+                                 final String userName,
+                                 final String password,
+                                 final String email) throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password)
+                || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
                 || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(email))
         {
-            throw new IllegalArgumentException("Null Parameters: Please correct");
+            throw new IllegalArgumentException("User detail is required");
         }
-
-        String apiUrl = shareUrl.replaceFirst("share", AlfrescoHttpClient.API_SERVICE);
         String firstName = userName;
         String defaultLastName = "lastName";
+        JSONObject body = encode(userName, password, firstName, defaultLastName, email);
 
+        String apiUrl = shareUrl.replaceFirst("share", AlfrescoHttpClient.ALFRESCO_API_PATH);
         String reqURL = apiUrl + "people?alf_ticket=" + AlfrescoHttpClient.getAlfTicket(apiUrl, adminUser, adminPass);
         if(logger.isTraceEnabled())
         {
-            logger.info("Using Url - " + reqURL);
+            logger.trace("Using Url - " + reqURL);
         }
-        String[] headers = AlfrescoHttpClient.getRequestHeaders();
-        String[] body = { "userName", userName, "firstName", firstName, "lastName", defaultLastName, "password", password, "email", email };
+        // Create the http client 
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost request = null;
         HttpResponse response = null;
         try
         {
-            request = AlfrescoHttpClient.generatePostRequest(reqURL, headers, body);
+            request = AlfrescoHttpClient.generatePostRequest(reqURL, body);
             response = AlfrescoHttpClient.executeRequest(client, request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
             {
@@ -86,5 +102,29 @@ public class User
         {
             request.releaseConnection();
         }
+    }
+    /**
+     * Builds a json object representing the user data.
+     * @param userName
+     * @param password
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    private static JSONObject encode(final String userName,
+                              final String password,
+                              final String firstName,
+                              final String lastName,
+                              final String email)
+    {
+        JSONObject body = new JSONObject();
+        body.put("userName", userName);
+        body.put("firstName", firstName);
+        body.put("lastName", lastName);
+        body.put("password", password);
+        body.put("email", email);
+        return body;
     }
 }

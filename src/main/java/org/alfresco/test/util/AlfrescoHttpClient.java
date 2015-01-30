@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,8 +36,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Helper class that provides HttpClient.
@@ -50,7 +50,7 @@ public class AlfrescoHttpClient
     private static Log logger = LogFactory.getLog(AlfrescoHttpClient.class);
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String MIME_TYPE_JSON = "application/json";
-    public static String API_SERVICE = "alfresco/service/api/";
+    public static String ALFRESCO_API_PATH = "alfresco/service/api/";
 
     /**
      * Provides an http client with basic authentication based on port 443.
@@ -96,11 +96,11 @@ public class AlfrescoHttpClient
      * @param alfUrl
      * @param userName
      * @param password
+     * @throws ParseException 
      */
-    public static String getAlfTicket(String alfUrl, String userName, String password) throws JSONException, IOException
+    public static String getAlfTicket(String alfUrl, String userName, String password) throws IOException, ParseException
     {
         String ticket = "";
-
         try
         {
             URL url = new URL(alfUrl + "login?u=" + userName + "&pw=" + password + "&format=json");
@@ -109,76 +109,39 @@ public class AlfrescoHttpClient
             String encoding = con.getContentEncoding();
             encoding = encoding == null ? UTF_8_ENCODING : encoding;
             String json = IOUtils.toString(in, encoding);
-            JSONObject getData = new JSONObject(json);
-            ticket = getData.getJSONObject("data").get("ticket").toString();
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject)parser.parse(json);
+            JSONObject data = (JSONObject) obj.get("data");
+            ticket = (String) data.get("ticket");
         }
         catch (IOException e)
         {
             logger.error("Unable to generate ticket ", e);
         }
-
         return ticket;
     }
 
-    public static HttpPost generatePostRequest(String requestURL, String[] headers, String[] reqBody) throws Exception
+    public static HttpPost generatePostRequest(String requestURL, JSONObject body) throws Exception
     {
-        boolean setRequestHeaders = false;
-        boolean setRequestBody = false;
-
         // Parameters check
         if (requestURL.isEmpty())
         {
             throw new IllegalArgumentException("Empty Request URL: Please correct");
         }
-
+        if(body == null)
+        {
+            throw new IllegalArgumentException("JSON body is required");
+        }
         HttpPost request = new HttpPost(requestURL);
-        setRequestHeaders = canSetHeaderOrBody(headers);
-        setRequestBody = canSetHeaderOrBody(reqBody);
-
         // set Headers
-        if (setRequestHeaders)
-        {
-            for (int i = 0; i < headers.length; i = i + 2)
-            {
-                request.addHeader(headers[i], headers[i + 1]);
-            }
-        }
-
+        String contentType = MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING;
+        request.addHeader("Content-Type", contentType);
         // set Body
-        if (setRequestBody)
-        {
-            JSONObject json = new JSONObject();
+        request.setEntity(setMessageBody(body));
 
-            for (int i = 0; i < reqBody.length; i = i + 2)
-            {
-                json.put(reqBody[i], reqBody[i + 1]);
-            }
-            logger.info("Message Body: " + json);
-            request.setEntity(setMessageBody(json));
-        }
         return request;
     }
 
-    private static Boolean canSetHeaderOrBody(String[] params) throws Exception
-    {
-        if (params == null)
-        {
-            throw new IllegalArgumentException("Null Parameters: Please correct");
-        }
-
-        if (params.length < 2)
-        {
-            return false;
-        }
-        else if (params[0] == "")
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
 
     /**
      * Populate HTTP message call with given content.
@@ -187,36 +150,19 @@ public class AlfrescoHttpClient
      * @return {@link StringEntity} content.
      * @throws UnsupportedEncodingException if unsupported
      */
-    public static StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
+    private static StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
     {
         if (json == null || json.toString().isEmpty())
         {
-            throw new UnsupportedOperationException("JSON Content is required.");
+            throw new IllegalArgumentException("JSON Content is required.");
         }
-
-        StringEntity se = setMessageBody(json.toString());
+        StringEntity se = new StringEntity(json.toString(), UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, MIME_TYPE_JSON));
         if (logger.isDebugEnabled())
         {
             logger.debug("Json string value: " + se);
         }
         return se;
-    }
-
-    /**
-     * Populate HTTP message call with given content.
-     * 
-     * @param content String content
-     * @return {@link StringEntity} content.
-     * @throws UnsupportedEncodingException if unsupported
-     */
-    public static StringEntity setMessageBody(final String content) throws UnsupportedEncodingException
-    {
-        if (content == null || content.isEmpty())
-        {
-            throw new UnsupportedOperationException("Content is required.");
-        }
-        return new StringEntity(content, UTF_8_ENCODING);
     }
 
     /**
@@ -243,22 +189,4 @@ public class AlfrescoHttpClient
         }
     }
 
-    public static String[] getRequestHeaders()
-    {
-        String contentType = MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING;
-        ArrayList<String> headers = new ArrayList<String>(2);
-        // headerKey for cloud
-        String headerKey = "";
-        if (headerKey != null)
-        {
-            headers.add("key");
-            headers.add(headerKey);
-        }
-        if (contentType != null)
-        {
-            headers.add("Content-Type");
-            headers.add(contentType);
-        }
-        return headers.toArray(new String[headers.size()]);
-    }
 }
