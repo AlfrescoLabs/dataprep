@@ -13,25 +13,25 @@ public class CreateUserTest
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName() throws Exception
     {
-        CreateUser.createEnterpriseUser(shareUrl, "admin", "admin", null, password, email);
+        User.create(shareUrl, "admin", "admin", null, password, email);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidPassword() throws Exception
     {
-        CreateUser.createEnterpriseUser(shareUrl, "admin", "admin", userName, null, email);
+        User.create(shareUrl, "admin", "admin", userName, null, email);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidShareUrl() throws Exception
     {
-        CreateUser.createEnterpriseUser(null, "admin", "admin", userName, password, email);
+        User.create(null, "admin", "admin", userName, password, email);
     }
 
     @Test
     public void creatEnterpriseUser() throws Exception
     {
-        boolean result = CreateUser.createEnterpriseUser(shareUrl, "admin", "admin", userName, password, email);
+        boolean result = User.create(shareUrl, "admin", "admin", userName, password, email);
         Assert.assertTrue(result);
     }
 
@@ -41,8 +41,8 @@ public class CreateUserTest
         String userName = "sameUser";
         String password = "password";
 
-        CreateUser.createEnterpriseUser(shareUrl, "admin", "admin", userName, password, email);
-        boolean result = CreateUser.createEnterpriseUser(shareUrl, "admin", "admin", userName, password, email);
+        User.create(shareUrl, "admin", "admin", userName, password, email);
+        boolean result = User.create(shareUrl, "admin", "admin", userName, password, email);
         Assert.assertFalse(result);
     }
 }

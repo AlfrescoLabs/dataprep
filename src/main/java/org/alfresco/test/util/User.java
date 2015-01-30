@@ -29,11 +29,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
  * @author Michael Suzuki
  * @author Bocancea Bogdan
  */
-public class CreateUser extends AlfrescoHttpClient
+public class User
 {
-    private static Log logger = LogFactory.getLog(CreateUser.class);
+    private static Log logger = LogFactory.getLog(User.class);
 
-    public static boolean createEnterpriseUser(String shareUrl, String adminUser, String adminPass, String userName, String password, String email)
+    public static boolean create(String shareUrl, String adminUser, String adminPass, String userName, String password, String email)
             throws Exception
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
@@ -42,35 +42,43 @@ public class CreateUser extends AlfrescoHttpClient
             throw new IllegalArgumentException("Null Parameters: Please correct");
         }
 
-        String apiUrl = shareUrl.replaceFirst("share", apiContextEnt);
+        String apiUrl = shareUrl.replaceFirst("share", AlfrescoHttpClient.API_SERVICE);
         String firstName = userName;
         String defaultLastName = "lastName";
 
-        String reqURL = apiUrl + "people?alf_ticket=" + getAlfTicket(apiUrl, adminUser, adminPass);
-        logger.info("Using Url - " + reqURL);
-        String[] headers = getRequestHeaders(MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING);
+        String reqURL = apiUrl + "people?alf_ticket=" + AlfrescoHttpClient.getAlfTicket(apiUrl, adminUser, adminPass);
+        if(logger.isTraceEnabled())
+        {
+            logger.info("Using Url - " + reqURL);
+        }
+        String[] headers = AlfrescoHttpClient.getRequestHeaders();
         String[] body = { "userName", userName, "firstName", firstName, "lastName", defaultLastName, "password", password, "email", email };
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost request = null;
         HttpResponse response = null;
-
         try
         {
-            request = generatePostRequest(reqURL, headers, body);
-            response = executeRequest(client, request);
+            request = AlfrescoHttpClient.generatePostRequest(reqURL, headers, body);
+            response = AlfrescoHttpClient.executeRequest(client, request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
             {
-                logger.info("User created successfully: " + userName);
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace("User created successfully: " + userName);
+                }
                 return true;
             }
             else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT)
             {
-                logger.info("User: " + userName + " alreary created");
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace("User: " + userName + " alreary created");
+                }
                 return false;
             }
             else
             {
-                logger.error(response.toString());
+                logger.error("Unable to create user: " + response.toString());
                 return false;
             }
         }
@@ -78,6 +86,5 @@ public class CreateUser extends AlfrescoHttpClient
         {
             request.releaseConnection();
         }
-
     }
 }

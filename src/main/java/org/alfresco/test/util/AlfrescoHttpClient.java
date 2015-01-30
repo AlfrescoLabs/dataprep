@@ -50,7 +50,7 @@ public class AlfrescoHttpClient
     private static Log logger = LogFactory.getLog(AlfrescoHttpClient.class);
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String MIME_TYPE_JSON = "application/json";
-    public static String apiContextEnt = "alfresco/service/api/";
+    public static String API_SERVICE = "alfresco/service/api/";
 
     /**
      * Provides an http client with basic authentication based on port 443.
@@ -243,8 +243,9 @@ public class AlfrescoHttpClient
         }
     }
 
-    public static String[] getRequestHeaders(String contentType)
+    public static String[] getRequestHeaders()
     {
+        String contentType = MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING;
         ArrayList<String> headers = new ArrayList<String>(2);
         // headerKey for cloud
         String headerKey = "";
