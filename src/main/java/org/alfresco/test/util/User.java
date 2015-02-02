@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.json.simple.JSONObject;
@@ -34,7 +35,8 @@ public class User
     private static Log logger = LogFactory.getLog(User.class);
 
     /**
-     * Create an Alfresco user.
+     * Create an Alfresco user on enterprise.
+     * 
      * @param shareUrl
      * @param adminUser
      * @param adminPass
@@ -44,15 +46,10 @@ public class User
      * @return true if successful
      * @throws Exception if error
      */
-    public static boolean create(final String shareUrl,
-                                 final String adminUser,
-                                 final String adminPass,
-                                 final String userName,
-                                 final String password,
-                                 final String email) throws Exception
+    public static boolean create(final String shareUrl, final String adminUser, final String adminPass, final String userName, final String password, final String email)
+            throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password)
-                || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
                 || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(email))
         {
             throw new IllegalArgumentException("User detail is required");
@@ -64,7 +61,7 @@ public class User
 
         String apiUrl = shareUrl.replaceFirst("share", AlfrescoHttpClient.ALFRESCO_API_PATH);
         String reqURL = apiUrl + "people?alf_ticket=" + client.getAlfTicket(apiUrl, adminUser, adminPass);
-        if(logger.isTraceEnabled())
+        if (logger.isTraceEnabled())
         {
             logger.trace("Using Url - " + reqURL);
         }
@@ -77,17 +74,17 @@ public class User
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
-                    if(logger.isTraceEnabled())
+                    if (logger.isTraceEnabled())
                     {
                         logger.trace("User created successfully: " + userName);
                     }
                     return true;
                 case HttpStatus.SC_CONFLICT:
-                    if(logger.isTraceEnabled())
+                    if (logger.isTraceEnabled())
                     {
                         logger.trace("User: " + userName + " alreary created");
                     }
-                    
+
                     break;
                 default:
                     logger.error("Unable to create user: " + response.toString());
@@ -101,9 +98,10 @@ public class User
         }
         return false;
     }
-    
+
     /**
      * Builds a json object representing the user data.
+     * 
      * @param userName
      * @param password
      * @param firstName
@@ -112,11 +110,7 @@ public class User
      * @return
      */
     @SuppressWarnings("unchecked")
-    private static JSONObject encode(final String userName,
-                              final String password,
-                              final String firstName,
-                              final String lastName,
-                              final String email)
+    private static JSONObject encode(final String userName, final String password, final String firstName, final String lastName, final String email)
     {
         JSONObject body = new JSONObject();
         body.put("userName", userName);
@@ -126,32 +120,81 @@ public class User
         body.put("email", email);
         return body;
     }
+
     /**
      * Checks if user already exists.
+     * 
      * @param shareUrl
      * @param username
      * @return
      * @throws Exception
      */
-    public static boolean userExists(final String shareUrl, 
-                                     final String adminUser,
-                                     final String adminPass,
-                                     final String username) throws Exception
+    public static boolean userExists(final String shareUrl, final String adminUser, final String adminPass, final String username) throws Exception
     {
         AlfrescoHttpClient client = new AlfrescoHttpClient();
         String ticket = client.getAlfTicket(shareUrl, adminUser, adminPass);
-        String url = client.parsePath(shareUrl) + "people/" + username +"?alf_ticket=" + ticket; 
+        String url = client.parsePath(shareUrl) + "people/" + username + "?alf_ticket=" + ticket;
         HttpGet get = new HttpGet(url);
         try
         {
             HttpResponse response = client.executeRequest(get);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 return true;
             }
         }
         finally
         {
+            client.close();
+        }
+        return false;
+    }
+
+    /**
+     * Delete a user from enterprise
+     * 
+     * @param shareUrl
+     * @param adminUser
+     * @param adminPass
+     * @param userName
+     * @return true if successful
+     * @throws Exception
+     */
+    public static boolean delete(final String shareUrl, final String adminUser, final String adminPass, final String userName) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        AlfrescoHttpClient client = new AlfrescoHttpClient();
+        String ticket = client.getAlfTicket(shareUrl, adminUser, adminPass);
+        String url = client.parsePath(shareUrl) + "people/" + userName + "?alf_ticket=" + ticket;
+        HttpDelete httpDelete = new HttpDelete(url);
+        try
+        {
+            HttpResponse response = client.executeRequest(httpDelete);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("User deleted successfully: " + userName);
+                    }
+                    return true;
+                case HttpStatus.SC_NOT_FOUND:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("User: " + userName + " doesn't exists");
+                    }
+                    break;
+                default:
+                    logger.error("Unable to delete user: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            httpDelete.releaseConnection();
             client.close();
         }
         return false;
