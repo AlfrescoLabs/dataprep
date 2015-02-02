@@ -46,8 +46,12 @@ public class User
      * @return true if successful
      * @throws Exception if error
      */
-    public static boolean create(final String shareUrl, final String adminUser, final String adminPass, final String userName, final String password, final String email)
-            throws Exception
+    public static boolean create(final String shareUrl, 
+                                 final String adminUser, 
+                                 final String adminPass, 
+                                 final String userName, 
+                                 final String password, 
+                                 final String email) throws Exception
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
                 || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(email))
@@ -110,7 +114,11 @@ public class User
      * @return
      */
     @SuppressWarnings("unchecked")
-    private static JSONObject encode(final String userName, final String password, final String firstName, final String lastName, final String email)
+    private static JSONObject encode(final String userName, 
+                                     final String password, 
+                                     final String firstName, 
+                                     final String lastName, 
+                                     final String email)
     {
         JSONObject body = new JSONObject();
         body.put("userName", userName);
@@ -129,7 +137,10 @@ public class User
      * @return
      * @throws Exception
      */
-    public static boolean userExists(final String shareUrl, final String adminUser, final String adminPass, final String username) throws Exception
+    public static boolean userExists(final String shareUrl, 
+                                     final String adminUser, 
+                                     final String adminPass, 
+                                     final String username) throws Exception
     {
         AlfrescoHttpClient client = new AlfrescoHttpClient();
         String ticket = client.getAlfTicket(shareUrl, adminUser, adminPass);
@@ -160,7 +171,10 @@ public class User
      * @return true if successful
      * @throws Exception
      */
-    public static boolean delete(final String shareUrl, final String adminUser, final String adminPass, final String userName) throws Exception
+    public static boolean delete(final String shareUrl, 
+                                 final String adminUser, 
+                                 final String adminPass, 
+                                 final String userName) throws Exception
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
         {
@@ -182,11 +196,7 @@ public class User
                     }
                     return true;
                 case HttpStatus.SC_NOT_FOUND:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("User: " + userName + " doesn't exists");
-                    }
-                    break;
+                    throw new RuntimeException("User: " + userName + " doesn't exists");
                 default:
                     logger.error("Unable to delete user: " + response.toString());
                     break;

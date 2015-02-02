@@ -46,7 +46,7 @@ public class UserTest
     @Test
     public void createSameEnterpriseUser() throws Exception
     {
-        String userName = "sameUser";
+        String userName = "sameUserR1";
         String password = "password";
         User.create(shareUrl, admin, admin, userName, password, email);
         boolean result = User.create(shareUrl, admin, admin, userName, password, email);
@@ -61,11 +61,11 @@ public class UserTest
         Assert.assertTrue(User.delete(shareUrl, admin, admin, userName));
     }
 
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void deleteNonExistent() throws Exception
     {
         String userName = "booo";
-        Assert.assertFalse(User.delete(shareUrl, admin, admin, userName));
+        User.delete(shareUrl, admin, admin, userName);
     }
 
 }
