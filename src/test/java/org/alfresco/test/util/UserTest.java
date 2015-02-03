@@ -14,33 +14,33 @@ public class UserTest
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName() throws Exception
     {
-        User.create(shareUrl, admin, admin, null, password, email);
+        UserService.create(shareUrl, admin, admin, null, password, email);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidPassword() throws Exception
     {
-        User.create(shareUrl, admin, admin, userName, null, email);
+        UserService.create(shareUrl, admin, admin, userName, null, email);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidShareUrl() throws Exception
     {
-        User.create(null, admin, admin, userName, password, email);
+        UserService.create(null, admin, admin, userName, password, email);
     }
 
     @Test
     public void creatEnterpriseUser() throws Exception
     {
-        boolean result = User.create(shareUrl, admin, admin, userName, password, email);
+        boolean result = UserService.create(shareUrl, admin, admin, userName, password, email);
         Assert.assertTrue(result);
-        Assert.assertTrue(User.userExists(shareUrl, admin, admin, userName));
+        Assert.assertTrue(UserService.userExists(shareUrl, admin, admin, userName));
     }
 
     @Test
     public void checkUserExistsWhenHeDoesnt() throws Exception
     {
-        Assert.assertFalse(User.userExists(shareUrl, admin, admin, "booo"));
+        Assert.assertFalse(UserService.userExists(shareUrl, admin, admin, "booo"));
     }
 
     @Test
@@ -48,8 +48,8 @@ public class UserTest
     {
         String userName = "sameUserR1";
         String password = "password";
-        User.create(shareUrl, admin, admin, userName, password, email);
-        boolean result = User.create(shareUrl, admin, admin, userName, password, email);
+        UserService.create(shareUrl, admin, admin, userName, password, email);
+        boolean result = UserService.create(shareUrl, admin, admin, userName, password, email);
         Assert.assertFalse(result);
     }
 
@@ -57,15 +57,15 @@ public class UserTest
     public void deleteUser() throws Exception
     {
         String userName = "deleteUser";
-        User.create(shareUrl, admin, admin, userName, password, email);
-        Assert.assertTrue(User.delete(shareUrl, admin, admin, userName));
+        UserService.create(shareUrl, admin, admin, userName, password, email);
+        Assert.assertTrue(UserService.delete(shareUrl, admin, admin, userName));
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteNonExistent() throws Exception
     {
         String userName = "booo";
-        User.delete(shareUrl, admin, admin, userName);
+        UserService.delete(shareUrl, admin, admin, userName);
     }
 
 }

@@ -30,9 +30,9 @@ import org.json.simple.JSONObject;
  * @author Michael Suzuki
  * @author Bocancea Bogdan
  */
-public class User
+public class UserService
 {
-    private static Log logger = LogFactory.getLog(User.class);
+    private static Log logger = LogFactory.getLog(UserService.class);
 
     /**
      * Create an Alfresco user on enterprise.
@@ -134,7 +134,7 @@ public class User
      * 
      * @param shareUrl
      * @param username
-     * @return
+     * @return true if user exists
      * @throws Exception
      */
     public static boolean userExists(final String shareUrl, 
@@ -162,7 +162,7 @@ public class User
     }
 
     /**
-     * Delete a user from enterprise
+     * Delete a user from enterprise.
      * 
      * @param shareUrl
      * @param adminUser
