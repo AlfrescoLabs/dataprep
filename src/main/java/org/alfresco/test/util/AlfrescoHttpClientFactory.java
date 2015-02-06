@@ -14,7 +14,6 @@
  */
 package org.alfresco.test.util;
 
-import org.springframework.beans.factory.FactoryBean;
 
 /**
  * Alfresco HttpClient factory.
