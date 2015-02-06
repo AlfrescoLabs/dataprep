@@ -64,6 +64,7 @@ public class UserTest extends AbstractTest
         String userName = "deleteUser";
         userService.create(admin, admin, userName, password, email);
         Assert.assertTrue(userService.delete(admin, admin, userName));
+        Assert.assertFalse(userService.userExists(admin, admin, userName));
     }
 
     @Test(expectedExceptions = RuntimeException.class)
