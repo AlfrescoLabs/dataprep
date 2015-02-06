@@ -14,37 +14,39 @@
  */
 package org.alfresco.test.util;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Test the AlfrescoHttpClient helper class.
+ * Alfresco HttpClient factory.
  * 
  * @author Michael Suzuki
  */
-public class AlfrescoHttpClientTest
+public class AlfrescoHttpClientFactory
 {
-    AlfrescoHttpClient client;
-    @BeforeMethod
-    public void init()
+
+    private String host;
+    private String scheme;
+    private int port;
+    AlfrescoHttpClientFactory(final String scheme, final String host, int port)
     {
-        client = new AlfrescoHttpClient("http","localhost",8080);
+        this.scheme = scheme;
+        this.host = host;
+        this.port = port;
     }
-    @AfterMethod
-    public void tearDown() throws IOException
+    public AlfrescoHttpClient getObject() throws Exception
     {
-        client.close();
+        return new AlfrescoHttpClient(scheme, host, port);
     }
-    @Test(expectedExceptions=RuntimeException.class)
-    public void getAlfTicketBadUser() throws IOException, ParseException
+
+    public Class<?> getObjectType()
     {
-        String ticket = client.getAlfTicket("someUser", "wrongPassword");
-        Assert.assertEquals(ticket, "");
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean isSingleton()
+    {
+        return false;
     }
 
 }

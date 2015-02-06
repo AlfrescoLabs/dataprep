@@ -37,9 +37,12 @@ import org.springframework.social.alfresco.api.entities.Site.Visibility;
 public class SiteService
 {
     private final PublicApiFactory publicApiFactory;
-    public SiteService(PublicApiFactory publicApiFactory)
+    private final AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    
+    public SiteService(PublicApiFactory publicApiFactory, AlfrescoHttpClientFactory alfrescoHttpClientFactory)
     {
         this.publicApiFactory = publicApiFactory;
+        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
     }
     
     /**
@@ -62,7 +65,7 @@ public class SiteService
         publicApi.createSite(domain, 
                              siteId, 
                              "site-dashboard", 
-                             description,
+                             siteId,
                              description, 
                              visability);
     }
@@ -76,10 +79,10 @@ public class SiteService
      */
     public boolean exists(final String siteId, final String username,final String password) throws Exception
     {
-        AlfrescoHttpClient client = new AlfrescoHttpClient();
-        //TODO FIXME pull me from spring context
-        String ticket = client.getAlfTicket("http://localhost:8080/share", username, password);
-        String url = String.format("http://localhost:8080/alfresco/service/api/sites/%s?alf_ticket=%s", siteId, ticket);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String ticket = client.getAlfTicket(username, password);
+        String apiUrl = client.getApiUrl();
+        String url = String.format("%ssites/%s?alf_ticket=%s",apiUrl, siteId, ticket);
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.executeRequest(get);
         if( 200 == response.getStatusLine().getStatusCode())

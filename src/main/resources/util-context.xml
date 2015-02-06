@@ -40,5 +40,15 @@
     </bean>
     <bean id="siteService" class="org.alfresco.test.util.SiteService">
         <constructor-arg name="publicApiFactory" ref="basicAuthPublicApiFactory"/>
+        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
+    </bean>
+    <bean id="userService" class="org.alfresco.test.util.UserService">
+        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
+    </bean>
+    
+    <bean id="alfrescoHttpClientFactory" class="org.alfresco.test.util.AlfrescoHttpClientFactory">
+        <constructor-arg name="scheme" value="${alfresco.scheme}"/>
+        <constructor-arg name="host" value="${alfresco.server}"/>
+        <constructor-arg name="port" value="${alfresco.port}"/>
     </bean>
 </beans>

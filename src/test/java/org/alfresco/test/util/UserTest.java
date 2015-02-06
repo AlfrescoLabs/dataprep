@@ -1,46 +1,51 @@
 package org.alfresco.test.util;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class UserTest
+public class UserTest extends AbstractTest
 {
-    String userName = System.currentTimeMillis() + "@test.com";
+    UserService userService;
+    String userName = "userm-" + System.currentTimeMillis() + "@test.com";
     String password = "password";
     String email = userName;
-    String shareUrl = "http://127.0.0.1:8080/share";
     String admin = "admin";
-
+    @BeforeClass
+    public void setup()
+    {
+        userService = (UserService) ctx.getBean("userService");
+    }
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName() throws Exception
     {
-        UserService.create(shareUrl, admin, admin, null, password, email);
+        userService.create(admin, admin, null, password, email);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidPassword() throws Exception
     {
-        UserService.create(shareUrl, admin, admin, userName, null, email);
+        userService.create(admin, admin, userName, null, email);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void createUserInvalidShareUrl() throws Exception
+    public void createUserNullAdmin() throws Exception
     {
-        UserService.create(null, admin, admin, userName, password, email);
+        userService.create(null, admin, userName, password, email);
     }
 
     @Test
     public void creatEnterpriseUser() throws Exception
     {
-        boolean result = UserService.create(shareUrl, admin, admin, userName, password, email);
+        boolean result = userService.create(admin, admin, userName, password, email);
         Assert.assertTrue(result);
-        Assert.assertTrue(UserService.userExists(shareUrl, admin, admin, userName));
+        Assert.assertTrue(userService.userExists(admin, admin, userName));
     }
 
     @Test
     public void checkUserExistsWhenHeDoesnt() throws Exception
     {
-        Assert.assertFalse(UserService.userExists(shareUrl, admin, admin, "booo"));
+        Assert.assertFalse(userService.userExists(admin, admin, "booo"));
     }
 
     @Test
@@ -48,8 +53,8 @@ public class UserTest
     {
         String userName = "sameUserR1";
         String password = "password";
-        UserService.create(shareUrl, admin, admin, userName, password, email);
-        boolean result = UserService.create(shareUrl, admin, admin, userName, password, email);
+        userService.create(admin, admin, userName, password, email);
+        boolean result = userService.create(admin, admin, userName, password, email);
         Assert.assertFalse(result);
     }
 
@@ -57,15 +62,15 @@ public class UserTest
     public void deleteUser() throws Exception
     {
         String userName = "deleteUser";
-        UserService.create(shareUrl, admin, admin, userName, password, email);
-        Assert.assertTrue(UserService.delete(shareUrl, admin, admin, userName));
+        userService.create(admin, admin, userName, password, email);
+        Assert.assertTrue(userService.delete(admin, admin, userName));
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteNonExistent() throws Exception
     {
         String userName = "booo";
-        UserService.delete(shareUrl, admin, admin, userName);
+        userService.delete(admin, admin, userName);
     }
 
 }

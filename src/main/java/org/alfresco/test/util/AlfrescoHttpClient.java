@@ -49,43 +49,40 @@ public class AlfrescoHttpClient
     public static final String MIME_TYPE_JSON = "application/json";
     public static String ALFRESCO_API_PATH = "alfresco/service/api/";
     private CloseableHttpClient client;
+    private String scheme;
+    private String host;
+    private int port;
+    private String apiUrl;
 
-    public AlfrescoHttpClient()
+    public AlfrescoHttpClient(final String scheme, final String host)
     {
-        client = HttpClientBuilder.create().build();
+        this(scheme, host, 80);
     }
-    /**
-     * Parase the share url and returns the alfresco
-     * api url.
-     * @param shareUrl
-     * @return String the url + alfresco/service/api/
-     */
-    public String parsePath(final String shareUrl)
+    public AlfrescoHttpClient(final String scheme, final String host, final int port)
     {
-        if(StringUtils.isEmpty(shareUrl))
-        {
-            throw new IllegalArgumentException("URL is required");
-        }
-        return shareUrl.replaceFirst("share", AlfrescoHttpClient.ALFRESCO_API_PATH);
+        this.scheme = scheme;
+        this.host = host;
+        this.port = port;
+        apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
+        client = HttpClientBuilder.create().build();
     }
     /**
      * Generates an Alfresco Authentication Ticket based on the user name and password passed in.
      * 
-     * @param alfUrl
+     * @param apiUrl
      * @param userName
      * @param password
      * @throws ParseException 
      */
-    public String getAlfTicket(String shareUrl, String username, String password) throws IOException, ParseException
+    public String getAlfTicket(String username, String password) throws IOException, ParseException
     {
-        String alfUrl = parsePath(shareUrl);
         if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
         {
             throw new IllegalArgumentException("Username and password are required");
         }
         try
         {
-            URL url = new URL(alfUrl + "login?u=" + username + "&pw=" + password + "&format=json");
+            URL url = new URL(apiUrl + "login?u=" + username + "&pw=" + password + "&format=json");
             URLConnection con = url.openConnection();
             InputStream in = con.getInputStream();
             String encoding = con.getContentEncoding();
@@ -188,6 +185,22 @@ public class AlfrescoHttpClient
     public HttpClient getClient()
     {
         return client;
+    }
+    public String getScheme()
+    {
+        return scheme;
+    }
+    public String getHost()
+    {
+        return host;
+    }
+    public int getPort()
+    {
+        return port;
+    }
+    public String getApiUrl()
+    {
+        return apiUrl;
     }
 
 }

@@ -33,6 +33,12 @@ import org.json.simple.JSONObject;
 public class UserService
 {
     private static Log logger = LogFactory.getLog(UserService.class);
+    private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    
+    public UserService(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
+    {
+        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
+    }
 
     /**
      * Create an Alfresco user on enterprise.
@@ -46,14 +52,13 @@ public class UserService
      * @return true if successful
      * @throws Exception if error
      */
-    public static boolean create(final String shareUrl, 
-                                 final String adminUser, 
-                                 final String adminPass, 
-                                 final String userName, 
-                                 final String password, 
-                                 final String email) throws Exception
+    public boolean create(final String adminUser, 
+                          final String adminPass, 
+                          final String userName, 
+                          final String password, 
+                          final String email) throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser)
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(adminUser)
                 || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(email))
         {
             throw new IllegalArgumentException("User detail is required");
@@ -61,10 +66,9 @@ public class UserService
         String firstName = userName;
         String defaultLastName = "lastName";
         JSONObject body = encode(userName, password, firstName, defaultLastName, email);
-        AlfrescoHttpClient client = new AlfrescoHttpClient();
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
 
-        String apiUrl = shareUrl.replaceFirst("share", AlfrescoHttpClient.ALFRESCO_API_PATH);
-        String reqURL = apiUrl + "people?alf_ticket=" + client.getAlfTicket(apiUrl, adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "people?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
         if (logger.isTraceEnabled())
         {
             logger.trace("Using Url - " + reqURL);
@@ -137,14 +141,13 @@ public class UserService
      * @return true if user exists
      * @throws Exception
      */
-    public static boolean userExists(final String shareUrl, 
-                                     final String adminUser, 
-                                     final String adminPass, 
-                                     final String username) throws Exception
+    public boolean userExists(final String adminUser, 
+                              final String adminPass, 
+                              final String username) throws Exception
     {
-        AlfrescoHttpClient client = new AlfrescoHttpClient();
-        String ticket = client.getAlfTicket(shareUrl, adminUser, adminPass);
-        String url = client.parsePath(shareUrl) + "people/" + username + "?alf_ticket=" + ticket;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String ticket = client.getAlfTicket(adminUser, adminPass);
+        String url = client.getApiUrl() + "people/" + username + "?alf_ticket=" + ticket;
         HttpGet get = new HttpGet(url);
         try
         {
@@ -171,18 +174,17 @@ public class UserService
      * @return true if successful
      * @throws Exception
      */
-    public static boolean delete(final String shareUrl, 
-                                 final String adminUser, 
-                                 final String adminPass, 
-                                 final String userName) throws Exception
+    public boolean delete(final String adminUser, 
+                          final String adminPass, 
+                          final String userName) throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(shareUrl) || StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
+        if (StringUtils.isEmpty(userName) ||  StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
         {
             throw new IllegalArgumentException("Null Parameters: Please correct");
         }
-        AlfrescoHttpClient client = new AlfrescoHttpClient();
-        String ticket = client.getAlfTicket(shareUrl, adminUser, adminPass);
-        String url = client.parsePath(shareUrl) + "people/" + userName + "?alf_ticket=" + ticket;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String ticket = client.getAlfTicket(adminUser, adminPass);
+        String url = client.getApiUrl() + "people/" + userName + "?alf_ticket=" + ticket;
         HttpDelete httpDelete = new HttpDelete(url);
         try
         {
