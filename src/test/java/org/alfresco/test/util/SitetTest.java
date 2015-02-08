@@ -29,6 +29,8 @@ import org.testng.annotations.Test;
  */
 public class SitetTest extends AbstractTest
 {
+    private static final String MY_DOMAIN = "mydomain";
+    private static final String ADMIN = "admin";
     private SiteService site;
     private String siteId;
     
@@ -41,9 +43,9 @@ public class SitetTest extends AbstractTest
     @Test
     public void create() throws IOException
     {
-        site.create("admin",
-                    "admin",
-                    "mydomain",
+        site.create(ADMIN,
+                    ADMIN,
+                    MY_DOMAIN,
                     siteId, 
                     "my site description", 
                     Visibility.PUBLIC);
@@ -51,22 +53,30 @@ public class SitetTest extends AbstractTest
     @Test(dependsOnMethods="create")
     public void exists() throws Exception
     {
-        boolean exists = site.exists(siteId, "admin", "admin");
+        boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
     }
+    @Test(dependsOnMethods="exists")
+    public void delete() throws Exception
+    {
+        site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
+        boolean exists = site.exists(siteId, ADMIN, ADMIN);
+        Assert.assertFalse(exists);
+    }
+    
     @Test
     public void fakeSiteDoesNotExists() throws Exception
     {
-        boolean exists = site.exists("bs-site","admin", "admin");
+        boolean exists = site.exists("bs-site",ADMIN, ADMIN);
         Assert.assertFalse(exists);
     }
     @Test(expectedExceptions=AlfrescoException.class)
     public void createSiteWithInvalidDetails() throws IOException
     {
         String siteId = "michael" + System.currentTimeMillis();
-        site.create("admin",
+        site.create(ADMIN,
                     "fake",
-                    "mydomain",
+                    MY_DOMAIN,
                     siteId, 
                     "my site description", 
                     Visibility.PUBLIC);

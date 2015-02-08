@@ -46,7 +46,7 @@ public class SiteService
     }
     
     /**
-     * Create site using Alfresco public api.
+     * Create site using Alfresco public API.
      * @param siteManager
      * @param domain
      * @param siteId
@@ -55,11 +55,11 @@ public class SiteService
      * @return
      */
     public void create(final String username,
-                          final String password,
-                          final String domain, 
-                          final String siteId,
-                          final String description,
-                          final Visibility visability) throws IOException
+                       final String password,
+                       final String domain, 
+                       final String siteId,
+                       final String description,
+                       final Visibility visability) throws IOException
     {
         Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
         publicApi.createSite(domain, 
@@ -80,15 +80,37 @@ public class SiteService
     public boolean exists(final String siteId, final String username,final String password) throws Exception
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String ticket = client.getAlfTicket(username, password);
-        String apiUrl = client.getApiUrl();
-        String url = String.format("%ssites/%s?alf_ticket=%s",apiUrl, siteId, ticket);
-        HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(get);
-        if( 200 == response.getStatusLine().getStatusCode())
+        try
         {
-            return true;
+            String ticket = client.getAlfTicket(username, password);
+            String apiUrl = client.getApiUrl();
+            String url = String.format("%ssites/%s?alf_ticket=%s",apiUrl, siteId, ticket);
+            HttpGet get = new HttpGet(url);
+            HttpResponse response = client.executeRequest(get);
+            if( 200 == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+            return false;
+        } 
+        finally
+        {
+            client.close();
         }
-        return false;
+    }
+    /**
+     * Delete an alfresco site.
+     * @param username
+     * @param password
+     * @param domain
+     * @param siteId
+     */
+    public void delete(final String username,
+                       final String password,
+                       final String domain, 
+                       final String siteId)
+    {
+        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
+        publicApi.removeSite(domain, siteId);
     }
 }

@@ -92,7 +92,6 @@ public class UserService
                     {
                         logger.trace("User: " + userName + " alreary created");
                     }
-
                     break;
                 default:
                     logger.error("Unable to create user: " + response.toString());
@@ -118,7 +117,7 @@ public class UserService
      * @return
      */
     @SuppressWarnings("unchecked")
-    private static JSONObject encode(final String userName, 
+    private JSONObject encode(final String userName, 
                                      final String password, 
                                      final String firstName, 
                                      final String lastName, 
