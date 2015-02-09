@@ -19,9 +19,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.json.simple.JSONObject;
 
 /**
@@ -34,6 +36,9 @@ public class UserService
 {
     private static Log logger = LogFactory.getLog(UserService.class);
     private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    public static String DEFAULT_LAST_NAME = "lastName";
+    public static String PAGE_ACCEPT_URL = "page/accept-invite";
+    public static String PAGE_REJECT_URL = "page/reject-invite";
     
     public UserService(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
     {
@@ -64,10 +69,8 @@ public class UserService
             throw new IllegalArgumentException("User detail is required");
         }
         String firstName = userName;
-        String defaultLastName = "lastName";
-        JSONObject body = encode(userName, password, firstName, defaultLastName, email);
+        JSONObject body = encode(userName, password, firstName, DEFAULT_LAST_NAME, email);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-
         String reqURL = client.getApiUrl() + "people?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
         if (logger.isTraceEnabled())
         {
@@ -208,6 +211,114 @@ public class UserService
             httpDelete.releaseConnection();
             client.close();
         }
+        return false;
+    }
+    
+    /**
+     * Utility to invite a enterprise user to Site and accept the invitation
+     * 
+     * @param invitingUserName
+     * @param invitingUserPassword
+     * @param userToInvite
+     * @param siteName
+     * @param role
+     * @return true if invite is successful
+     * @throws Exception
+     */
+    public boolean inviteUserToSiteAndAccept(final String invitingUserName, 
+                                             final String invitingUserPassword, 
+                                             final String userToInvite,
+                                             final String siteName,
+                                             final String role) throws Exception
+    {      
+        if (StringUtils.isEmpty(invitingUserName) ||  StringUtils.isEmpty(invitingUserPassword) || StringUtils.isEmpty(userToInvite) ||
+                StringUtils.isEmpty(siteName) || StringUtils.isEmpty(role) )
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "invite/start?inviteeFirstName=" + userToInvite + 
+                     "&inviteeLastName=" + DEFAULT_LAST_NAME + 
+                     "&inviteeEmail=" + userToInvite + 
+                     "&inviteeUserName=" + userToInvite +         
+                     "&siteShortName=" + siteName +
+                     "&inviteeSiteRole=" + role + 
+                     "&serverPath="  + client.getHost()+
+                     "&acceptUrl="  + PAGE_ACCEPT_URL +
+                     "&rejectUrl="  + PAGE_REJECT_URL;
+
+        if (logger.isTraceEnabled())
+        {
+            logger.trace("Invite user: " + userToInvite + " using Url - " + url);
+        }    
+        HttpGet get = new HttpGet(url);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(invitingUserName, invitingUserPassword);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(get);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("User successfully invited: " + userToInvite);
+                    }
+                    String result = client.readStream(response.getEntity()).toJSONString();
+                    String inviteId = client.getParameterFromJSON(result, "inviteId");
+                    String inviteTicket = client.getParameterFromJSON(result, "inviteTicket");
+                    return acceptSiteInvitation(inviteId, inviteTicket);
+                default:
+                    logger.error("Unable to invite user: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        }  
+        return false;
+    }
+    
+    /**
+     * Accept invitation to site
+     * 
+     * @param inviteId
+     * @param inviteTicket
+     * @return true if invite is successful
+     * @throws Exception
+     */
+    private boolean acceptSiteInvitation(final String inviteId, 
+                                     final String inviteTicket) throws Exception
+    {
+        if (StringUtils.isEmpty(inviteId) ||  StringUtils.isEmpty(inviteTicket))
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "invite/" + inviteId + "/" + inviteTicket + "/accept";
+        HttpPut put = new HttpPut(url);      
+        try
+        {
+            HttpResponse response = client.executeRequest(put);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("User accepted the invitation successfully");
+                    }
+                    return true;
+                default:
+                    logger.error("Unable to accept the invite: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            put.releaseConnection();
+            client.close();
+        } 
         return false;
     }
 }

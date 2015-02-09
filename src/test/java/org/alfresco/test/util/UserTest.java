@@ -14,13 +14,15 @@
  */
 package org.alfresco.test.util;
 
+import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 /**
  * Test user data load api crud operations.
+ * 
  * @author Michael Suzuki
- *
  */
 public class UserTest extends AbstractTest
 {
@@ -29,11 +31,15 @@ public class UserTest extends AbstractTest
     String password = "password";
     String email = userName;
     String admin = "admin";
+    SiteService site;
+
     @BeforeClass
     public void setup()
     {
         userService = (UserService) ctx.getBean("userService");
+        site = (SiteService) ctx.getBean("siteService");
     }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName() throws Exception
     {
@@ -91,5 +97,47 @@ public class UserTest extends AbstractTest
         String userName = "booo";
         userService.delete(admin, admin, userName);
     }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void inviteUserInvalidinvitingUser() throws Exception
+    {
+        userService.inviteUserToSiteAndAccept(null, password, "userToInvite", "site", "SiteConsumer");
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void inviteUserInvalidSite() throws Exception
+    {
+        userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", null , "SiteConsumer");
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void inviteUserInvalidRole() throws Exception
+    {
+        userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", "site", null);
+    }
 
+    @Test
+    public void inviteUserToSiteAndAccept() throws Exception
+    {
+        String userManager = "userSiteManager" + System.currentTimeMillis();
+        String userToInvite = "inviteUser" + System.currentTimeMillis();
+        String emailUserManager = userManager + "@test.com";
+        String emailUserInvited = userToInvite + "@test.com";
+        String siteId = "site" + System.currentTimeMillis();
+        userService.create(admin, admin, userManager, password, emailUserManager);
+        userService.create(admin, admin, userToInvite, password, emailUserInvited);
+        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PUBLIC);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, siteId, "SiteConsumer"));
+    }
+    
+    @Test
+    public void inviteUserToNonExistentSite() throws Exception
+    {
+        String userManager = "userSiteManager" + System.currentTimeMillis();
+        String userToInvite = "inviteUser" + System.currentTimeMillis();
+        String emailUserManager = userManager + "@test.com";
+        userService.create(admin, admin, userManager, password, emailUserManager);
+        Assert.assertFalse(userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, "whatSite", "SiteConsumer"));
+    }
+  
 }

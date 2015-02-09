@@ -24,15 +24,21 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -66,6 +72,7 @@ public class AlfrescoHttpClient
         apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
         client = HttpClientBuilder.create().build();
     }
+    
     /**
      * Generates an Alfresco Authentication Ticket based on the user name and password passed in.
      * 
@@ -174,6 +181,65 @@ public class AlfrescoHttpClient
             throw new RuntimeException("Error during execute request", e);
         }
     }
+    
+    public HttpClient getHttpClientWithBasicAuth(String username, String password)
+    {
+        CredentialsProvider provider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+        provider.setCredentials(AuthScope.ANY, credentials);
+        HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+        return client;
+    }
+    
+    /**
+     * Parses http response stream into a {@link JSONObject}.
+     * 
+     * @param stream Http response entity
+     * @return {@link JSONObject} response
+     */
+    public JSONObject readStream(final HttpEntity entity)
+    {
+        String rsp = null;
+        try
+        {
+            rsp = EntityUtils.toString(entity, UTF_8_ENCODING);
+        }
+        catch (Throwable ex)
+        {
+            throw new RuntimeException("Failed to read HTTP entity stream.", ex);
+        }
+        finally
+        {
+            EntityUtils.consumeQuietly(entity);
+        }
+        try
+        {
+            JSONParser parser = new JSONParser();
+            JSONObject result = (JSONObject) parser.parse(rsp);
+            return result;
+        }
+        catch (Throwable e)
+        {
+            throw new RuntimeException("Failed to convert response to JSON: \n" + "   Response: \r\n" + rsp, e);
+        }
+    }
+    
+    /**
+     * Method to get parameters from JSON
+     * 
+     * @param result
+     * @param entity
+     * @param param
+     * @return String
+     */
+    public String getParameterFromJSON(String result, String param) throws ParseException
+    {
+        JSONParser parser = new JSONParser();
+        JSONObject obj = (JSONObject) parser.parse(result);
+        return (String) obj.get(param);
+    }
+    
+
     /**
      * Closes the HttpClient. 
      * @throws IOException if error
