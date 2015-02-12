@@ -53,7 +53,7 @@ public class SiteService
      * @param siteId site identifier
      * @param description site description
      * @param visability site visability type
-     * @throws IOException
+     * @throws IOException io error
      */
     public void create(final String username,
                        final String password,

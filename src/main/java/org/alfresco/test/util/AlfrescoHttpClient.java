@@ -76,7 +76,6 @@ public class AlfrescoHttpClient
     /**
      * Generates an Alfresco Authentication Ticket based on the user name and password passed in.
      * 
-     * @param apiUrl url for api end point
      * @param username user identifier
      * @param password user password
      * @throws ParseException if error
@@ -162,7 +161,8 @@ public class AlfrescoHttpClient
 
     /**
      * Execute HttpClient request.
-     * @param HttpRequestBase request to send 
+     * @param request to send 
+     * @return {@link HttpResponse} response
      * @throws Exception if error
      */
     public HttpResponse executeRequest(HttpRequestBase request) throws Exception
@@ -201,7 +201,7 @@ public class AlfrescoHttpClient
     /**
      * Parses http response stream into a {@link JSONObject}.
      * 
-     * @param stream Http response entity
+     * @param entity Http response entity
      * @return {@link JSONObject} response
      */
     public JSONObject readStream(final HttpEntity entity)
@@ -237,6 +237,7 @@ public class AlfrescoHttpClient
      * @param result json message
      * @param param key identifier
      * @return String value of key
+     * @throws ParseException if error parsing
      */
     public String getParameterFromJSON(String result, String param) throws ParseException
     {
