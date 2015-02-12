@@ -47,12 +47,13 @@ public class SiteService
     
     /**
      * Create site using Alfresco public API.
-     * @param siteManager
-     * @param domain
-     * @param siteId
-     * @param title
-     * @param description
-     * @return
+     * @param username identifier
+     * @param password user password
+     * @param domain the comany or org id
+     * @param siteId site identifier
+     * @param description site description
+     * @param visability site visability type
+     * @throws IOException
      */
     public void create(final String username,
                        final String password,
@@ -100,10 +101,10 @@ public class SiteService
     }
     /**
      * Delete an alfresco site.
-     * @param username
-     * @param password
-     * @param domain
-     * @param siteId
+     * @param username user details
+     * @param password user details
+     * @param domain user details 
+     * @param siteId site identifier
      */
     public void delete(final String username,
                        final String password,

@@ -48,12 +48,11 @@ public class UserService
     /**
      * Create an Alfresco user on enterprise.
      * 
-     * @param shareUrl
-     * @param adminUser
-     * @param adminPass
-     * @param userName
-     * @param password
-     * @param email
+     * @param adminUser admin username
+     * @param adminPass password
+     * @param userName new user
+     * @param password new user password
+     * @param email new user email
      * @return true if successful
      * @throws Exception if error
      */
@@ -112,12 +111,12 @@ public class UserService
     /**
      * Builds a json object representing the user data.
      * 
-     * @param userName
-     * @param password
-     * @param firstName
-     * @param lastName
-     * @param email
-     * @return
+     * @param userName user identifier
+     * @param password user password
+     * @param firstName first name
+     * @param lastName last name
+     * @param email email
+     * @return {@link JSONObject} of user entity
      */
     @SuppressWarnings("unchecked")
     private JSONObject encode(final String userName, 
@@ -138,10 +137,11 @@ public class UserService
     /**
      * Checks if user already exists.
      * 
-     * @param shareUrl
-     * @param username
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param username user identifier 
      * @return true if user exists
-     * @throws Exception
+     * @throws Exception if error
      */
     public boolean userExists(final String adminUser, 
                               final String adminPass, 
@@ -169,12 +169,11 @@ public class UserService
     /**
      * Delete a user from enterprise.
      * 
-     * @param shareUrl
-     * @param adminUser
-     * @param adminPass
-     * @param userName
-     * @return true if successful
-     * @throws Exception
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param userName user identifier
+     * @return true if successful 
+     * @throws Exception if error
      */
     public boolean delete(final String adminUser, 
                           final String adminPass, 
@@ -217,13 +216,13 @@ public class UserService
     /**
      * Utility to invite a enterprise user to Site and accept the invitation
      * 
-     * @param invitingUserName
-     * @param invitingUserPassword
-     * @param userToInvite
-     * @param siteName
-     * @param role
+     * @param invitingUserName user identifier
+     * @param invitingUserPassword user password
+     * @param userToInvite user label
+     * @param siteName site identifier which invite user.
+     * @param role type
      * @return true if invite is successful
-     * @throws Exception
+     * @throws Exception if error
      */
     public boolean inviteUserToSiteAndAccept(final String invitingUserName, 
                                              final String invitingUserPassword, 
@@ -281,15 +280,15 @@ public class UserService
     }
     
     /**
-     * Accept invitation to site
+     * Accept invitation to site.
      * 
-     * @param inviteId
-     * @param inviteTicket
+     * @param inviteId identifier
+     * @param inviteTicket authentication ticket
      * @return true if invite is successful
-     * @throws Exception
+     * @throws Exception if error
      */
     private boolean acceptSiteInvitation(final String inviteId, 
-                                     final String inviteTicket) throws Exception
+                                         final String inviteTicket) throws Exception
     {
         if (StringUtils.isEmpty(inviteId) ||  StringUtils.isEmpty(inviteTicket))
         {

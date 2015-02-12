@@ -76,9 +76,9 @@ public class AlfrescoHttpClient
     /**
      * Generates an Alfresco Authentication Ticket based on the user name and password passed in.
      * 
-     * @param apiUrl
-     * @param userName
-     * @param password
+     * @param apiUrl url for api end point
+     * @param userName user identifier
+     * @param password user password
      * @throws ParseException 
      */
     public String getAlfTicket(String username, String password) throws IOException, ParseException
@@ -109,10 +109,10 @@ public class AlfrescoHttpClient
 
     /**
      * Creates the post request message body.
-     * @param requestURL
-     * @param body
+     * @param requestURL url end point
+     * @param body content of request
      * @return {@link HttpPost} post request in json format
-     * @throws Exception
+     * @throws Exception if error
      */
     public HttpPost generatePostRequest(String requestURL, JSONObject body) throws Exception
     {
@@ -160,10 +160,7 @@ public class AlfrescoHttpClient
 
     /**
      * Execute HttpClient request.
-     * 
-     * @param HttpClient
-     * @param HttpPost
-     * @return HttpResponse
+     * @param requrest to send 
      * @throws Exception
      */
     public HttpResponse executeRequest(HttpRequestBase request) throws Exception
@@ -172,7 +169,10 @@ public class AlfrescoHttpClient
         try
         {
             response = client.execute(request);
-            logger.info("Status Received:" + response.getStatusLine());
+            if(logger.isTraceEnabled())
+            {
+                logger.trace("Status Received:" + response.getStatusLine());
+            }
             return response;
         }
         catch (Exception e)
@@ -227,10 +227,9 @@ public class AlfrescoHttpClient
     /**
      * Method to get parameters from JSON
      * 
-     * @param result
-     * @param entity
-     * @param param
-     * @return String
+     * @param result json message
+     * @param param key identifier
+     * @return String value of key
      */
     public String getParameterFromJSON(String result, String param) throws ParseException
     {
