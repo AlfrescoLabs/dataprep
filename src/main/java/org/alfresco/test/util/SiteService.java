@@ -74,7 +74,7 @@ public class SiteService
      * Checks if site exists
      * @param siteId site identifier
      * @param username site user
-     * @param password 
+     * @param password user password
      * @return true if exists
      * @throws Exception if error
      */

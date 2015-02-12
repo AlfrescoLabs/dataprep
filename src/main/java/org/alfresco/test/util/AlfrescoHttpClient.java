@@ -77,9 +77,11 @@ public class AlfrescoHttpClient
      * Generates an Alfresco Authentication Ticket based on the user name and password passed in.
      * 
      * @param apiUrl url for api end point
-     * @param userName user identifier
+     * @param username user identifier
      * @param password user password
-     * @throws ParseException 
+     * @throws ParseException if error
+     * @throws IOException if error
+     * @return Sting authentication ticket
      */
     public String getAlfTicket(String username, String password) throws IOException, ParseException
     {
@@ -160,8 +162,8 @@ public class AlfrescoHttpClient
 
     /**
      * Execute HttpClient request.
-     * @param requrest to send 
-     * @throws Exception
+     * @param HttpRequestBase request to send 
+     * @throws Exception if error
      */
     public HttpResponse executeRequest(HttpRequestBase request) throws Exception
     {
@@ -181,7 +183,12 @@ public class AlfrescoHttpClient
             throw new RuntimeException("Error during execute request", e);
         }
     }
-    
+    /**
+     * Get basic http client with basic credential.
+     * @param username String username 
+     * @param password String password
+     * @return {@link HttpClient} client
+     */
     public HttpClient getHttpClientWithBasicAuth(String username, String password)
     {
         CredentialsProvider provider = new BasicCredentialsProvider();
