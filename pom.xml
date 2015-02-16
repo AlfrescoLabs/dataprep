@@ -106,6 +106,7 @@
                     <!-- Download and install the latest enterprise alfresco installer -->
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
                         <executions>
                             <execution>
                                 <id>fetch-installer</id>
