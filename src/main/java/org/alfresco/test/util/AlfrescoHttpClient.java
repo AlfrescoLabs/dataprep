@@ -103,7 +103,7 @@ public class AlfrescoHttpClient
         }
         catch (IOException e)
         {
-            logger.error("Unable to generate ticket ", e);
+            logger.error(String.format("Unable to generate ticket, url: %s",apiUrl), e);
         }
         throw new RuntimeException("Unable to get ticket");
     }
