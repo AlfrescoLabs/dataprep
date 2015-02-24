@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Iterator;
+import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +41,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -54,11 +57,15 @@ public class AlfrescoHttpClient
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String MIME_TYPE_JSON = "application/json";
     public static String ALFRESCO_API_PATH = "alfresco/service/api/";
+    public static String ALFRESCO_API_CLOUD = "api.alfresco.me";
+    public static String CONTEXT_CLOUD_INTERNAL = "alfresco/service/internal/cloud/";
     private CloseableHttpClient client;
     private String scheme;
     private String host;
     private int port;
     private String apiUrl;
+    private String cloudUrl;
+    private String apiCloud;
 
     public AlfrescoHttpClient(final String scheme, final String host)
     {
@@ -70,6 +77,13 @@ public class AlfrescoHttpClient
         this.host = host;
         this.port = port;
         apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
+        client = HttpClientBuilder.create().build();
+    }
+    
+    public AlfrescoHttpClient(final String cloudUrl)
+    {
+        this.cloudUrl = cloudUrl;
+        apiCloud = cloudUrl.replace("my.alfresco.me/share", AlfrescoHttpClient.ALFRESCO_API_CLOUD);
         client = HttpClientBuilder.create().build();
     }
     
@@ -130,6 +144,10 @@ public class AlfrescoHttpClient
         // set Headers
         String contentType = MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING;
         request.addHeader("Content-Type", contentType);
+        if(!getCloudKey().isEmpty())
+        {
+            request.addHeader("key", getCloudKey());
+        }
         // set Body
         request.setEntity(setMessageBody(body));
 
@@ -144,7 +162,7 @@ public class AlfrescoHttpClient
      * @return {@link StringEntity} content.
      * @throws UnsupportedEncodingException if unsupported
      */
-    private StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
+    public StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
     {
         if (json == null || json.toString().isEmpty())
         {
@@ -246,6 +264,39 @@ public class AlfrescoHttpClient
         return (String) obj.get(param);
     }
     
+    /**
+     * Method to get parameters from JSON
+     * 
+     * @param result
+     * @param entity
+     * @param param
+     * @return String
+     */
+    @SuppressWarnings("unchecked")
+    public String getParameterFromJSON(String response, String entity, String param) throws ParseException
+    {  
+        try
+        {
+            JSONParser parser = new JSONParser();  
+            Object obj = parser.parse(response);
+            JSONObject jsonObject = (JSONObject) obj;  
+            JSONArray jArray = (JSONArray) jsonObject.get(entity);
+            Iterator<JSONObject> iterator = jArray.iterator();
+            while (iterator.hasNext()) 
+            {
+                JSONObject factObj = (JSONObject) iterator.next();
+                return (String) factObj.get(param);
+            }
+        }
+        catch (Exception e)
+        {
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject) parser.parse(response);
+            JSONObject data = (JSONObject) obj.get(entity);
+            return (String) data.get(param);
+        }          
+        return "";       
+    }
 
     /**
      * Closes the HttpClient. 
@@ -274,6 +325,33 @@ public class AlfrescoHttpClient
     public String getApiUrl()
     {
         return apiUrl;
+    }
+    public String getCloudUrl()
+    {
+        return cloudUrl;
+    }
+
+    public String getCloudApiUrl()
+    {
+        return apiCloud;
+    }
+
+    /**
+     * Get the cloud key from the propertie file 
+     *
+     */
+    public String getCloudKey() throws IOException 
+    {    
+        String result = "";
+        Properties prop = new Properties();
+        String propFileName = "data.properties";
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+        if (inputStream != null) 
+        {
+            prop.load(inputStream);
+        }
+        result = prop.getProperty("alfresco.cloud.key");
+        return result;
     }
 
 }
