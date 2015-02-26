@@ -19,7 +19,6 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
     private String scheme;
     private String host;
     private int port;
-    private String cloudUrl;
     private int maxNumberOfConnections;
     private int connectionTimeoutMs;
     private int socketTimeoutMs;
@@ -34,16 +33,16 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
     
     public BasicAuthPublicApiFactory(String scheme, String host, int port, CMISEndpoint preferredCMISEndPoint,
             int maxNumberOfConnections, int connectionTimeoutMs, 
-            int socketTimeoutMs, int socketTtlMs, String cloudUrl)
+            int socketTimeoutMs, int socketTtlMs)
     {
         this(scheme, host, port, preferredCMISEndPoint, maxNumberOfConnections, connectionTimeoutMs, socketTimeoutMs,
-                socketTtlMs, "alfresco", "api", "service", cloudUrl);
+                socketTtlMs, "alfresco", "api", "service");
         this.preferredCMISEndPoint = preferredCMISEndPoint;
     }
 
     public BasicAuthPublicApiFactory(String scheme, String host, int port, CMISEndpoint preferredCMISEndPoint,
             int maxNumberOfConnections, int connectionTimeoutMs,  int socketTimeoutMs, int socketTtlMs,
-            String context, String publicApiServletName, String serviceServletName, String cloudUrl)
+            String context, String publicApiServletName, String serviceServletName)
     {
         super();
         this.scheme = scheme;
@@ -57,7 +56,6 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
         this.context = context;
         this.publicApiServletName = publicApiServletName;
         this.serviceServletName = serviceServletName;
-        this.cloudUrl = cloudUrl;
     }
 
     public String getContext()
@@ -83,11 +81,6 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
     public int getPort()
     {
         return port;
-    }
-    
-    public String getCloudUrl()
-    {
-        return cloudUrl;
     }
     
     public CMISEndpoint getPreferredCMISEndPoint()

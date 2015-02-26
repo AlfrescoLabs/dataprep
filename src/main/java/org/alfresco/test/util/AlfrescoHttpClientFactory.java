@@ -26,25 +26,17 @@ public class AlfrescoHttpClientFactory
     private String host;
     private String scheme;
     private int port;
-    private String cloudUrl;
-    AlfrescoHttpClientFactory(final String scheme, final String host, int port, final String cloudUrl)
+    AlfrescoHttpClientFactory(final String scheme, final String host, int port)
     {
         this.scheme = scheme;
         this.host = host;
         this.port = port;
-        this.cloudUrl = cloudUrl;
     }
-    
     public AlfrescoHttpClient getObject() throws Exception
     {
         return new AlfrescoHttpClient(scheme, host, port);
     }
-    
-    public AlfrescoHttpClient getCloudObject() throws Exception
-    {
-        return new AlfrescoHttpClient(cloudUrl);
-    }
-    
+
     public Class<?> getObjectType()
     {
         // TODO Auto-generated method stub
@@ -55,4 +47,5 @@ public class AlfrescoHttpClientFactory
     {
         return false;
     }
+
 }
