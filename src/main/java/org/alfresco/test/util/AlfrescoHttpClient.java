@@ -145,7 +145,7 @@ public class AlfrescoHttpClient
      * @return {@link StringEntity} content.
      * @throws UnsupportedEncodingException if unsupported
      */
-    private StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
+    public StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
     {
         if (json == null || json.toString().isEmpty())
         {

@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 /**
  * Test user data load api crud operations.
  * 
- * @author Michael Suzuki
+ * @author Michael Suzuki, Bogdan Bocancea
  */
 public class UserTest extends AbstractTest
 {
@@ -140,4 +140,124 @@ public class UserTest extends AbstractTest
         Assert.assertFalse(userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, "whatSite", "SiteConsumer"));
     }
   
+    @Test
+    public void requestSiteMembership() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+    }
+    
+    @Test
+    public void requestSiteMembershipTwice() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertFalse(userService.requestSiteMembership(userName, password, siteId));
+    }
+    
+    @Test
+    public void requestSiteMembershipNoExistentSite() throws Exception
+    {
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertFalse(userService.requestSiteMembership(userName, password, "fakeSite"));
+    }
+    
+    @Test
+    public void requestSiteMembershipNoExistentUser() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Assert.assertFalse(userService.requestSiteMembership("fakeUser", password, "fakeSite"));
+    }
+    
+    @Test
+    public void removePendingRequestModeratedSite() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.MODERATED);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertTrue(userService.removePendingSiteRequest(admin, admin, userName, siteId));
+    }
+    
+    @Test
+    public void removePendingRequestPublicSite() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertFalse(userService.removePendingSiteRequest(admin, admin, userName, siteId));
+    }
+    
+    @Test
+    public void removeSiteMembership() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertTrue(userService.removeSiteMembership(admin, admin, userName, siteId));
+    }
+    
+    @Test
+    public void removeSiteMembershiNoExistentUser() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Assert.assertFalse(userService.removeSiteMembership(admin, admin, "fakeUser", siteId));
+    }
+    
+    @Test
+    public void removeSiteMembershipNoExistentSite() throws Exception
+    {
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertFalse(userService.removeSiteMembership(admin, admin, userName, "fakeSite"));
+    }
 }

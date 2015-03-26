@@ -73,7 +73,7 @@ public class UserService
         String reqURL = client.getApiUrl() + "people?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
         if (logger.isTraceEnabled())
         {
-            logger.trace("Using Url - " + reqURL);
+            logger.trace("Create user using Url - " + reqURL);
         }
         HttpPost request = null;
         HttpResponse response = null;
@@ -318,6 +318,130 @@ public class UserService
             put.releaseConnection();
             client.close();
         } 
+        return false;
+    }
+    
+    /**
+     * Method to request to join a site
+     * 
+     * @param userName
+     * @param password
+     * @param domain
+     * @param siteId
+     * @return true if request is successful
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean requestSiteMembership(final String userName,
+                                         final String password, 
+                                         final String siteId) throws Exception 
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteId))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }        
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getApiUrl().replace("/service", "");
+        String reqUrl = api + "-default-/public/alfresco/versions/1/people/" + userName + "/site-membership-requests";
+        HttpPost post  = new HttpPost(reqUrl);
+        JSONObject body = new JSONObject();
+        body.put("id", siteId);
+        post.setEntity(client.setMessageBody(body));
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(post);
+            if(201 == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+        }
+        finally
+        {
+            post.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Delete a pending request for a Moderated Site
+     * 
+     * @param siteManager
+     * @param passManager
+     * @param userName - user that made the request to the Site
+     * @param siteId
+     * @return true if request is deleted (204 Status)
+     * @throws Exception if error
+     */
+    public boolean removePendingSiteRequest(final String siteManager,
+                                            final String passwordManager, 
+                                            final String userName,
+                                            final String siteId) throws Exception 
+    {
+        if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
+                || StringUtils.isEmpty(userName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }        
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getApiUrl().replace("/service", "");
+        String reqUrl = api + "-default-/public/alfresco/versions/1/people/" + userName + "/site-membership-requests/" + siteId;
+        HttpDelete delete  = new HttpDelete(reqUrl);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(delete);
+            if(204 == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+        }
+        finally
+        {
+            delete.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Remove a user from site
+     * 
+     * @param siteManager
+     * @param passManager
+     * @param userName - user that made the request to the Site
+     * @param siteId
+     * @return true if request is deleted (204 Status)
+     * @throws Exception if error
+     */
+    public boolean removeSiteMembership(final String siteManager,
+                                        final String passwordManager, 
+                                        final String userName,
+                                        final String siteId) throws Exception 
+    {
+        if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
+                || StringUtils.isEmpty(userName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }        
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships/" + userName;
+        HttpDelete delete  = new HttpDelete(url);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(delete);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+        }
+        finally
+        {
+            delete.releaseConnection();
+            client.close();
+        }
         return false;
     }
 }
