@@ -17,6 +17,7 @@ package org.alfresco.test.util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -24,7 +25,9 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  * Create user helper class, creates an Alfresco user using public API.
@@ -120,10 +123,10 @@ public class UserService
      */
     @SuppressWarnings("unchecked")
     private JSONObject encode(final String userName, 
-                                     final String password, 
-                                     final String firstName, 
-                                     final String lastName, 
-                                     final String email)
+                              final String password, 
+                              final String firstName, 
+                              final String lastName, 
+                              final String email)
     {
         JSONObject body = new JSONObject();
         body.put("userName", userName);
@@ -443,5 +446,376 @@ public class UserService
             client.close();
         }
         return false;
+    }
+    
+    /**
+     * Checks if group exists.
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    public boolean groupExists(final String adminUser,
+                               final String adminPass,
+                               final String groupName) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpGet request = new HttpGet(reqURL);
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+
+    /**
+     * Create a new Group.
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName 
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createGroup(final String adminUser,
+                               final String adminPass,
+                               final String groupName) throws Exception
+    {
+        if (StringUtils .isEmpty( adminUser) || StringUtils .isEmpty( adminPass) || StringUtils.isEmpty (groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "rootgroups/" + groupName + "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        if (logger.isTraceEnabled())
+        {
+            logger.trace ("Create group using url - " + reqURL);
+        }
+        HttpPost request = new HttpPost(reqURL);
+        JSONObject body = new JSONObject();
+        body.put("displayName", groupName);
+        request.setEntity(client.setMessageBody(body));
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
+            {
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace("Group: " + groupName + " is created successfully");
+                }
+                return true;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Add user to group.
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName 
+     * @param userName
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean addUserToGroup(final String adminUser,
+                                  final String adminPass,
+                                  final String groupName,
+                                  final String userName) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName + 
+                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpPost request = new HttpPost(reqURL);
+        JSONObject body = new JSONObject();
+        body.put("", "");
+        request.setEntity(client.setMessageBody(body));
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("User " + userName + " was added to " + groupName);
+                    }
+                    return true;
+                case HttpStatus.SC_NOT_FOUND:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Root group " + groupName + " not found");
+                    }
+                default:
+                    logger.error("Unable to add user to group: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        } 
+        return false;
+    }
+    
+    /**
+     * Add sub group. If sub group doesn't exists it will be created.
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName 
+     * @param userName
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean addSubGroup(final String adminUser,
+                               final String adminPass,
+                               final String groupName,
+                               final String subGroup) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup + 
+                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpPost request = new HttpPost(reqURL);
+        JSONObject body = new JSONObject();
+        body.put("", "");
+        request.setEntity(client.setMessageBody(body));
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_CREATED:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Sub group " + subGroup + " was added to " + groupName);
+                    }
+                    return true;
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Sub group " + subGroup + " was added to " + groupName);
+                    }
+                    return true;
+                case HttpStatus.SC_NOT_FOUND:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Root group " + groupName + " not found");
+                    }
+                default:
+                    logger.error("Unable to add sub group to group: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        } 
+        return false;
+    }
+    
+    /**
+     * Remove user from group
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName 
+     * @param userName
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    public boolean removeUserFromGroup(final String adminUser,
+                                       final String adminPass,
+                                       final String groupName,
+                                       final String userName) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName + 
+                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpDelete request = new HttpDelete(reqURL);
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace("User: " + userName + " is removed from " + groupName);
+                }
+                return true;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Remove subgroup from group
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName 
+     * @param subGroup
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    public boolean removeSubgroupFromGroup(final String adminUser,
+                                           final String adminPass,
+                                           final String groupName,
+                                           final String subGroup) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup + 
+                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpDelete request = new HttpDelete(reqURL);
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace("Sub group: " + subGroup + " is removed from " + groupName);
+                }
+                return true;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Remove a root group
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName 
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    public boolean removeGroup(final String adminUser,
+                               final String adminPass,
+                               final String groupName) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "rootgroups/" + groupName + "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpDelete request = new HttpDelete(reqURL);
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace("Group: " + groupName + " is removed successfully");
+                }
+                return true;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Count users and groups added in root group
+     * 
+     * @param adminUser admin username
+     * @param adminPass admin credential
+     * @param groupName
+     * @return true if user exists
+     * @throws Exception if error
+     */
+    public int countAuthoritiesFromGroup(final String adminUser,
+                                         final String adminPass,
+                                         final String groupName) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpGet request = new HttpGet(reqURL);
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                HttpEntity entity = response. getEntity();
+                String responseString = EntityUtils.toString(entity , "UTF-8");        
+                JSONParser parser = new JSONParser();
+                JSONObject obj = (JSONObject) parser.parse(responseString);       
+                JSONObject data = (JSONObject) obj.get("paging");
+                long count = (Long) data.get("totalItems");
+                Integer i = (int) (long) count;
+                return i;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return 0;
     }
 }

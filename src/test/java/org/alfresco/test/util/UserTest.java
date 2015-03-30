@@ -241,6 +241,40 @@ public class UserTest extends AbstractTest
     }
     
     @Test
+    public void removeSiteMembershipByUser() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertTrue(userService.removeSiteMembership(userName, password, userName, siteId));
+    }
+    
+    @Test
+    public void removeSiteMembershipNonMemberUser() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String nonMemberUser = "nonMember-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, nonMemberUser, password, userName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertFalse(userService.removeSiteMembership(nonMemberUser, password, userName, siteId));
+    }
+    
+    @Test
     public void removeSiteMembershiNoExistentUser() throws Exception
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
@@ -259,5 +293,150 @@ public class UserTest extends AbstractTest
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName);
         Assert.assertFalse(userService.removeSiteMembership(admin, admin, userName, "fakeSite"));
+    }
+    
+    @Test
+    public void createGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.groupExists(admin, admin, groupName));
+    }
+    
+    @Test
+    public void createSameGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertFalse(userService.createGroup(admin, admin, groupName));
+    }
+    
+    @Test
+    public void createGroupNonAdminUser() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertFalse(userService.createGroup(userName, password, groupName));
+        Assert.assertFalse(userService.groupExists(userName, password, groupName));
+    }
+    
+    @Test
+    public void addUserToGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userName2 = "userm2-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName2, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
+        Assert.assertEquals(userService.countAuthoritiesFromGroup(admin, admin, groupName), 2);
+    }
+    
+    @Test
+    public void addNonExistentUserToGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertFalse(userService.addUserToGroup(admin, admin, groupName, "fakeUser"));
+    }
+    
+    @Test
+    public void addUserToNonExistenGroup() throws Exception
+    {
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertFalse(userService.addUserToGroup(admin, admin, "fakeGroup", userName));
+    }
+    
+    @Test
+    public void addUserToGroupTwice() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        Assert.assertFalse(userService.addUserToGroup(admin, admin, groupName, userName));
+    }
+    
+    @Test
+    public void addNonExistentSubGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String subGroup = "subgroup" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addSubGroup(admin, admin, groupName, subGroup));
+        Assert.assertTrue(userService.groupExists(admin, admin, subGroup));     
+    }
+    
+    @Test
+    public void addExistentSubGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String subGroup = "subgroup" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.createGroup(admin, admin, subGroup));
+        Assert.assertTrue(userService.addSubGroup(admin, admin, groupName, subGroup));
+        Assert.assertTrue(userService.groupExists(admin, admin, subGroup));
+        Assert.assertEquals(userService.countAuthoritiesFromGroup(admin, admin, groupName), 1);
+    }
+    
+    @Test
+    public void addSubGroupToNonExistentGroup() throws Exception
+    {
+        String subGroup = "subgroup" + System.currentTimeMillis();
+        Assert.assertFalse(userService.addSubGroup(admin, admin, "fakeGroup", subGroup));  
+    }
+    
+    @Test
+    public void removeUserFromGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        Assert.assertTrue(userService.removeUserFromGroup(admin, admin, groupName, userName));
+        Assert.assertEquals(userService.countAuthoritiesFromGroup(admin, admin, groupName), 0);
+    }
+    
+    @Test
+    public void removeNonExistentUserFromGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertFalse(userService.removeUserFromGroup(admin, admin, groupName, "fakeUser"));
+    }
+    
+    @Test
+    public void removeSubgroupFromGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String subGroup = "subgroup" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addSubGroup(admin, admin, groupName, subGroup));
+        Assert.assertTrue(userService.removeSubgroupFromGroup(admin, admin, groupName, subGroup));
+    }
+    
+    @Test
+    public void removeGroup() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.removeGroup(admin, admin, groupName));
+        Assert.assertFalse(userService.groupExists(admin, admin, groupName));
+    }
+    
+    @Test
+    public void removeGroupNonAdminUser() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertFalse(userService.removeGroup(userName, password, groupName));
     }
 }
