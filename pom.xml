@@ -99,6 +99,7 @@
             <plugin>
                 <!-- Configuration triggered by mvn antrun:run, used by Bamboo to stop server -->
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
