@@ -439,4 +439,33 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.createGroup(admin, admin, groupName));
         Assert.assertFalse(userService.removeGroup(userName, password, groupName));
     }
+    
+    @Test
+    public void countSiteMembers() throws Exception
+    {
+        String userManager = "user1-" + System.currentTimeMillis();
+        String userToInvite = "user2-" + System.currentTimeMillis();
+        String siteName = "site-" + System.currentTimeMillis();
+        String emailUserManager = userManager + "@test.com";
+        String emailUserToInvite = userToInvite + "@test.com";
+        userService.create(admin, admin, userManager, password, emailUserManager);
+        userService.create(admin, admin, userToInvite, password, emailUserToInvite);
+        site.create(userManager, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
+        userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, siteName, "SiteConsumer");
+        int noOfSiteMembers=userService.countSiteMembers(userManager, password, siteName);
+        Assert.assertEquals(noOfSiteMembers,2);
+
+    }
+    
+    @Test
+    public void countSiteMembersWithNoInvitee() throws Exception
+    {
+        String userName = "user-" + System.currentTimeMillis();
+        String siteName = "site-" + System.currentTimeMillis();
+        String userEmail = userName + "@test.com";
+        userService.create(admin, admin, userName, password, userEmail);
+        site.create(userName, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
+        int noOfSiteMembers=userService.countSiteMembers(userName, password, siteName);
+        Assert.assertEquals(noOfSiteMembers,1);
+    }
 }

@@ -26,7 +26,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
 /**
@@ -818,4 +820,49 @@ public class UserService
         }
         return 0;
     }
+    
+    /**
+     * Count members of a site
+     * 
+     * @param userName user name that owns the site
+     * @param userPass user password
+     * @param siteName
+     * @return total number of site members
+     * @throws Exception if error
+     */
+    public int countSiteMembers(final String userName,
+                                         final String userPass,
+                                         final String siteName) throws Exception
+    { 
+           int count=0;
+           if (StringUtils .isEmpty(userName) || StringUtils .isEmpty(userPass) || StringUtils.isEmpty(siteName))
+           {
+               throw new IllegalArgumentException("Parameter missing");
+           }
+           
+           AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+           String reqURL = client.getApiUrl() + "sites/" + siteName + "/memberships?alf_ticket=" + client.getAlfTicket(userName, userPass);
+           HttpGet request = new HttpGet(reqURL);
+           
+           try
+           {
+               HttpResponse response = client.executeRequest(request);
+               if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+               {
+                   HttpEntity entity = response.getEntity();
+                   String responseString = EntityUtils.toString(entity , "UTF-8"); 
+                   Object obj=JSONValue.parse(responseString);
+                   JSONArray array=(JSONArray)obj;
+                   count = array.size();
+               }
+           }
+           finally
+           {
+               request.releaseConnection();
+               client.close();
+           }
+           
+           return count;
+    }
+    
 }
