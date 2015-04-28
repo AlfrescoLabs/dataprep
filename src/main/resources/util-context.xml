@@ -46,6 +46,10 @@
         <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
     </bean>
     
+     <bean id="contentService" class="org.alfresco.test.util.ContentService">
+        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
+    </bean>
+    
     <bean id="alfrescoHttpClientFactory" class="org.alfresco.test.util.AlfrescoHttpClientFactory">
         <constructor-arg name="scheme" value="${alfresco.scheme}"/>
         <constructor-arg name="host" value="${alfresco.server}"/>
