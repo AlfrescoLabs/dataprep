@@ -113,7 +113,7 @@ public class ContentTest extends AbstractTest
                     Visibility.PUBLIC);
         Folder rootFld = content.createFolder(userName, password, rootFolder, siteName);
         Assert.assertFalse(rootFld.getId().isEmpty());    
-        Map<String, String> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, secondFolder);
         Folder secondFld = rootFld.createFolder(properties);
@@ -246,7 +246,7 @@ public class ContentTest extends AbstractTest
                     Visibility.PUBLIC);     
         Folder folderRoot = content.createFolder(userName, password, folder, siteName);
         content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);   
-        Map<String, String> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folder);
         folderRoot.createFolder(properties);
@@ -329,7 +329,7 @@ public class ContentTest extends AbstractTest
         content.createDocument(userName, password, siteName, DocumentType.XML, "xmlDoc", "contentfwfwfwfwgwegwgw");
         Folder f = content.createFolder(userName, password, folder, siteName);
         content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);      
-        Map<String, String> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folder1);
         f.createFolder(properties);

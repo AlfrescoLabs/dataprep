@@ -51,7 +51,7 @@ public class ContentService extends CMISUtil
         {
             throw new IllegalArgumentException("Parameter missing");
         }      
-        Map<String, String> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<String, String >();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folderName);
         Session session = getCMISSession(userName, password);

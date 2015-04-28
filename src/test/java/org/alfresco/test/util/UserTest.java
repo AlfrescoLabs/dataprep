@@ -468,4 +468,5 @@ public class UserTest extends AbstractTest
         int noOfSiteMembers=userService.countSiteMembers(userName, password, siteName);
         Assert.assertEquals(noOfSiteMembers,1);
     }
+   
 }
