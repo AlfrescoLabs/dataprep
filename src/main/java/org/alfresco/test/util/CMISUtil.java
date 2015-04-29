@@ -65,9 +65,9 @@ public class CMISUtil
         parameter.put(SessionParameter.USER, userName);
         parameter.put(SessionParameter.PASSWORD, password);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/atom";
-        parameter.put(SessionParameter.ATOMPUB_URL, serviceUrl);
-        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+        String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/browser";
+        parameter.put(SessionParameter.BROWSER_URL, serviceUrl);
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.BROWSER.value());
         try
         {
             // create session

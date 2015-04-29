@@ -1,6 +1,7 @@
 package org.alfresco.test.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +69,11 @@ public class ContentService extends CMISUtil
         catch(CmisContentAlreadyExistsException ae)
         {
             throw new CmisRuntimeException("Folder already exists " + folderName, ae);
-        } 
+        }
+        finally
+        {
+            
+        }
     }
     
     /**
@@ -102,7 +107,11 @@ public class ContentService extends CMISUtil
         catch(CmisConstraintException ce)
         {
             throw new CmisRuntimeException("Cannot delete folder with at least one child", ce);
-        }  
+        }
+        finally
+        {
+            
+        }
     }
     
     /**
@@ -134,10 +143,10 @@ public class ContentService extends CMISUtil
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         properties.put(PropertyIds.NAME, docName);     
         Session session = getCMISSession(userName, password);
+        byte[] content = docContent.getBytes();
+        InputStream stream = new ByteArrayInputStream(content);
         try
-        {
-            byte[] content = docContent.getBytes();
-            InputStream stream = new ByteArrayInputStream(content);
+        {       
             ContentStream contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
             Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
@@ -150,6 +159,60 @@ public class ContentService extends CMISUtil
         catch(CmisContentAlreadyExistsException ae)
         {
             throw new CmisRuntimeException("Document already exits " + siteName, ae);
+        }
+        finally
+        {
+            stream.close();
+        }
+    }
+    
+    /**
+     * Create a new document using CMIS
+     * 
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param DocumentType 
+     * @param File fileName
+     * @param docContent
+     * @return document
+     * @throws Exception if error
+     */
+    public Document createDocument(final String userName,
+                                   final String password,
+                                   final String siteName,
+                                   final DocumentType fileType,
+                                   final File docName,
+                                   final String docContent) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }   
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        properties.put(PropertyIds.NAME, docName.getName());     
+        Session session = getCMISSession(userName, password);
+        byte[] content = docContent.getBytes();
+        InputStream stream = new ByteArrayInputStream(content);
+        try
+        {        
+            ContentStream contentStream = session.getObjectFactory().createContentStream(docName.getName(), Long.valueOf(content.length), fileType.type, stream);
+            Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+            Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
+            return d;
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+        }
+        catch(CmisContentAlreadyExistsException ae)
+        {
+            throw new CmisRuntimeException("Document already exits " + siteName, ae);
+        }
+        finally
+        {
+            stream.close();
         }
     }
     
@@ -184,10 +247,10 @@ public class ContentService extends CMISUtil
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         properties.put(PropertyIds.NAME, docName);     
         Session session = getCMISSession(userName, password);
+        byte[] content = docContent.getBytes();
+        InputStream stream = new ByteArrayInputStream(content);
         try
-        {
-            byte[] content = docContent.getBytes();
-            InputStream stream = new ByteArrayInputStream(content);
+        {           
             ContentStream contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
             String folderId = getNodeRef(userName, password, siteName, folderName);
             CmisObject folderObj = session.getObject(folderId);
@@ -209,6 +272,10 @@ public class ContentService extends CMISUtil
         catch(CmisInvalidArgumentException ia)
         {
             throw new CmisRuntimeException("Invalid folder " + folderName, ia);
+        }
+        finally
+        {
+           stream.close();
         }
         return d;
     }

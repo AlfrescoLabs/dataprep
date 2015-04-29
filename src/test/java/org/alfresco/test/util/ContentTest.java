@@ -1,5 +1,6 @@
 package org.alfresco.test.util;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -336,6 +337,24 @@ public class ContentTest extends AbstractTest
         content.deleteTree(userName, password, siteName, folder);
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, folder1).isEmpty());
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainDoc).isEmpty());       
+    }
+    
+    @Test
+    public void testCreateDocumentFile() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String plainDoc = "plain" +  System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        File file = new File(plainDoc);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.MSWORD, file, plainDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
     }
  
 }
