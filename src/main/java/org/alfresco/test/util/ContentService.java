@@ -70,10 +70,6 @@ public class ContentService extends CMISUtil
         {
             throw new CmisRuntimeException("Folder already exists " + folderName, ae);
         }
-        finally
-        {
-            
-        }
     }
     
     /**
@@ -107,10 +103,6 @@ public class ContentService extends CMISUtil
         catch(CmisConstraintException ce)
         {
             throw new CmisRuntimeException("Cannot delete folder with at least one child", ce);
-        }
-        finally
-        {
-            
         }
     }
     
