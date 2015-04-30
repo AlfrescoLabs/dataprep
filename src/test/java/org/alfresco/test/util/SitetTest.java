@@ -15,6 +15,7 @@
 package org.alfresco.test.util;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;
@@ -30,7 +31,7 @@ import org.testng.annotations.Test;
 public class SitetTest extends AbstractTest
 {
     private static final String MY_DOMAIN = "mydomain";
-    private static final String ADMIN = "admin";
+    private static final String ADMIN = "admin"; 
     private SiteService site;
     private String siteId;
     
@@ -56,7 +57,7 @@ public class SitetTest extends AbstractTest
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
     }
-    @Test(dependsOnMethods="exists")
+    @Test(dependsOnMethods="getAllSites")
     public void delete() throws Exception
     {
         site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
@@ -80,5 +81,13 @@ public class SitetTest extends AbstractTest
                     siteId, 
                     "my site description", 
                     Visibility.PUBLIC);
+    }
+    
+    @Test(dependsOnMethods="exists")
+    public void getAllSites() throws Exception
+    {
+        List<String> sites= site.getSites(ADMIN, ADMIN);
+        Assert.assertTrue(sites.contains(siteId));
+        Assert.assertNotEquals(sites.size(),0);
     }
 }

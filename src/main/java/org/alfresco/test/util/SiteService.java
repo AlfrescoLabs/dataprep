@@ -19,9 +19,16 @@
 package org.alfresco.test.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 
@@ -113,5 +120,45 @@ public class SiteService
     {
         Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
         publicApi.removeSite(domain, siteId);
+    }
+    
+    /**
+     * Gets all existing sites
+     * @param username site user
+     * @param password user password
+     * @return list of sites
+     * @throws Exception if error
+     */
+    public List<String> getSites(final String username,final String password) throws Exception
+    {
+        List<String> mySitesList=new ArrayList<String>() ;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        try
+        {
+            String ticket = client.getAlfTicket(username, password);
+            String apiUrl = client.getApiUrl();
+            String url = String.format("%ssites?alf_ticket=%s",apiUrl, ticket);
+            HttpGet get = new HttpGet(url);
+            HttpResponse response = client.executeRequest(get);
+            if( 200 == response.getStatusLine().getStatusCode())
+            {
+                HttpEntity entity = response.getEntity();
+                String responseString = EntityUtils.toString(entity , "UTF-8"); 
+                Object obj=JSONValue.parse(responseString);
+                JSONArray jarray=(JSONArray)obj;           
+                for (Object item:jarray)
+                {
+                        JSONObject jobject=(JSONObject) item;
+                        mySitesList.add(jobject.get("title").toString());
+                        System.out.println("----"+jobject.get("title").toString());
+                }
+                
+            }
+            return mySitesList;
+        } 
+        finally
+        {
+            client.close();
+        }
     }
 }
