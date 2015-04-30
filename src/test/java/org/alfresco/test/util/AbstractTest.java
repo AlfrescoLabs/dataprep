@@ -14,12 +14,14 @@
  */
 package org.alfresco.test.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.BeforeSuite;
+
 /**
  * Abstract that setups spring context.
  * @author Michael Suzuki
@@ -27,6 +29,10 @@ import org.testng.annotations.BeforeSuite;
  */
 public class AbstractTest
 {
+    public static final String SLASH = File.separator;
+    private static final String SRC_ROOT = System.getProperty("user.dir") + SLASH;
+    protected static final String DATA_FOLDER = SRC_ROOT + "src\\test\\resources\\testdata" + SLASH;
+    
     protected static ApplicationContext ctx;
     @BeforeSuite(alwaysRun = true)
     public static void setupContext()

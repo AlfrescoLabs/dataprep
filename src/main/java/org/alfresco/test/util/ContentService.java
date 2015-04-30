@@ -2,8 +2,11 @@ package org.alfresco.test.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -19,6 +22,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExists
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -342,5 +346,55 @@ public class ContentService extends CMISUtil
         {
             throw new CmisRuntimeException("Invalid folder " + folderName, nf);
         } 
+    }
+  
+    public List<Document> uploadFiles(final String filesPath, 
+            final String userName,
+            final String password,
+            final String siteName) throws Exception
+    {
+        List <Document> uploadedFiles=new ArrayList<Document>();
+        String fileName=null;
+        String fileExtention=null;
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        
+        File dir = new File(filesPath);
+        if (!dir.exists() || !dir.isDirectory()) 
+        {
+            throw new IllegalArgumentException("Invalid Path: " + dir.getPath());
+        }
+        
+        File[] fileList = dir.listFiles();
+        for (File file : fileList)
+        {
+            fileName=file.getName();
+            fileExtention=FilenameUtils.getExtension(file.getPath());
+            FileInputStream fileContent=new FileInputStream(file);
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            properties.put(PropertyIds.NAME, fileName);     
+            Session session = getCMISSession(userName, password);
+            try
+            {
+                ContentStream contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);
+                Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+                Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
+                uploadedFiles.add(d);
+            }
+            catch(CmisObjectNotFoundException nf)
+            {
+                throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+            }
+            catch(CmisContentAlreadyExistsException ae)
+            {
+                throw new CmisRuntimeException("Document already exits " + siteName, ae);
+            }
+            
+        }
+        
+        return uploadedFiles;        
     }
 }

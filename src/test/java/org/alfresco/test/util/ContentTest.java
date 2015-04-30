@@ -2,6 +2,7 @@ package org.alfresco.test.util;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.alfresco.test.util.CMISUtil.DocumentType;
@@ -337,6 +338,25 @@ public class ContentTest extends AbstractTest
         content.deleteTree(userName, password, siteName, folder);
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, folder1).isEmpty());
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainDoc).isEmpty());       
+    }
+    @Test
+    public void testUploadDocsInDocumentLibrary() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        List <Document> uploadedDocs=content.uploadFiles(DATA_FOLDER, userName,password, siteName);
+        Assert.assertNotNull(uploadedDocs);
+        for (Document d:uploadedDocs)
+        {
+            Assert.assertFalse(d.getId().isEmpty());
+        }       
     }
     
     @Test
