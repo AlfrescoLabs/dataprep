@@ -349,11 +349,11 @@ public class ContentService extends CMISUtil
     }
   
     public List<Document> uploadFiles(final String filesPath, 
-            final String userName,
-            final String password,
-            final String siteName) throws Exception
+                                      final String userName,
+                                      final String password,
+                                      final String siteName) throws Exception
     {
-        List <Document> uploadedFiles=new ArrayList<Document>();
+        List<Document> uploadedFiles=new ArrayList<Document>();
         String fileName=null;
         String fileExtention=null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))

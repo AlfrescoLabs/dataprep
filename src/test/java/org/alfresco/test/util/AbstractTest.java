@@ -31,7 +31,7 @@ public class AbstractTest
 {
     public static final String SLASH = File.separator;
     private static final String SRC_ROOT = System.getProperty("user.dir") + SLASH;
-    protected static final String DATA_FOLDER = SRC_ROOT + "src\\test\\resources\\testdata" + SLASH;
+    protected static final String DATA_FOLDER = SRC_ROOT + "src/test/resources/testdata" + SLASH;
     
     protected static ApplicationContext ctx;
     @BeforeSuite(alwaysRun = true)

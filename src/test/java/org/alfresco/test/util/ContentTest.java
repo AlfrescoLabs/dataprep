@@ -351,7 +351,7 @@ public class ContentTest extends AbstractTest
                     siteName, 
                     "my site description", 
                     Visibility.PUBLIC);
-        List <Document> uploadedDocs=content.uploadFiles(DATA_FOLDER, userName,password, siteName);
+        List<Document> uploadedDocs = content.uploadFiles(DATA_FOLDER, userName,password, siteName);
         Assert.assertNotNull(uploadedDocs);
         for (Document d:uploadedDocs)
         {
