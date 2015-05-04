@@ -397,4 +397,71 @@ public class ContentService extends CMISUtil
         
         return uploadedFiles;        
     }
+    
+    public List<Document> uploadFilesInFolder(final String filesPath, 
+                                              final String userName,
+                                              final String password,
+                                              final String siteName,
+                                              final String folderName) throws Exception
+    {
+        List<Document> uploadedFiles=new ArrayList<Document>();
+        String fileName=null;
+        String fileExtention=null;
+        CmisObject folderObj=null;
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        
+        File dir = new File(filesPath);
+        if (!dir.exists() || !dir.isDirectory()) 
+        {
+            throw new IllegalArgumentException("Invalid Path: " + dir.getPath());
+        }
+        
+        Session session = getCMISSession(userName, password);
+        String folderId = getNodeRef(userName, password, siteName, folderName);
+        if (StringUtils.isEmpty(folderId))
+        {
+            throw new CmisRuntimeException("Invalid folder: " + folderName);
+        }
+        
+        File[] fileList = dir.listFiles();
+        for (File file : fileList)
+        {
+            fileName=file.getName();
+            fileExtention=FilenameUtils.getExtension(file.getPath());
+            FileInputStream fileContent=new FileInputStream(file);
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            properties.put(PropertyIds.NAME, fileName);     
+            try
+            {
+                ContentStream contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);
+                
+                folderObj = session.getObject(folderId);
+                Folder f = (Folder)folderObj;           
+                Document d = f.createDocument(properties, contentStream, VersioningState.MAJOR);
+                uploadedFiles.add(d);
+            }
+            catch(CmisObjectNotFoundException nf)
+            {
+                throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+            }
+            catch(CmisContentAlreadyExistsException ae)
+            {
+                throw new CmisRuntimeException("Document already exits " + siteName, ae);
+            }
+            catch(ClassCastException cce)
+            {
+                throw new CmisRuntimeException("Nole: " + folderName + " is not a folder.", cce);
+            }
+            finally
+            {
+                fileContent.close();
+            }        
+        }
+        
+        return uploadedFiles;        
+   }
 }

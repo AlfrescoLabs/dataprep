@@ -339,6 +339,7 @@ public class ContentTest extends AbstractTest
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, folder1).isEmpty());
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainDoc).isEmpty());       
     }
+    
     @Test
     public void testUploadDocsInDocumentLibrary() throws Exception
     {
@@ -357,6 +358,60 @@ public class ContentTest extends AbstractTest
         {
             Assert.assertFalse(d.getId().isEmpty());
         }       
+    }
+    
+    @Test
+    public void testUploadDocsInFolder() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String folderName = "cmisFolder" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createFolder(userName, password, folderName, siteName);
+        List<Document> uploadedDocs = content.uploadFilesInFolder(DATA_FOLDER, userName,password, siteName,folderName);
+        Assert.assertNotNull(uploadedDocs);
+        for (Document d:uploadedDocs)
+        {
+            Assert.assertFalse(d.getId().isEmpty());
+        }       
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void testUploadDocsInNonExistentFolder() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.uploadFilesInFolder(DATA_FOLDER, userName,password, siteName,"NotExistFld");     
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void testUploadDocsInFileInsteadFolder() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String fileName = "cmisFile" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, fileName, "file node");
+        content.uploadFilesInFolder(DATA_FOLDER, userName,password, siteName, fileName);     
     }
     
     @Test
