@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
  * Create documents and folders using CMIS.
  * 
  * @author Bocancea Bogdan
+ * @author Cristina Axinte
  */
 
 public class ContentService extends CMISUtil
@@ -348,6 +349,16 @@ public class ContentService extends CMISUtil
         } 
     }
   
+    /**
+     * Upload files from a physical location
+     * 
+     * @param filesPath physical path where the files are stored
+     * @param userName user name
+     * @param password user password
+     * @param siteName site name
+     * @return list of uploaded documents
+     * @throws Exception if error
+     */  
     public List<Document> uploadFiles(final String filesPath, 
                                       final String userName,
                                       final String password,
@@ -398,6 +409,17 @@ public class ContentService extends CMISUtil
         return uploadedFiles;        
     }
     
+    /**
+     * Upload files in a folder from a physical location
+     * 
+     * @param filesPath physical path where the files are stored
+     * @param userName user name
+     * @param password user password
+     * @param siteName site name
+     * @param folderName folder name where files are uploaded
+     * @return list of uploaded documents
+     * @throws Exception if error
+     */
     public List<Document> uploadFilesInFolder(final String filesPath, 
                                               final String userName,
                                               final String password,
@@ -463,5 +485,26 @@ public class ContentService extends CMISUtil
         }
         
         return uploadedFiles;        
-   }
+    }
+       
+    /**
+     * Delete multiple files (from root or from folder) using CMIS (in root or in folder)
+     * 
+     * @param userName user name 
+     * @param password user password
+     * @param siteName site name
+     * @param fileNames names of files to be deleted
+     * @throws Exception
+     */
+    public void deleteFiles(final String userName,
+                            final String password,
+                            final String siteName,
+                            final String... fileNames) throws Exception
+    {
+        for(int i=0; i<fileNames.length;i++)
+        {
+            deleteDocument(userName, password, siteName, fileNames[i]);
+        }
+        
+    }
 }

@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
  * Test CMIS crud operations.
  * 
  * @author Bogdan Bocancea
+ * @author Cristina Axinte
  */
 
 public class ContentTest extends AbstractTest
@@ -430,6 +431,75 @@ public class ContentTest extends AbstractTest
         File file = new File(plainDoc);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.MSWORD, file, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
+    }
+    
+    @Test
+    public void testDeleteFiles() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String plainFile = "UploadFile-plaintext.txt" ;
+        String xmlFile = "UploadFile-xml.xml";
+        String htmlFile = "UploadFile-html.html";
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.uploadFiles(DATA_FOLDER, userName, password, siteName);
+        content.deleteFiles(userName, password, siteName, plainFile, xmlFile, htmlFile);  
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainFile).isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, xmlFile).isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, htmlFile).isEmpty());
+    }
+    
+    @Test
+    public void testDeleteNoFiles() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String plainFile = "UploadFile-plaintext.txt" ;
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.uploadFiles(DATA_FOLDER, userName, password, siteName);
+        content.deleteFiles(userName, password, siteName);  
+        Assert.assertFalse(content.getNodeRef(userName, password, siteName, plainFile).isEmpty());
+    }
+    
+    @Test
+    public void testDeleteFilesFromFolders() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String folderName= "cmisFolder" + System.currentTimeMillis();
+        String plainFile = "UploadFile-plaintext.txt" ;
+        String xmlFile = "UploadFile-xml.xml";
+        String htmlFile = "UploadFile-html.html";
+        String xlxsFile = "UploadFile-xlsx.xlsx" ;
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.HTML, htmlFile, "content html");
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainFile, "content plain text");
+        content.createFolder(userName, password, folderName, siteName);
+        content.createDocumentInFolder(userName, password, siteName, folderName, DocumentType.XML, xmlFile, "content xml");
+        content.createDocumentInFolder(userName, password, siteName, folderName, DocumentType.MSEXCEL, xlxsFile, "content excel");
+        content.deleteFiles(userName, password, siteName, plainFile, xmlFile, xlxsFile);  
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainFile).isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, xmlFile).isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, xlxsFile).isEmpty());
+        Assert.assertFalse(content.getNodeRef(userName, password, siteName, htmlFile).isEmpty());
     }
  
 }
