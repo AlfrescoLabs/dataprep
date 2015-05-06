@@ -1,18 +1,27 @@
 package org.alfresco.test.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.Property;
+import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.Repository;
+import org.apache.chemistry.opencmis.client.api.SecondaryType;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.api.Tree;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
 
@@ -46,6 +55,47 @@ public class CMISUtil
     public CMISUtil(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
     {
         this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
+    }
+    
+    /**
+     * Different Aspects of Documents and folders.
+     */
+    public enum DocumentAspect
+    {
+        CLASSIFIABLE("Classifiable", "P:cm:generalclassifiable"),
+        VERSIONABLE("Versionable", "P:cm:versionable"),
+        AUDIO("Audio", "P:audio:audio"),
+        INDEX_CONTROL("Index Control", "P:cm:indexControl"),
+        COMPLIANCEABLE("Complianceable", "P:cm:complianceable"),
+        DUBLIN_CORE("Dublin Core", "P:cm:dublincore"),
+        EFFECTIVITY("Effectivity", "P:cm:effectivity"),
+        SUMMARIZABLE("Summarizable", "P:cm:summarizable"),
+        TEMPLATABLE("Templatable", "P:cm:templatable"),
+        EMAILED("Emailed", "P:cm:emailed"),
+        ALIASABLE_EMAIL("Email Alias", "P:emailserver:aliasable"),
+        TAGGABLE("Taggable", "P:cm:taggable"),
+        INLINE_EDITABLE("Inline Editable", "P:app:inlineeditable"),
+        GEOGRAPHIC("Geographic", "P:cm:geographic"),
+        EXIF("EXIF", "P:exif:exif"),
+        RESTRICTABLE("Restrictable", "P:dp:restrictable");
+
+        private String value;
+        private String property;
+        private DocumentAspect(String value, String property)
+        {
+            this.value = value;
+            this.property = property;
+        }
+
+        public String getValue()
+        {
+            return this.value;
+        }
+
+        public String getProperty()
+        {
+            return this.property;
+        }
     }
 
     /**
@@ -107,7 +157,7 @@ public class CMISUtil
         {
             if(entry.getKey().equalsIgnoreCase(contentName))
             {
-                nodeRef = entry.getValue().split(";")[0];;
+                nodeRef = entry.getValue().split(";")[0];
                 return nodeRef;
             }
         }    
@@ -115,7 +165,7 @@ public class CMISUtil
     }
     
     private Map<String, String> getId(Tree<FileableCmisObject> tree,
-                                      String contentName)
+                                      final String contentName)
     { 
         contents.put(tree.getItem().getName(), tree.getItem().getId());
         for (Tree<FileableCmisObject> t : tree.getChildren()) 
@@ -123,6 +173,173 @@ public class CMISUtil
             getId(t, contentName);
         }       
         return contents;
+    }
+    
+    /**
+     * Method to add aspect
+     *
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param contentName
+     * @throws Exception 
+     */
+    public void addAspect(final String userName,
+                          final String password,
+                          final String contentNodeRef,
+                          List<DocumentAspect> documentAspects) throws Exception
+    {
+        Session session = getCMISSession(userName, password);      
+        try
+        {
+            CmisObject contentObj = session.getObject(contentNodeRef);
+            List<SecondaryType> secondaryTypesList = contentObj.getSecondaryTypes();
+            List<String> secondaryTypes = new ArrayList<String>();
+            if (secondaryTypesList != null)
+            {
+                for (SecondaryType secondaryType : secondaryTypesList)
+                {
+                    secondaryTypes.add(secondaryType.getId());
+                }
+            }
+            for (DocumentAspect aspect : documentAspects)
+            {
+                secondaryTypes.add(aspect.getProperty());
+            }
+            Map<String, Object> properties = new HashMap<String, Object>();
+            {
+                properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondaryTypes);
+            }
+            contentObj.updateProperties(properties);
+        }
+        catch(CmisInvalidArgumentException ia)
+        {
+            throw new CmisRuntimeException("Invalid content " + contentNodeRef, ia);
+        }
+    }
+    
+    /**
+     * Method to add properties for aspects
+     *
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param contentName
+     * @param propertiesMap
+     */
+    public void addProperties(final String userName,
+                              final String password,
+                              final String contentNodeRef,
+                              Map<String, Object> propertiesMap) throws Exception
+    {
+        try
+        {
+            Session session = getCMISSession(userName, password);
+            CmisObject contentObj = session.getObject(contentNodeRef);
+            contentObj.updateProperties(propertiesMap);
+        }
+        catch(CmisInvalidArgumentException ia)
+        {
+            throw new CmisRuntimeException("Invalid content " + contentNodeRef, ia);
+        }
+    }
+    
+    /**
+     * Method to get all object properties
+     *
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param contentName
+     */
+    public List<Property<?>> getProperties(final String userName,
+                                           final String password,
+                                           final String siteName,
+                                           final String contentName) throws Exception
+    {
+        Session session = getCMISSession(userName, password);
+        String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        CmisObject obj = session.getObject(nodeRef);
+        return obj.getProperties();
+    }
+    
+    /**
+     * Get a specific value from a property list
+     * 
+     * @param propertyList
+     * @param propertyName
+     * @return
+     */
+    public String getPropertyValue(final List<Property<?>> propertyList, 
+                                   final String propertyName)
+    {
+        String value = null;
+        for (Property<?> property : propertyList)
+        {
+            if (property.getDefinition().getId().equals(propertyName))
+            {
+                value = property.getValueAsString();
+                break;
+            }
+        }
+        return value;
+    }
+    
+    /**
+     * Get the list of values from a specific property list
+     * 
+     * @param propertyList
+     * @param propertyName
+     * @return List<> of values
+     */
+    public List<?> getValues(final List<Property<?>> propertyList, 
+                             final String propertyName)
+    {
+        List<?> values = new ArrayList<String>();
+        for (Property<?> property : propertyList)
+        {
+            if (property.getDefinition().getId().equals(propertyName))
+            {
+                values = property.getValues();
+                break;
+            }
+        }
+        return values;
+    }
+    
+    /**
+     * Method to get the ID for a Category
+     * @param userName
+     * @param password
+     * @param categoryName
+     * @return
+     */
+    public String getCategoryNodeRef(final String userName,
+                                     final String password,
+                                     final String categoryName) throws Exception
+    {
+        List<CmisObject> objList = new ArrayList<CmisObject>();
+        String categoryNodeRef = "";
+        Session session = getCMISSession(userName, password);
+        
+        // execute query
+        ItemIterable<QueryResult> results = session.query("select cmis:objectId from cm:category where cmis:name = '" + categoryName + "'", false); 
+        for (QueryResult qResult : results) 
+        {
+            String objectId = "";
+            PropertyData<?> propData = qResult.getPropertyById("cmis:objectId");
+            objectId = (String) propData.getFirstValue();
+            CmisObject obj = session.getObject(session.createObjectId(objectId));
+            objList.add(obj);
+        }
+        for (CmisObject result : objList) 
+        {
+            if(result.getName().equalsIgnoreCase(categoryName))
+            {
+                categoryNodeRef = result.getId();
+            }     
+        }
+        return categoryNodeRef;
     }
 }
 

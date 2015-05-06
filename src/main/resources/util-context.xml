@@ -44,9 +44,11 @@
     </bean>
     <bean id="userService" class="org.alfresco.test.util.UserService">
         <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
+    </bean>   
+    <bean id="contentService" class="org.alfresco.test.util.ContentService">
+        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
     </bean>
-    
-     <bean id="contentService" class="org.alfresco.test.util.ContentService">
+    <bean id="contentAspects" class="org.alfresco.test.util.ContentAspects">
         <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
     </bean>
     
