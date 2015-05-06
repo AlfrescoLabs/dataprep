@@ -249,7 +249,7 @@ public class ContentAspects extends CMISUtil
     }
     
     /**
-     * Method to add Summarizable Aspect 
+     * Method to add Index Control Aspect 
      * 
      */
     public void addIndexControl(final String userName,
