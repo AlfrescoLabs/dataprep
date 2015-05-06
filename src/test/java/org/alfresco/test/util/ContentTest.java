@@ -361,6 +361,24 @@ public class ContentTest extends AbstractTest
         }       
     }
     
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testUploadDocsFromFileInsteadFolder() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String fileName = "cmisFile" + System.currentTimeMillis();
+        String fileFromPath = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, fileName, "file node");
+        content.uploadFiles(fileFromPath, userName, password, siteName);     
+    }
+    
     @Test
     public void testUploadDocsInFolder() throws Exception
     {

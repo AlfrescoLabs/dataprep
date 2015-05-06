@@ -130,6 +130,7 @@ public class ContentService extends CMISUtil
                                    final String docName,
                                    final String docContent) throws Exception
     {
+        ContentStream contentStream = null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName)
                 || StringUtils.isEmpty(siteName))
         {
@@ -144,7 +145,7 @@ public class ContentService extends CMISUtil
         InputStream stream = new ByteArrayInputStream(content);
         try
         {       
-            ContentStream contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
             Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
             return d;
@@ -160,6 +161,7 @@ public class ContentService extends CMISUtil
         finally
         {
             stream.close();
+            contentStream.getStream().close();
         }
     }
     
@@ -182,6 +184,7 @@ public class ContentService extends CMISUtil
                                    final File docName,
                                    final String docContent) throws Exception
     {
+        ContentStream contentStream = null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
             throw new IllegalArgumentException("Parameter missing");
@@ -194,7 +197,7 @@ public class ContentService extends CMISUtil
         InputStream stream = new ByteArrayInputStream(content);
         try
         {        
-            ContentStream contentStream = session.getObjectFactory().createContentStream(docName.getName(), Long.valueOf(content.length), fileType.type, stream);
+            contentStream = session.getObjectFactory().createContentStream(docName.getName(), Long.valueOf(content.length), fileType.type, stream);
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
             Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
             return d;
@@ -210,6 +213,7 @@ public class ContentService extends CMISUtil
         finally
         {
             stream.close();
+            contentStream.getStream().close();
         }
     }
     
@@ -234,6 +238,7 @@ public class ContentService extends CMISUtil
                                            final String docName,
                                            final String docContent) throws Exception
     {
+        ContentStream contentStream = null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName)
                 || StringUtils.isEmpty(siteName))
         {
@@ -248,7 +253,7 @@ public class ContentService extends CMISUtil
         InputStream stream = new ByteArrayInputStream(content);
         try
         {           
-            ContentStream contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
             String folderId = getNodeRef(userName, password, siteName, folderName);
             CmisObject folderObj = session.getObject(folderId);
             if(folderObj instanceof Folder)
@@ -273,6 +278,7 @@ public class ContentService extends CMISUtil
         finally
         {
            stream.close();
+           contentStream.getStream().close();
         }
         return d;
     }
@@ -290,8 +296,7 @@ public class ContentService extends CMISUtil
                                final String password,
                                final String siteName,
                                final String docName) throws Exception
-    {
-        String docId;     
+    {   
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName) 
                 || StringUtils.isEmpty(siteName))
         {
@@ -299,6 +304,7 @@ public class ContentService extends CMISUtil
         }        
         try
         {
+            String docId; 
             Session session = getCMISSession(userName, password); 
             docId = getNodeRef(userName, password, siteName, docName);
             session.getObject(docId).delete();
@@ -364,6 +370,7 @@ public class ContentService extends CMISUtil
                                       final String password,
                                       final String siteName) throws Exception
     {
+        ContentStream contentStream = null;
         List<Document> uploadedFiles=new ArrayList<Document>();
         String fileName=null;
         String fileExtention=null;
@@ -375,7 +382,7 @@ public class ContentService extends CMISUtil
         File dir = new File(filesPath);
         if (!dir.exists() || !dir.isDirectory()) 
         {
-            throw new IllegalArgumentException("Invalid Path: " + dir.getPath());
+            throw new UnsupportedOperationException("Invalid Path: " + dir.getPath());
         }
         
         File[] fileList = dir.listFiles();
@@ -390,7 +397,7 @@ public class ContentService extends CMISUtil
             Session session = getCMISSession(userName, password);
             try
             {
-                ContentStream contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);
+                contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);
                 Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
                 Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
                 uploadedFiles.add(d);
@@ -402,6 +409,11 @@ public class ContentService extends CMISUtil
             catch(CmisContentAlreadyExistsException ae)
             {
                 throw new CmisRuntimeException("Document already exits " + siteName, ae);
+            }
+            finally
+            {
+                fileContent.close();
+                contentStream.getStream().close();
             }
             
         }
@@ -430,6 +442,7 @@ public class ContentService extends CMISUtil
         String fileName=null;
         String fileExtention=null;
         CmisObject folderObj=null;
+        ContentStream contentStream=null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
             throw new IllegalArgumentException("Parameter missing");
@@ -459,8 +472,7 @@ public class ContentService extends CMISUtil
             properties.put(PropertyIds.NAME, fileName);     
             try
             {
-                ContentStream contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);
-                
+                contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);              
                 folderObj = session.getObject(folderId);
                 Folder f = (Folder)folderObj;           
                 Document d = f.createDocument(properties, contentStream, VersioningState.MAJOR);
@@ -481,6 +493,8 @@ public class ContentService extends CMISUtil
             finally
             {
                 fileContent.close();
+                contentStream.getStream().close();
+                
             }        
         }
         
