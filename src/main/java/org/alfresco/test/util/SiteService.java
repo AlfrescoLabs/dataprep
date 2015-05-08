@@ -148,11 +148,10 @@ public class SiteService
                 JSONArray jarray=(JSONArray)obj;           
                 for (Object item:jarray)
                 {
-                        JSONObject jobject=(JSONObject) item;
-                        mySitesList.add(jobject.get("title").toString());
-                        System.out.println("----"+jobject.get("title").toString());
-                }
-                
+                    JSONObject jobject=(JSONObject) item;
+                    mySitesList.add(jobject.get("title").toString());
+                    System.out.println("----"+jobject.get("title").toString());
+                }      
             }
             return mySitesList;
         } 

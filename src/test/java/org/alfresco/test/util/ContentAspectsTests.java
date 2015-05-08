@@ -17,7 +17,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class ContentAspectTests extends AbstractTest
+/**
+ * Test content aspects crud operations.
+ * 
+ * @author Bogdan Bocancea
+ */
+
+public class ContentAspectsTests extends AbstractTest
 {
     UserService userService;
     SiteService site;
@@ -369,7 +375,6 @@ public class ContentAspectTests extends AbstractTest
         String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "doc" +  System.currentTimeMillis();
         String addressee = "testUser@test.com";
-        //String addressees[] = {"test2@test.com"};
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -481,8 +486,7 @@ public class ContentAspectTests extends AbstractTest
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         List<?> values = contentAspect.getValues(properties, "cm:categories");
         Assert.assertEquals(values.get(0), contentAspect.getCategoryNodeRef(userName, password, categories.get(0)));
-        Assert.assertEquals(values.get(1), contentAspect.getCategoryNodeRef(userName, password, categories.get(1)));
-        
+        Assert.assertEquals(values.get(1), contentAspect.getCategoryNodeRef(userName, password, categories.get(1)));      
         contentAspect.removeAspect(userName, password, siteName, plainDoc, DocumentAspect.CLASSIFIABLE);
         properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         values = contentAspect.getValues(properties, "cm:categories");
@@ -529,4 +533,27 @@ public class ContentAspectTests extends AbstractTest
         Assert.assertTrue(properties.toString().contains(DocumentAspect.EXIF.getProperty()));
     }
     
+    @Test
+    public void addTagDocument() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));
+        List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, tagDoc);       
+        Assert.assertTrue(properties.toString().contains(DocumentAspect.TAGGABLE.getProperty()));
+        String tagNodeRef = content.getTagNodeRef(userName, password, siteName, tagDoc, tag1);
+        List<?> values = contentAspect.getValues(properties, "cm:taggable");
+        Assert.assertTrue(values.contains(tagNodeRef));
+    }
 }

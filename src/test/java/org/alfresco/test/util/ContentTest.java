@@ -1,6 +1,7 @@
 package org.alfresco.test.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -519,5 +520,219 @@ public class ContentTest extends AbstractTest
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, xlxsFile).isEmpty());
         Assert.assertFalse(content.getNodeRef(userName, password, siteName, htmlFile).isEmpty());
     }
- 
+    
+    @Test
+    public void addSingleTagDocument() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));
+        List<String> tag = content.getTagNamesFromContent(userName, password, siteName, tagDoc);
+        Assert.assertEquals(tag.get(0), tag1);
+    }
+    
+    @Test
+    public void addMultipleTagsDocument() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        String tag2 = "tag2" + System.currentTimeMillis();
+        String tag3 = "tag3" + System.currentTimeMillis();     
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        List<String> tags = new ArrayList<String>();
+        tags.add(tag1);
+        tags.add(tag2);
+        tags.add(tag3);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertTrue(content.addMultipleTags(userName, password, siteName, tagDoc, tags));            
+        List<String> returnTags = content.getTagNamesFromContent(userName, password, siteName, tagDoc);
+        Assert.assertEquals(returnTags.get(0), tag1);
+        Assert.assertEquals(returnTags.get(1), tag2);
+        Assert.assertEquals(returnTags.get(2), tag3);     
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addTagInvalidContent() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.addSingleTag(userName, password, siteName, "fakeDoc", tag1);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addTagInvalidSite() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        content.addSingleTag(userName, password, "fakeSite", tagDoc, tag1);
+    }
+    
+    @Test 
+    public void addTagFolder() throws Exception
+    {
+        String siteName = "siteTag-" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        String folder = "cmisFolder"; 
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Folder newFolder = content.createFolder(userName, password, folder, siteName);
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        content.addSingleTag(userName, password, siteName, folder, tag1);
+        List<String> returnTags = content.getTagNamesFromContent(userName, password, siteName, folder);
+        Assert.assertEquals(returnTags.get(0), tag1);
+    }
+    
+    @Test
+    public void addMultipleTagsFolder() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagFolder = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        String tag2 = "tag2" + System.currentTimeMillis();
+        String tag3 = "tag3" + System.currentTimeMillis();     
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        List<String> tags = new ArrayList<String>();
+        tags.add(tag1);
+        tags.add(tag2);
+        tags.add(tag3);
+        content.createFolder(userName, password, tagFolder, siteName);
+        Assert.assertTrue(content.addMultipleTags(userName, password, siteName, tagFolder, tags));            
+        List<String> returnTags = content.getTagNamesFromContent(userName, password, siteName, tagFolder);
+        Assert.assertEquals(returnTags.get(0), tag1);
+        Assert.assertEquals(returnTags.get(1), tag2);
+        Assert.assertEquals(returnTags.get(2), tag3);     
+    }
+    
+    @Test
+    public void deleteTag() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));
+        
+        content.removeTag(userName, password, siteName, tagDoc, tag1);
+        List<String> tag = content.getTagNamesFromContent(userName, password, siteName, tagDoc);
+        Assert.assertTrue(tag.isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteTagInvalidTag() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));     
+        content.removeTag(userName, password, siteName, tagDoc, "faketag");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteTagInvalidContent() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));     
+        content.removeTag(userName, password, siteName, "fakeDoc", tag1);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void deleteTagInvalidSite() throws Exception
+    {
+        String siteName = "siteTag" + System.currentTimeMillis();
+        String userName = "tagUser" + System.currentTimeMillis();
+        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tag1 = "tag1" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));     
+        content.removeTag(userName, password, "fakeSite", tagDoc, tag1);
+    }
 }

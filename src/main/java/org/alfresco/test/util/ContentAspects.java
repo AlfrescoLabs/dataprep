@@ -286,8 +286,7 @@ public class ContentAspects extends CMISUtil
     }
     
     /**
-     * Method to add Clasifiable Aspect 
-     * @throws Exception 
+     * Method to add Clasifiable Aspect  
      * 
      */
     public void addClasifiable(final String userName,

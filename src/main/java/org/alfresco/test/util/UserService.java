@@ -831,8 +831,8 @@ public class UserService
      * @throws Exception if error
      */
     public int countSiteMembers(final String userName,
-                                         final String userPass,
-                                         final String siteName) throws Exception
+                                final String userPass,
+                                final String siteName) throws Exception
     { 
            int count=0;
            if (StringUtils .isEmpty(userName) || StringUtils .isEmpty(userPass) || StringUtils.isEmpty(siteName))
@@ -851,8 +851,8 @@ public class UserService
                {
                    HttpEntity entity = response.getEntity();
                    String responseString = EntityUtils.toString(entity , "UTF-8"); 
-                   Object obj=JSONValue.parse(responseString);
-                   JSONArray array=(JSONArray)obj;
+                   Object obj = JSONValue.parse(responseString);
+                   JSONArray array = (JSONArray)obj;
                    count = array.size();
                }
            }

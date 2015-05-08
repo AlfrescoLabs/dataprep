@@ -22,6 +22,7 @@ import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
 
@@ -49,7 +50,7 @@ public class CMISUtil
         }
     }
 
-    private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    protected AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     Map<String, String> contents = new HashMap<String,String>();
     
     public CMISUtil(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
@@ -148,19 +149,26 @@ public class CMISUtil
         String nodeRef = "";
         contents.clear();
         Session session = getCMISSession(userName, password);
-        Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
-        for (Tree<FileableCmisObject> t : documentLibrary.getDescendants(-1)) 
+        try
         {
-            contents = getId(t, contentName);      
-        }      
-        for (Map.Entry<String, String> entry : contents.entrySet()) 
-        {
-            if(entry.getKey().equalsIgnoreCase(contentName))
+            Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+            for (Tree<FileableCmisObject> t : documentLibrary.getDescendants(-1)) 
             {
-                nodeRef = entry.getValue().split(";")[0];
-                return nodeRef;
-            }
-        }    
+                contents = getId(t, contentName);      
+            }      
+            for (Map.Entry<String, String> entry : contents.entrySet()) 
+            {
+                if(entry.getKey().equalsIgnoreCase(contentName))
+                {
+                    nodeRef = entry.getValue().split(";")[0];
+                    return nodeRef;
+                }
+            }    
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Site doesn't exists: " + siteName, nf);
+        }
         return nodeRef;
     }
     
@@ -321,7 +329,7 @@ public class CMISUtil
         List<CmisObject> objList = new ArrayList<CmisObject>();
         String categoryNodeRef = "";
         Session session = getCMISSession(userName, password);
-        
+       
         // execute query
         ItemIterable<QueryResult> results = session.query("select cmis:objectId from cm:category where cmis:name = '" + categoryName + "'", false); 
         for (QueryResult qResult : results) 
