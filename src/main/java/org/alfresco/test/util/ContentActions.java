@@ -598,8 +598,9 @@ public class ContentActions extends CMISUtil
             JSONObject jsonObject = (JSONObject) obj;  
             JSONObject list = (JSONObject) jsonObject.get("entry");
             JSONObject aggregate = (JSONObject) list.get("aggregate");
-            long nrLikes = (long) aggregate.get("numberOfRatings");
-            return (int) nrLikes;
+            String strLikes =  (String) aggregate.get("numberOfRatings").toString();
+            int nrLikes = Integer.parseInt(strLikes);
+            return nrLikes;
         }
         return 0;
     }
