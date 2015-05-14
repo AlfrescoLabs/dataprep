@@ -51,6 +51,9 @@
     <bean id="contentAspects" class="org.alfresco.test.util.ContentAspects">
         <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
     </bean>
+    <bean id="contentActions" class="org.alfresco.test.util.ContentActions">
+        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
+    </bean>
     
     <bean id="alfrescoHttpClientFactory" class="org.alfresco.test.util.AlfrescoHttpClientFactory">
         <constructor-arg name="scheme" value="${alfresco.scheme}"/>

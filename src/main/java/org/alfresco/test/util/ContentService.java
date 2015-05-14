@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,20 +24,6 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundExcept
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /**
  * Create documents and folders using CMIS.
@@ -48,9 +33,7 @@ import org.json.simple.parser.JSONParser;
  */
 
 public class ContentService extends CMISUtil
-{
-    private static Log logger = LogFactory.getLog(ContentService.class);
-    
+{  
     public ContentService(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
     {
         super(alfrescoHttpClientFactory);
@@ -91,6 +74,10 @@ public class ContentService extends CMISUtil
         catch(CmisContentAlreadyExistsException ae)
         {
             throw new CmisRuntimeException("Folder already exists " + folderName, ae);
+        }
+        catch(CmisConstraintException ce)
+        {
+            throw new CmisRuntimeException("Invalid symbols in folder name " + folderName, ce);
         }
     }
     
@@ -173,7 +160,11 @@ public class ContentService extends CMISUtil
         }
         catch(CmisContentAlreadyExistsException ae)
         {
-            throw new CmisRuntimeException("Document already exits " + siteName, ae);
+            throw new CmisRuntimeException("Document already exits " + docName, ae);
+        }
+        catch(CmisConstraintException ce)
+        {
+            throw new CmisRuntimeException("Invalid symbols in file name " + docName, ce);
         }
         finally
         {
@@ -291,6 +282,10 @@ public class ContentService extends CMISUtil
         catch(CmisInvalidArgumentException ia)
         {
             throw new CmisRuntimeException("Invalid folder " + folderName, ia);
+        }
+        catch(CmisConstraintException ce)
+        {
+            throw new CmisRuntimeException("Invalid symbols in file name " + docName, ce);
         }
         finally
         {
@@ -527,296 +522,5 @@ public class ContentService extends CMISUtil
         {
             deleteDocument(userName, password, siteName, fileNames[i]);
         }
-    }
-    
-    /**
-     * Create tag for a document or folder
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param tag
-     * @return true if request is successful
-     * @throws Exception if error
-     */
-    @SuppressWarnings("unchecked")
-    public boolean addSingleTag(final String userName,
-                                final String password, 
-                                final String siteName,
-                                final String contentName,
-                                final String tag) throws Exception 
-    {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-            || StringUtils.isEmpty(contentName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }        
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
-        String api = client.getApiUrl().replace("/service", "");
-        String reqUrl = api + "-default-/public/alfresco/versions/1/nodes/" + nodeRef + "/tags";
-        HttpPost post  = new HttpPost(reqUrl);
-        JSONObject body = new JSONObject();
-        body.put("tag", tag);
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            HttpResponse response = clientWithAuth.execute(post);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_CREATED:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Tag was added successfully " + tag);
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Content doesn't exists " + contentName);
-                default:
-                    logger.error("Unable to create tag: " + response.toString());
-                    break;
-            }
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
-        } 
-        return false;
-    }
-    
-    /**
-     * Create multiple tags for a document or folder
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param List<String> tags
-     * @return true if request is successful
-     * @throws Exception if error
-     */
-    public boolean addMultipleTags(final String userName,
-                                   final String password, 
-                                   final String siteName,
-                                   final String contentName,
-                                   final List<String> tags) throws Exception 
-    {
-        String jsonInput = "";  
-        
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-            || StringUtils.isEmpty(contentName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }        
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
-        String reqUrl = client.getApiUrl() + "node/workspace/SpacesStore/" + nodeRef + "/tags";
-        HttpPost post  = new HttpPost(reqUrl);  
-        jsonInput =  ( "[\"" + tags.get(0) + "\"" );
-        for( int i = 1; i < tags.size(); i++ )
-        {
-            jsonInput = ( jsonInput + "," + "\"" + tags.get(i) + "\"" );
-        }
-        jsonInput = ( jsonInput + "]" );        
-        StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
-        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
-        post.setEntity(se);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            HttpResponse response = clientWithAuth.execute(post);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-            {
-                return true;
-            }
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
-        }
-        return false;
-    }
-    
-    /**
-     * Get all tags that are set for a document or folder
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @return String Json response
-     * @throws Exception if error
-     */
-    private String getTags(final String userName,
-                           final String password, 
-                           final String siteName,
-                           final String contentName) throws Exception
-    {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-                || StringUtils.isEmpty(contentName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }        
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
-        String api = client.getApiUrl().replace("/service", "");
-        String reqUrl = api + "-default-/public/alfresco/versions/1/nodes/" + nodeRef + "/tags";
-        try
-        {
-            HttpGet get = new HttpGet(reqUrl);
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(get);
-            if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
-            {
-                return client.readStream(response.getEntity()).toJSONString(); 
-            }
-        }
-        finally
-        {
-            client.close();
-        } 
-        return "";
-    }
-    
-    /**
-     * Get list of tag names that are set for a document or folder
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @return List<String> tags
-     * @throws Exception if error
-     */
-    @SuppressWarnings("unchecked")
-    public List<String> getTagNamesFromContent(final String userName,
-                                               final String password, 
-                                               final String siteName,
-                                               final String contentName) throws Exception
-    {
-        List<String> tags = new ArrayList<String>(); 
-        String result = getTags(userName, password, siteName, contentName);     
-        if(!StringUtils.isEmpty(result))
-        {
-            JSONParser parser = new JSONParser();  
-            Object obj = parser.parse(result);
-            JSONObject jsonObject = (JSONObject) obj;  
-            JSONObject list = (JSONObject) jsonObject.get("list");
-            JSONArray jArray = (JSONArray) list.get("entries");
-            Iterator<JSONObject> iterator = jArray.iterator();
-            while (iterator.hasNext()) 
-            {
-                JSONObject factObj = (JSONObject) iterator.next();
-                JSONObject entry = (JSONObject) factObj.get("entry");
-                tags.add((String) entry.get("tag"));
-            }           
-            return tags;
-        }
-        else
-        {
-            return tags;
-        }
-    }  
-    
-    /**
-     * Get the node ref from a tag
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param tagName
-     * @return String nodeRef
-     * @throws Exception if error
-     */
-    @SuppressWarnings("unchecked")
-    public String getTagNodeRef(final String userName,
-                                final String password, 
-                                final String siteName,
-                                final String contentName,
-                                final String tagName) throws Exception
-    {
-        String nodeRef = "";
-        String result = getTags(userName, password, siteName, contentName);     
-        if(!StringUtils.isEmpty(result))
-        {
-            JSONParser parser = new JSONParser();  
-            Object obj = parser.parse(result);
-            JSONObject jsonObject = (JSONObject) obj;  
-            JSONObject list = (JSONObject) jsonObject.get("list");
-            JSONArray jArray = (JSONArray) list.get("entries");
-            Iterator<JSONObject> iterator = jArray.iterator();
-            while (iterator.hasNext()) 
-            {
-                JSONObject factObj = (JSONObject) iterator.next();
-                JSONObject entry = (JSONObject) factObj.get("entry");
-                String name = (String) entry.get("tag");
-                if(name.equalsIgnoreCase(tagName))
-                {
-                    nodeRef = (String) entry.get("id");               
-                }
-            }                   
-            return nodeRef;
-        }
-        else
-        {
-            return nodeRef;
-        }
-    }
-    
-    /**
-     * Remove tag from content
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param tagName
-     * @return true if deleted
-     * @throws Exception if error
-     */   
-    public boolean removeTag(final String userName,
-                             final String password,
-                             final String siteName,
-                             final String contentName,
-                             final String tagName) throws Exception
-    {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-                || StringUtils.isEmpty(contentName) || StringUtils.isEmpty(tagName))
-        {
-                throw new IllegalArgumentException("Parameter missing");
-        }       
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        String tagNodeRef = getTagNodeRef(userName, password, siteName, contentName, tagName);
-        if(StringUtils.isEmpty(tagNodeRef) || StringUtils.isEmpty(contentNodeRef))
-        {
-            throw new RuntimeException("Tag or content doesn't exists");
-        }
-        String api = client.getApiUrl().replace("/service", "");
-        String reqUrl = api + "-default-/public/alfresco/versions/1/nodes/" + contentNodeRef + "/tags/" + tagNodeRef;        
-        try
-        {
-            HttpDelete delete = new HttpDelete(reqUrl);
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(delete);           
-            if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
-            {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("Tag: " + tagName + " is removed successfully");
-                }
-                return true;
-            }
-        }
-        finally
-        {
-            client.close();
-        }    
-        return false;
     }
 }

@@ -49,14 +49,6 @@ public class CMISUtil
             this.type = type;
         }
     }
-
-    protected AlfrescoHttpClientFactory alfrescoHttpClientFactory;
-    Map<String, String> contents = new HashMap<String,String>();
-    
-    public CMISUtil(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
-    }
     
     /**
      * Different Aspects of Documents and folders.
@@ -97,6 +89,14 @@ public class CMISUtil
         {
             return this.property;
         }
+    }
+    
+    protected AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    Map<String, String> contents = new HashMap<String,String>();
+    
+    public CMISUtil(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
+    {
+        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
     }
 
     /**

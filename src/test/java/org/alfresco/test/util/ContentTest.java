@@ -1,7 +1,6 @@
 package org.alfresco.test.util;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,8 @@ public class ContentTest extends AbstractTest
     ContentService content;
     String admin = "admin";
     String password = "password";
+    String folder = "cmisFolder";
+    String plainDoc = "plainDoc";
     
     @BeforeClass
     public void setup()
@@ -43,8 +44,7 @@ public class ContentTest extends AbstractTest
     public void testCreateFolderTwice() throws Exception
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();      
+        String userName = "cmisUser" + System.currentTimeMillis();    
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -61,7 +61,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder"; 
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -75,13 +74,27 @@ public class ContentTest extends AbstractTest
         Assert.assertEquals(parent.getName(), "documentLibrary");      
     }
     
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void testCreateFolderInvalidSimbols() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String symbolFolder = "*/.:?|\\`\"";
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createFolder(userName, password, symbolFolder, siteName);
+    }
+    
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInvalidUser() throws Exception
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();
-       
+        String userName = "cmisUser" + System.currentTimeMillis();   
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -95,8 +108,7 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void createFolderInvalidSite() throws Exception
     {
-        String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();    
+        String userName = "cmisUser" + System.currentTimeMillis();    
         userService.create(admin, admin, userName, password, password);
         content.createFolder(userName, password, folder, "fakeSite");
     }
@@ -106,8 +118,8 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteCMISDelete" + System.currentTimeMillis();
         String userName = "cmisUserDelete" + System.currentTimeMillis();
-        String rootFolder = "cmisFolderDelete" +  System.currentTimeMillis();
-        String secondFolder = "cmisSecondFolder" +  System.currentTimeMillis();   
+        String rootFolder = "cmisFolderDelete";
+        String secondFolder = "cmisSecondFolder";   
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -148,11 +160,11 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
-        String msWord = "msWord" + System.currentTimeMillis();
-        String msExcel = "msExcel" + System.currentTimeMillis();
-        String html = "html" + System.currentTimeMillis();
-        String xml = "xml" + System.currentTimeMillis();
+        String plainDoc = "plain";
+        String msWord = "msWord";
+        String msExcel = "msExcel";
+        String html = "html";
+        String xml = "xml";
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -173,10 +185,25 @@ public class ContentTest extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
+    public void testCreateDocInvalidSimbols() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String symbolDoc = "*/.:?|\\`\"";
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, symbolDoc, symbolDoc);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
     public void createDocFakeSite() throws Exception
     {
-        String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();  
         userService.create(admin, admin, userName, password, password);
         content.createDocument(userName, password, "fakeSite", DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
     }
@@ -186,7 +213,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc";
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -203,8 +229,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -218,11 +242,28 @@ public class ContentTest extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
+    public void createDocInFolderInvalidSymbols() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String symbolDoc = "*/.:?|\\`\"";
+        String folder = "cmisFolder";
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createFolder(userName, password, folder, siteName);
+        content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, symbolDoc, symbolDoc);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
     public void createDocInNonExistentFolder() throws Exception
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -238,9 +279,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
-        String subFolderDoc = "cmisDoc" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();            
+        String subFolderDoc = "cmisDoc" + System.currentTimeMillis();       
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -263,7 +302,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -281,8 +319,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -301,8 +337,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -320,8 +354,6 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "cmisDoc" + System.currentTimeMillis();
-        String folder = "cmisFolder" +  System.currentTimeMillis();
         String folder1 = "cmisFolder1" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -519,220 +551,5 @@ public class ContentTest extends AbstractTest
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, xmlFile).isEmpty());
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, xlxsFile).isEmpty());
         Assert.assertFalse(content.getNodeRef(userName, password, siteName, htmlFile).isEmpty());
-    }
-    
-    @Test
-    public void addSingleTagDocument() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));
-        List<String> tag = content.getTagNamesFromContent(userName, password, siteName, tagDoc);
-        Assert.assertEquals(tag.get(0), tag1);
-    }
-    
-    @Test
-    public void addMultipleTagsDocument() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        String tag2 = "tag2" + System.currentTimeMillis();
-        String tag3 = "tag3" + System.currentTimeMillis();     
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        List<String> tags = new ArrayList<String>();
-        tags.add(tag1);
-        tags.add(tag2);
-        tags.add(tag3);
-        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertTrue(content.addMultipleTags(userName, password, siteName, tagDoc, tags));            
-        List<String> returnTags = content.getTagNamesFromContent(userName, password, siteName, tagDoc);
-        Assert.assertEquals(returnTags.get(0), tag1);
-        Assert.assertEquals(returnTags.get(1), tag2);
-        Assert.assertEquals(returnTags.get(2), tag3);     
-    }
-    
-    @Test(expectedExceptions = RuntimeException.class)
-    public void addTagInvalidContent() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        content.addSingleTag(userName, password, siteName, "fakeDoc", tag1);
-    }
-    
-    @Test(expectedExceptions = RuntimeException.class)
-    public void addTagInvalidSite() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        content.addSingleTag(userName, password, "fakeSite", tagDoc, tag1);
-    }
-    
-    @Test 
-    public void addTagFolder() throws Exception
-    {
-        String siteName = "siteTag-" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        String folder = "cmisFolder"; 
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Folder newFolder = content.createFolder(userName, password, folder, siteName);
-        Assert.assertFalse(newFolder.getId().isEmpty());
-        content.addSingleTag(userName, password, siteName, folder, tag1);
-        List<String> returnTags = content.getTagNamesFromContent(userName, password, siteName, folder);
-        Assert.assertEquals(returnTags.get(0), tag1);
-    }
-    
-    @Test
-    public void addMultipleTagsFolder() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagFolder = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        String tag2 = "tag2" + System.currentTimeMillis();
-        String tag3 = "tag3" + System.currentTimeMillis();     
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        List<String> tags = new ArrayList<String>();
-        tags.add(tag1);
-        tags.add(tag2);
-        tags.add(tag3);
-        content.createFolder(userName, password, tagFolder, siteName);
-        Assert.assertTrue(content.addMultipleTags(userName, password, siteName, tagFolder, tags));            
-        List<String> returnTags = content.getTagNamesFromContent(userName, password, siteName, tagFolder);
-        Assert.assertEquals(returnTags.get(0), tag1);
-        Assert.assertEquals(returnTags.get(1), tag2);
-        Assert.assertEquals(returnTags.get(2), tag3);     
-    }
-    
-    @Test
-    public void deleteTag() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));
-        
-        content.removeTag(userName, password, siteName, tagDoc, tag1);
-        List<String> tag = content.getTagNamesFromContent(userName, password, siteName, tagDoc);
-        Assert.assertTrue(tag.isEmpty());
-    }
-    
-    @Test(expectedExceptions = RuntimeException.class)
-    public void deleteTagInvalidTag() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));     
-        content.removeTag(userName, password, siteName, tagDoc, "faketag");
-    }
-    
-    @Test(expectedExceptions = RuntimeException.class)
-    public void deleteTagInvalidContent() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));     
-        content.removeTag(userName, password, siteName, "fakeDoc", tag1);
-    }
-    
-    @Test(expectedExceptions = CmisRuntimeException.class)
-    public void deleteTagInvalidSite() throws Exception
-    {
-        String siteName = "siteTag" + System.currentTimeMillis();
-        String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
-        String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
-        site.create(userName,
-                    password,
-                    "mydomain",
-                    siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));     
-        content.removeTag(userName, password, "fakeSite", tagDoc, tag1);
     }
 }

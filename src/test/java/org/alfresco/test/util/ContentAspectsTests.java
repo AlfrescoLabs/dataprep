@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test content aspects crud operations.
+ * Test content aspects CRUD operations.
  * 
  * @author Bogdan Bocancea
  */
@@ -29,9 +29,12 @@ public class ContentAspectsTests extends AbstractTest
     SiteService site;
     ContentService content;
     ContentAspects contentAspect;
+    ContentActions contentAction;
     String admin = "admin";
     String password = "password";
     private final String DATE_FORMAT = "EEE MMM dd HH:mm";
+    String plainDoc = "testDoc.txt";
+    String folder = "cmisFolder"; 
     
     @BeforeClass
     public void setup()
@@ -40,6 +43,7 @@ public class ContentAspectsTests extends AbstractTest
         site = (SiteService) ctx.getBean("siteService");
         content = (ContentService) ctx.getBean("contentService");
         contentAspect = (ContentAspects) ctx.getBean("contentAspects");
+        contentAction = (ContentActions) ctx.getBean("contentActions");
     }
     
     @Test
@@ -47,7 +51,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -67,7 +70,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -83,7 +85,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -106,7 +107,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder"; 
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -128,7 +128,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -151,8 +150,7 @@ public class ContentAspectsTests extends AbstractTest
     public void removeFolderComplianceable() throws Exception
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder"; 
+        String userName = "cmisUser" + System.currentTimeMillis(); 
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -175,7 +173,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String folder = "cmisFolder"; 
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -191,7 +188,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -219,7 +215,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -241,7 +236,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -266,7 +260,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -289,7 +282,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         String summary = "Test summary";
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -310,7 +302,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         String templateDoc = "template" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -332,7 +323,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -350,7 +340,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         String templateDoc = "template" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -373,7 +362,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         String addressee = "testUser@test.com";
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -402,7 +390,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -423,7 +410,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         int hours = 5;
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -444,7 +430,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -469,7 +454,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "doc" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -498,7 +482,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -518,7 +501,6 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain" +  System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,
@@ -538,7 +520,7 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
-        String tagDoc = "tagDoc" +  System.currentTimeMillis();
+        String tagDoc = "tagDoc";
         String tag1 = "tag1" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -549,10 +531,10 @@ public class ContentAspectsTests extends AbstractTest
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(content.addSingleTag(userName, password, siteName, tagDoc, tag1));
+        Assert.assertTrue(contentAction.addSingleTag(userName, password, siteName, tagDoc, tag1));
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, tagDoc);       
         Assert.assertTrue(properties.toString().contains(DocumentAspect.TAGGABLE.getProperty()));
-        String tagNodeRef = content.getTagNodeRef(userName, password, siteName, tagDoc, tag1);
+        String tagNodeRef = contentAction.getTagNodeRef(userName, password, siteName, tagDoc, tag1);
         List<?> values = contentAspect.getValues(properties, "cm:taggable");
         Assert.assertTrue(values.contains(tagNodeRef));
     }

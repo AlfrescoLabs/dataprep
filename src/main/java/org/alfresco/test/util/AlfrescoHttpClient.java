@@ -54,6 +54,7 @@ public class AlfrescoHttpClient
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String MIME_TYPE_JSON = "application/json";
     public static String ALFRESCO_API_PATH = "alfresco/service/api/";
+    public static String ALFRESCO_API_VERSION = "-default-/public/alfresco/versions/1/";
     private CloseableHttpClient client;
     private String scheme;
     private String host;
@@ -71,6 +72,12 @@ public class AlfrescoHttpClient
         this.port = port;
         apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
         client = HttpClientBuilder.create().build();
+    }
+    
+    public String getApiVersionUrl()
+    {
+        String versionApi = getApiUrl().replace("/service", "");
+        return versionApi + ALFRESCO_API_VERSION;
     }
     
     /**

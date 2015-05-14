@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
  * @author Michael Suzuki
  *
  */
-public class SitetTest extends AbstractTest
+public class SiteTest extends AbstractTest 
 {
     private static final String MY_DOMAIN = "mydomain";
     private static final String ADMIN = "admin"; 
@@ -41,8 +41,9 @@ public class SitetTest extends AbstractTest
         site = (SiteService) ctx.getBean("siteService");
         siteId = "michael" + System.currentTimeMillis();
     }
+    
     @Test
-    public void create() throws IOException
+    public void create() throws Exception
     {
         site.create(ADMIN,
                     ADMIN,
@@ -51,19 +52,13 @@ public class SitetTest extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
     }
+    
     @Test(dependsOnMethods="create")
     public void exists() throws Exception
     {
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
-    }
-    @Test(dependsOnMethods="getAllSites")
-    public void delete() throws Exception
-    {
-        site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
-        boolean exists = site.exists(siteId, ADMIN, ADMIN);
-        Assert.assertFalse(exists);
-    }
+    } 
     
     @Test
     public void fakeSiteDoesNotExists() throws Exception
@@ -71,6 +66,7 @@ public class SitetTest extends AbstractTest
         boolean exists = site.exists("bs-site",ADMIN, ADMIN);
         Assert.assertFalse(exists);
     }
+    
     @Test(expectedExceptions=AlfrescoException.class)
     public void createSiteWithInvalidDetails() throws IOException
     {
@@ -89,5 +85,51 @@ public class SitetTest extends AbstractTest
         List<String> sites= site.getSites(ADMIN, ADMIN);
         Assert.assertTrue(sites.contains(siteId));
         Assert.assertNotEquals(sites.size(),0);
+    }
+    
+    @Test(dependsOnMethods="getAllSites")
+    public void setFavorite() throws Exception
+    {
+        Assert.assertTrue(site.setFavorite(ADMIN, ADMIN, siteId));
+        Assert.assertTrue(site.isFavorite(ADMIN, ADMIN, siteId));
+    }
+    
+    @Test(dependsOnMethods="setFavorite")
+    public void removeFavorite() throws Exception
+    {
+        Assert.assertTrue(site.removeFavorite(ADMIN, ADMIN, siteId));
+        Assert.assertFalse(site.isFavorite(ADMIN, ADMIN, siteId));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void favoriteFakeSite() throws Exception
+    {
+        site.setFavorite(ADMIN, ADMIN, "fakeSite");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void removeFavFakeSite() throws Exception
+    {
+        site.removeFavorite(ADMIN, ADMIN, "fakeSite");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void favSiteInvalidUser() throws Exception
+    {
+        site.setFavorite("fakeUser", ADMIN, siteId);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void removeFavInvalidUser() throws Exception
+    {
+        site.removeFavorite("fakeUser", ADMIN, siteId);
+    }
+    
+    @Test(dependsOnMethods="removeFavorite")
+    public void delete() throws Exception
+    {
+        site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
+        boolean exists = site.exists(siteId, ADMIN, ADMIN);
+        Assert.assertFalse(exists);
     }
 }
