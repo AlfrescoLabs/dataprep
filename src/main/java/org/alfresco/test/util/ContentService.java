@@ -24,6 +24,16 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundExcept
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Create documents and folders using CMIS.
@@ -522,5 +532,92 @@ public class ContentService extends CMISUtil
         {
             deleteDocument(userName, password, siteName, fileNames[i]);
         }
+    }
+    
+    /**
+     * Get the content from a document
+     * 
+     * @param userName 
+     * @param password
+     * @param siteName 
+     * @param docName
+     * @return String content
+     * @throws Exception
+     * 
+     */
+    public String getDocumentContent(final String userName,
+                                     final String password,
+                                     final String siteName,
+                                     final String docName) throws Exception
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String docNodeRef = getNodeRef(userName, password, siteName, docName);
+        String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/atom/content?id=" + docNodeRef;
+        HttpGet get = new HttpGet(serviceUrl);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {        
+            HttpResponse response = clientWithAuth.execute(get);
+            if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
+            {
+                HttpEntity entity = response.getEntity();
+                return EntityUtils.toString(entity, "UTF-8");
+            }
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        } 
+        return "";
+    }
+    
+    /**
+     * Update content of a document
+     * 
+     * @param userName 
+     * @param password
+     * @param siteName 
+     * @param DocumentType
+     * @param docName
+     * @param String new content
+     * @throws Exception
+     * 
+     */
+    public boolean updateDocumentContent(final String userName,
+                                         final String password,
+                                         final String siteName,
+                                         final DocumentType docType,
+                                         final String docName,
+                                         final String newContent) throws Exception
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String docNodeRef = getNodeRef(userName, password, siteName, docName);
+        if(StringUtils.isEmpty(docNodeRef))
+        {
+            throw new RuntimeException("Content doesn't exists");
+        }
+        String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/atom/content?id=" + docNodeRef;    
+        HttpPut request = new HttpPut(serviceUrl);
+        String contentType = docType.type + ";charset=" + AlfrescoHttpClient.UTF_8_ENCODING;
+        request.addHeader("Content-Type", contentType);    
+        StringEntity se = new StringEntity(newContent.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        request.setEntity(se);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(request);
+            if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return false;
     }
 }

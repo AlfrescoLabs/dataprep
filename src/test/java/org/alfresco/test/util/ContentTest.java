@@ -552,4 +552,69 @@ public class ContentTest extends AbstractTest
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, xlxsFile).isEmpty());
         Assert.assertFalse(content.getNodeRef(userName, password, siteName, htmlFile).isEmpty());
     }
+    
+    @Test
+    public void updateContent() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String plainDoc = "plain";
+        String html = "html";
+        String xml = "xml";
+        String newContentPlain = "new plain content";
+        String newContentHtml = "new html content";
+        String newContentXml = "new xml content";      
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
+        content.createDocument(userName, password, siteName, DocumentType.HTML, html, html);
+        content.createDocument(userName, password, siteName, DocumentType.XML, xml, xml);
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(plainDoc));
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, html).equals(html));
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(xml));     
+        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, newContentPlain));
+        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.HTML, html, newContentHtml));
+        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.XML, xml, newContentXml));       
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(newContentPlain));
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, html).equals(newContentHtml));
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(newContentXml));
+    }
+    
+    @Test
+    public void updateContentEmpty() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();
+        String plainDoc = "plain";     
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);   
+        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, ""));    
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(""));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void updateContentInvalidDoc() throws Exception
+    {
+        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String userName = "cmisUser" + System.currentTimeMillis();  
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);  
+        content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, "fakeDoc", "new content");    
+    }
 }
