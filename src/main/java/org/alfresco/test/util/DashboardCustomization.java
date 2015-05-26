@@ -1,5 +1,10 @@
 package org.alfresco.test.util;
 
+/**
+ *  Class that provides utils needed in customizing user and site dashboards.
+ * 
+ * @author Bogdan Bocancea
+ */
 
 public class DashboardCustomization
 {
