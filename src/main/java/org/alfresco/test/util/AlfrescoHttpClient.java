@@ -60,6 +60,7 @@ public class AlfrescoHttpClient
     private String host;
     private int port;
     private String apiUrl;
+    private String alfrescoUrl;
 
     public AlfrescoHttpClient(final String scheme, final String host)
     {
@@ -263,25 +264,36 @@ public class AlfrescoHttpClient
     {
         client.close();
     }
+    
     public HttpClient getClient()
     {
         return client;
     }
+    
     public String getScheme()
     {
         return scheme;
     }
+    
     public String getHost()
     {
         return host;
     }
+    
     public int getPort()
     {
         return port;
     }
+    
     public String getApiUrl()
     {
         return apiUrl;
+    }
+    
+    public String getAlfrescoUrl()
+    {
+        alfrescoUrl = String.format("%s://%s:%d/", scheme, host, port);
+        return alfrescoUrl;
     }
 
 }

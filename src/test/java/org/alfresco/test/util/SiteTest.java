@@ -15,8 +15,10 @@
 package org.alfresco.test.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.alfresco.test.util.DashboardCustomization.Page;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;
 import org.testng.Assert;
@@ -126,6 +128,23 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(dependsOnMethods="removeFavorite")
+    public void addPagesToSite() throws Exception
+    {
+        List<Page> pagesToAdd = new ArrayList<Page>();
+        pagesToAdd.add(Page.WIKI);
+        pagesToAdd.add(Page.LINKS);
+        pagesToAdd.add(Page.CALENDAR);
+        Assert.assertTrue(site.addPagesToSite(ADMIN, ADMIN, siteId, pagesToAdd));
+        Assert.assertTrue(site.addPageToSite(ADMIN, ADMIN, siteId, Page.BLOG, pagesToAdd));     
+    }
+    
+    @Test(dependsOnMethods="addPagesToSite")
+    public void addPageToInvalidSite() throws Exception
+    {   
+        Assert.assertFalse(site.addPageToSite(ADMIN, ADMIN, "fakeSite", Page.BLOG, null));
+    }
+    
+    @Test(dependsOnMethods="addPageToInvalidSite")
     public void delete() throws Exception
     {
         site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alfresco.test.util.DashboardCustomization.Page;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,6 +70,7 @@ public class SiteService
     
     /**
      * Create site using Alfresco public API.
+     * 
      * @param username identifier
      * @param password user password
      * @param domain the comany or org id
@@ -94,6 +96,7 @@ public class SiteService
     }
     /**
      * Checks if site exists
+     * 
      * @param siteId site identifier
      * @param username site user
      * @param password user password
@@ -125,6 +128,7 @@ public class SiteService
     }
     /**
      * Delete an alfresco site.
+     * 
      * @param username user details
      * @param password user details
      * @param domain user details 
@@ -141,6 +145,7 @@ public class SiteService
     
     /**
      * Gets all existing sites
+     * 
      * @param username site user
      * @param password user password
      * @return list of sites
@@ -370,5 +375,117 @@ public class SiteService
             client.close();
         } 
         return false; 
-    }         
+    }
+    
+    /**
+     * Add pages to site dashboard
+     * 
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param multiplePages
+     * @param page - single page to be added
+     * @param pages - list of pages to be added
+     * @return true if the page is added
+     * @throws Exception if error
+     */
+    private boolean addPages(final String userName,
+                             final String password,
+                             final String siteName,
+                             final boolean multiplePages,
+                             final Page page,
+                             final List<Page> pages) throws Exception
+    {        
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getAlfrescoUrl() + DashboardCustomization.SITE_PAGES_URL;        
+        org.json.JSONObject body = new org.json.JSONObject();
+        org.json.JSONArray array = new org.json.JSONArray();      
+        body.put("siteId", siteName);
+        // set the default page (Document Library)
+        array.put(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));
+        if(pages != null)
+        {
+            for(int i = 0; i < pages.size(); i++)
+            {
+                if(!Page.DOCLIB.pageId.equals(pages.get(i).pageId))
+                {
+                    array.put(new org.json.JSONObject().put("pageId", pages.get(i).pageId));
+                }
+            }
+        }       
+        // add the new page
+        if(!multiplePages)
+        {
+            array.put(new org.json.JSONObject().put("pageId", page.pageId));
+        }       
+        body.put("pages", array);
+        body.put("themeId", "");   
+        HttpPost post  = new HttpPost(url);
+        StringEntity se = new StringEntity(body.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(post);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Page " + page.pageId + " was added to site " + siteName);
+                }
+                return true;
+            }
+            else
+            {
+                logger.error("Unable to add page to site " + siteName);
+                return false;
+            }
+            }
+            finally
+            {
+                post.releaseConnection();
+                client.close();
+            }  
+    }            
+    
+    /**
+     * Add a single page to site dashboard
+     * If there are pages added previously add them to 'oldPages' list in order 
+     * to keep them on the site dashboard.
+     * 
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param page
+     * @param oldPages - pages that were added previously
+     * @return true if the page is added
+     * @throws Exception if error
+     */
+    public boolean addPageToSite(final String userName,
+                                 final String password,
+                                 final String siteName,
+                                 final Page page,
+                                 final List<Page> oldPages) throws Exception
+    {        
+        return addPages(userName, password, siteName, false, page, oldPages);
+    }
+    
+    /**
+     * Add pages to site dashboard
+     * 
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param pages
+     * @return true if pages are added
+     * @throws Exception if error
+     */
+    public boolean addPagesToSite(final String userName,
+                                 final String password,
+                                 final String siteName,
+                                 final List<Page> pages) throws Exception
+    {       
+        return addPages(userName, password, siteName, true, null, pages);
+    }
 }
