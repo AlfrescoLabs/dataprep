@@ -287,6 +287,10 @@ public class CMISUtil
             if (property.getDefinition().getId().equals(propertyName))
             {
                 value = property.getValueAsString();
+                if (value==null)
+                {
+                    value="(None)";
+                }
                 break;
             }
         }

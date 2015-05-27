@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.SecondaryType;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
@@ -305,5 +306,53 @@ public class ContentAspects extends CMISUtil
         propertyMap.put("cm:categories", nodeRefs);
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         addProperties(userName, password, contentNodeRef, propertyMap);     
+    }
+    
+    /**
+     * Method to read all basic Properties of a file  
+     * 
+     */
+    public Map<String, Object> getBasicProperties(final String userName,
+                               final String password,
+                               final String siteName,
+                               final String contentName) throws Exception
+    {             
+        List<Property<?>> basicProperties=getProperties(userName, password, siteName, contentName);
+        
+        Map<String, Object> propertiesMap = new HashMap<String, Object>();
+        propertiesMap.put("Name", getPropertyValue(basicProperties, PropertyIds.NAME));
+        propertiesMap.put("Title", getPropertyValue(basicProperties, "cm:title"));
+        propertiesMap.put("Description", getPropertyValue(basicProperties, PropertyIds.DESCRIPTION));
+        propertiesMap.put("MimeType", getPropertyValue(basicProperties, PropertyIds.CONTENT_STREAM_MIME_TYPE));
+        propertiesMap.put("Author", getPropertyValue(basicProperties, "cm:author"));
+        propertiesMap.put("Size", getPropertyValue(basicProperties, PropertyIds.CONTENT_STREAM_LENGTH));
+        propertiesMap.put("Creator", getPropertyValue(basicProperties, PropertyIds.CREATED_BY));
+        propertiesMap.put("CreatedDate", getPropertyValue(basicProperties, PropertyIds.CREATION_DATE));
+        propertiesMap.put("Modifier", getPropertyValue(basicProperties, PropertyIds.LAST_MODIFIED_BY));
+        propertiesMap.put("ModifiedDate", getPropertyValue(basicProperties, PropertyIds.LAST_MODIFICATION_DATE));
+
+        return propertiesMap;
+    }
+    
+    /**
+     * Method to update basic Properties of a file
+     * 
+     */
+    public void setBasicProperties(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  final String contentName,
+                                  final String docName,
+                                  final String docTile,
+                                  final String docDescription,
+                                  final String author) throws Exception
+    {       
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        propertyMap.put(PropertyIds.NAME, docName);
+        propertyMap.put("cm:title", docTile);
+        propertyMap.put(PropertyIds.DESCRIPTION, docDescription);
+        propertyMap.put("cm:author", author);
+        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
+        addProperties(userName, password, contentNodeRef, propertyMap);
     }
 }

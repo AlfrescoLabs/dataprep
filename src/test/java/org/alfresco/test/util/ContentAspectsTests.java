@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.alfresco.test.util.CMISUtil.DocumentAspect;
 import org.alfresco.test.util.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Property;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
@@ -537,5 +539,63 @@ public class ContentAspectsTests extends AbstractTest
         String tagNodeRef = contentAction.getTagNodeRef(userName, password, siteName, tagDoc, tag1);
         List<?> values = contentAspect.getValues(properties, "cm:taggable");
         Assert.assertTrue(values.contains(tagNodeRef));
+    }
+    
+    @Test
+    public void getBasicProperties() throws Exception
+    {
+        String siteName = "siteBasic" + System.currentTimeMillis();
+        String userName = "userBasic" + System.currentTimeMillis();
+        String contentName = "contentNameBasic" + System.currentTimeMillis();
+        String docContent = "contentBasic" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, contentName, docContent);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        
+        Map<String, Object> basicProperties=contentAspect.getBasicProperties(userName, password, siteName, contentName);
+        Assert.assertEquals(basicProperties.get("Name").toString(),contentName);
+        Assert.assertEquals(basicProperties.get("Title").toString(),"(None)");
+        Assert.assertEquals(basicProperties.get("Description").toString(),"(None)");
+        Assert.assertEquals(basicProperties.get("MimeType").toString(),doc1.getContentStream().getMimeType());
+        Assert.assertEquals(basicProperties.get("Author").toString(),"(None)");
+        Assert.assertEquals(basicProperties.get("Size").toString(),"25");
+        Assert.assertEquals(basicProperties.get("Creator").toString(),userName);
+        Assert.assertEquals(basicProperties.get("Modifier").toString(),userName);  
+    }
+    
+    @Test
+    public void setBasicProperties() throws Exception
+    {
+        String siteName = "siteSetBasic" + System.currentTimeMillis();
+        String userName = "userSetBasic" + System.currentTimeMillis();
+        String docName = "contentNameSetBasic" + System.currentTimeMillis();
+        String docContent = "content SetBasic " + System.currentTimeMillis();
+        String newName="new-name-" + System.currentTimeMillis();
+        String newTitle="new-title-" + System.currentTimeMillis();
+        String newDescription="new description-" + System.currentTimeMillis();
+        String newAuthor="new-author-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password);
+        site.create(userName,
+                  password,
+                  "mydomain",
+                  siteName, 
+                  "my site description", 
+                  Visibility.PUBLIC);
+        Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docContent);
+        Assert.assertFalse(doc1.getId().isEmpty());
+        
+
+        contentAspect.setBasicProperties(userName, password, siteName, docName, newName, newTitle, newDescription, newAuthor);
+        List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, newName);
+        Assert.assertEquals(contentAspect.getPropertyValue(properties, PropertyIds.NAME), newName);
+        Assert.assertEquals(contentAspect.getPropertyValue(properties, "cm:title"), newTitle);
+        Assert.assertEquals(contentAspect.getPropertyValue(properties, PropertyIds.DESCRIPTION), newDescription);
+        Assert.assertEquals(contentAspect.getPropertyValue(properties, "cm:author"), newAuthor);
     }
 }
