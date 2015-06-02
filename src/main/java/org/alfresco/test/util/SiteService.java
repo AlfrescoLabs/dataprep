@@ -20,9 +20,14 @@ package org.alfresco.test.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.alfresco.test.util.DashboardCustomization.DashletLayout;
 import org.alfresco.test.util.DashboardCustomization.Page;
+import org.alfresco.test.util.DashboardCustomization.SiteDashlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -395,7 +400,11 @@ public class SiteService
                              final boolean multiplePages,
                              final Page page,
                              final List<Page> pages) throws Exception
-    {        
+    {    
+        if(!exists(siteName, userName, password))
+        {
+            throw new RuntimeException("Site doesn't exists " + siteName);
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + DashboardCustomization.SITE_PAGES_URL;        
         org.json.JSONObject body = new org.json.JSONObject();
@@ -403,6 +412,7 @@ public class SiteService
         body.put("siteId", siteName);
         // set the default page (Document Library)
         array.put(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));
+        
         if(pages != null)
         {
             for(int i = 0; i < pages.size(); i++)
@@ -487,5 +497,84 @@ public class SiteService
                                  final List<Page> pages) throws Exception
     {       
         return addPages(userName, password, siteName, true, null, pages);
+    }
+    
+    /**
+     * Add dashlet to site dashboard
+     * 
+     * @param userName
+     * @param password
+     * @return true if the dashlet is added
+     * @throws Exception if error
+     */
+    public boolean addDashlet(final String userName,
+                              final String password,
+                              final String siteName,
+                              final SiteDashlet dashlet,
+                              final DashletLayout layout,
+                              final int column,
+                              final int position) throws Exception
+    {        
+        if(!exists(siteName, userName, password))
+        {
+            throw new RuntimeException("Site doesn't exists " + siteName);
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;        
+        org.json.JSONObject body = new org.json.JSONObject();
+        org.json.JSONArray array = new org.json.JSONArray();     
+        body.put("dashboardPage", "site/" + siteName + "/dashboard");
+        body.put("templateId", layout.id);
+        
+        Hashtable<String, String> defaultDashlets = new Hashtable<String, String>();
+        defaultDashlets.put(SiteDashlet.SITE_MEMBERS.id, "component-1-1");
+        defaultDashlets.put(SiteDashlet.SITE_CONNTENT.id, "component-2-1");
+        defaultDashlets.put(SiteDashlet.SITE_ACTIVITIES.id, "component-2-2");
+        
+        Iterator<Map.Entry<String, String>> entries = defaultDashlets.entrySet().iterator();
+        while (entries.hasNext()) 
+        {
+          Map.Entry<String, String> entry = entries.next();
+          org.json.JSONObject jDashlet = new org.json.JSONObject();
+          jDashlet.put("url", entry.getKey());
+          jDashlet.put("regionId", entry.getValue());
+          jDashlet.put("originalRegionId", entry.getValue());
+          array.put(jDashlet);
+        }    
+        
+        org.json.JSONObject newDashlet = new org.json.JSONObject();
+        newDashlet.put("url", dashlet.id);
+        String region = "component-" + column + "-" + position;
+        newDashlet.put("regionId", region);
+        array.put(newDashlet);
+        body.put("dashlets", array);
+        
+        HttpPost post  = new HttpPost(url);
+        StringEntity se = new StringEntity(body.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(post);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);
+                }
+                return true;
+            }
+            else
+            {
+                logger.error("Unable to add dashlet to site " + siteName);
+            }
+            }
+            finally
+            {
+                post.releaseConnection();
+                client.close();
+            }
+        return false;
     }
 }

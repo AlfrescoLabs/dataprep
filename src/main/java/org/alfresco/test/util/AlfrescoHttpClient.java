@@ -38,6 +38,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -180,6 +181,31 @@ public class AlfrescoHttpClient
         try
         {
             response = client.execute(request);
+            if(logger.isTraceEnabled())
+            {
+                logger.trace("Status Received:" + response.getStatusLine());
+            }
+            return response;
+        }
+        catch (Exception e)
+        {
+            logger.error(response);
+            throw new RuntimeException("Error during execute request", e);
+        }
+    }
+    
+    /**
+     * Execute HttpClient request.
+     * @param request to send 
+     * @return {@link HttpResponse} response
+     * @throws Exception if error
+     */
+    public HttpResponse executeRequest(HttpRequestBase request, HttpContext context) throws Exception
+    {
+        HttpResponse response = null;
+        try
+        {
+            response = client.execute(request, context);
             if(logger.isTraceEnabled())
             {
                 logger.trace("Status Received:" + response.getStatusLine());

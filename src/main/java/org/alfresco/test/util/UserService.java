@@ -14,17 +14,31 @@
  */
 package org.alfresco.test.util;
 
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.alfresco.test.util.DashboardCustomization.DashletLayout;
+import org.alfresco.test.util.DashboardCustomization.UserDashlet;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -843,7 +857,6 @@ public class UserService
            AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
            String reqURL = client.getApiUrl() + "sites/" + siteName + "/memberships?alf_ticket=" + client.getAlfTicket(userName, userPass);
            HttpGet request = new HttpGet(reqURL);
-           
            try
            {
                HttpResponse response = client.executeRequest(request);
@@ -863,6 +876,143 @@ public class UserService
            }
            
            return count;
+    }
+    
+    /**
+     * Login in alfresco share
+     * 
+     * @param userName 
+     * @param userPass 
+     * @return total number of site members
+     * @throws Exception if error
+     */
+    public boolean login(final String userName,
+                         final String password) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        HttpState state;
+        org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
+        String reqURL = client.getAlfrescoUrl() + "share/page/dologin";        
+        org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
+        NameValuePair[] formParams;
+        CookieStore cookieStore = new BasicCookieStore();
+        HttpClientContext localContext = HttpClientContext.create();
+        localContext.setCookieStore(cookieStore);      
+        formParams = (new NameValuePair[]{
+                        new NameValuePair("username", userName),
+                        new NameValuePair("password", password),
+                        new NameValuePair("success", "/share/page/user/" + userName + "/dashboard"),
+                        new NameValuePair("failure", "/share/page/type/login?error=true")});
+        post.setRequestBody(formParams);
+        int postStatus = theClient.executeMethod(post);
+        if(302 == postStatus)
+        {
+            state = theClient.getState();
+            post.releaseConnection();     
+            org.apache.commons.httpclient.methods.GetMethod get = new org.apache.commons.httpclient.methods.GetMethod(
+                    client.getAlfrescoUrl() + "share/page/user/" + userName + "/dashboard");
+            theClient.setState(state);
+            int getStatus = theClient.executeMethod(get);
+            get.releaseConnection();
+            if(200 == getStatus)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
+    
+    /**
+     * Add dashlet to user dashboard
+     * 
+     * @param userName
+     * @param password
+     * @param Dashlet
+     * @param DashletLayout
+     * @param column
+     * @param position
+     * @return true if the dashlet is added
+     * @throws Exception if error
+     */
+    public boolean addDashlet(final String userName,
+                              final String password,
+                              final UserDashlet dashlet,
+                              final DashletLayout layout,
+                              final int column,
+                              final int position) throws Exception
+    {     
+        login(userName, password);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();           
+        String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
+        org.json.JSONObject body = new org.json.JSONObject();
+        org.json.JSONArray array = new org.json.JSONArray();     
+        body.put("dashboardPage", "user/" + userName + "/dashboard");
+        body.put("templateId", layout.id);
+        
+        // keep default dashlets
+        Hashtable<String, String> defaultDashlets = new Hashtable<String, String>();
+        defaultDashlets.put(UserDashlet.MY_SITES.id, "component-1-1");
+        defaultDashlets.put(UserDashlet.MY_TASKS.id, "component-1-2");
+        defaultDashlets.put(UserDashlet.MY_ACTIVITIES.id, "component-2-1");
+        defaultDashlets.put(UserDashlet.MY_DOCUMENTS.id, "component-2-2");
+        
+        Iterator<Map.Entry<String, String>> entries = defaultDashlets.entrySet().iterator();
+        while (entries.hasNext())
+        {
+            Map.Entry<String, String> entry = entries.next();
+            org.json.JSONObject jDashlet = new org.json.JSONObject();
+            jDashlet.put("url", entry.getKey());
+            jDashlet.put("regionId", entry.getValue());
+            jDashlet.put("originalRegionId", entry.getValue());
+            array.put(jDashlet);
+        }    
+        
+        org.json.JSONObject newDashlet = new org.json.JSONObject();
+        newDashlet.put("url", dashlet.id);
+        String region = "component-" + column + "-" + position;
+        newDashlet.put("regionId", region);
+        array.put(newDashlet);
+        body.put("dashlets", array);
+        
+        HttpPost post  = new HttpPost(url);
+        StringEntity se = new StringEntity(body.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        try
+        {
+            HttpResponse response = client.executeRequest(post);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Dashlet " + dashlet.name + " was added on user: " + userName + " dashboard");
+                }
+                return true;
+            }
+            else
+            {
+                logger.error("Unable to add dashlet to user dashboard " + userName);
+            }
+            }
+            finally
+            {
+                post.releaseConnection();
+                client.close();
+            }
+        return false;
     }
     
 }
