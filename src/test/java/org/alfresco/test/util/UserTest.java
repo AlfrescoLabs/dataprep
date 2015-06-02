@@ -14,6 +14,8 @@
  */
 package org.alfresco.test.util;
 
+import org.alfresco.test.util.DashboardCustomization.DashletLayout;
+import org.alfresco.test.util.DashboardCustomization.UserDashlet;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -453,8 +455,7 @@ public class UserTest extends AbstractTest
         site.create(userManager, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
         userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, siteName, "SiteConsumer");
         int noOfSiteMembers=userService.countSiteMembers(userManager, password, siteName);
-        Assert.assertEquals(noOfSiteMembers,2);
-
+        Assert.assertEquals(noOfSiteMembers, 2);
     }
     
     @Test
@@ -469,4 +470,22 @@ public class UserTest extends AbstractTest
         Assert.assertEquals(noOfSiteMembers,1);
     }
    
+    @Test
+    public void addDashlets() throws Exception
+    {
+        String theUser = "alfrescouser" + System.currentTimeMillis();     
+        userService.create(admin, admin, theUser, password, theUser);
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_MEETING_WORKSPACES, DashletLayout.THREE_COLUMNS, 3, 1));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DISCUSSIONS, DashletLayout.THREE_COLUMNS, 3, 2));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.FOUR_COLUMNS, 4, 2));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DOC_WORKSPACES, DashletLayout.FOUR_COLUMNS, 4, 3));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.RSS_FEED, DashletLayout.FOUR_COLUMNS, 4, 4));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.SITE_SEARCH, DashletLayout.FOUR_COLUMNS, 4, 5));
+    }
+    
+    @Test
+    public void addDashletToInvalidUser() throws Exception
+    {   
+        Assert.assertFalse(userService.addDashlet("fakeUser", "fakePass", UserDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1));
+    }
 }

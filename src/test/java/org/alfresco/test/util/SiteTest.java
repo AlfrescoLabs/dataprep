@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alfresco.test.util.DashboardCustomization.DashletLayout;
 import org.alfresco.test.util.DashboardCustomization.Page;
+import org.alfresco.test.util.DashboardCustomization.SiteDashlet;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;
 import org.testng.Assert;
@@ -135,16 +137,43 @@ public class SiteTest extends AbstractTest
         pagesToAdd.add(Page.LINKS);
         pagesToAdd.add(Page.CALENDAR);
         Assert.assertTrue(site.addPagesToSite(ADMIN, ADMIN, siteId, pagesToAdd));
-        Assert.assertTrue(site.addPageToSite(ADMIN, ADMIN, siteId, Page.BLOG, pagesToAdd));     
+        Assert.assertTrue(site.addPageToSite(ADMIN, ADMIN, siteId, Page.BLOG, pagesToAdd));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addPageToInvalidSite() throws Exception
+    {   
+        site.addPageToSite(ADMIN, ADMIN, "fakeSite", Page.BLOG, null);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addPageToInvalidUser() throws Exception
+    {   
+        site.addPageToSite("fakeUser", "fakePass", siteId, Page.BLOG, null);
     }
     
     @Test(dependsOnMethods="addPagesToSite")
-    public void addPageToInvalidSite() throws Exception
+    public void addDashlets() throws Exception
     {   
-        Assert.assertFalse(site.addPageToSite(ADMIN, ADMIN, "fakeSite", Page.BLOG, null));
+        Assert.assertTrue(site.addDashlet(ADMIN, ADMIN, siteId, SiteDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1));
+        Assert.assertTrue(site.addDashlet(ADMIN, ADMIN, siteId, SiteDashlet.SITE_CALENDAR, DashletLayout.THREE_COLUMNS, 3, 2));
+        Assert.assertTrue(site.addDashlet(ADMIN, ADMIN, siteId, SiteDashlet.SAVED_SEARCH, DashletLayout.THREE_COLUMNS, 2, 3));
+        Assert.assertTrue(site.addDashlet(ADMIN, ADMIN, siteId, SiteDashlet.RSS_FEED, DashletLayout.TWO_COLUMNS_WIDE_LEFT, 2, 4));
     }
     
-    @Test(dependsOnMethods="addPageToInvalidSite")
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addDashletInvalidUser() throws Exception
+    {   
+        site.addDashlet("fakeUser", "fakePass", siteId, SiteDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addDashletToInvalidSite() throws Exception
+    {   
+        site.addDashlet(ADMIN, ADMIN, "fakeSite", SiteDashlet.ADDONS_RSS_FEED, DashletLayout.FOUR_COLUMNS, 2, 1);
+    }
+    
+    @Test(dependsOnMethods="addDashlets")
     public void delete() throws Exception
     {
         site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
