@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite" parallel="classes" thread-count="7">
+  <test name="Test">
+    <classes>
+      <class name="org.alfresco.test.util.UserTest"/>
+      <class name="org.alfresco.test.util.ContentAspectsTests"/>
+      <class name="org.alfresco.test.util.AlfrescoHttpClientTest"/>
+      <class name="org.alfresco.test.util.ContentTest"/>
+      <class name="org.alfresco.test.util.BasicAuthPublicApiFactoryTest"/>
+      <class name="org.alfresco.test.util.SiteTest"/>
+      <class name="org.alfresco.test.util.ContentActionsTests"/>
+    </classes>
+  </test> <!-- Test -->
+</suite> <!-- Suite -->
