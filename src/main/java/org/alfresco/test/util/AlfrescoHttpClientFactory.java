@@ -14,13 +14,15 @@
  */
 package org.alfresco.test.util;
 
+import org.springframework.beans.factory.FactoryBean;
+
 
 /**
  * Alfresco HttpClient factory.
  * 
  * @author Michael Suzuki
  */
-public class AlfrescoHttpClientFactory
+public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient>
 {
 
     private String host;

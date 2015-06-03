@@ -44,11 +44,6 @@ import org.apache.http.util.EntityUtils;
 
 public class ContentService extends CMISUtil
 {  
-    public ContentService(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        super(alfrescoHttpClientFactory);
-    }
-    
     /**
      * Create a new folder
      * 

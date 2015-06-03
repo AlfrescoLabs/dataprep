@@ -38,22 +38,11 @@
         <constructor-arg name="publicApiServletName" value="${alfresco.public.api.servlet.name}"/>
         <constructor-arg name="serviceServletName" value="${alfresco.service.servlet.name}"/>
     </bean>
-    <bean id="siteService" class="org.alfresco.test.util.SiteService">
-        <constructor-arg name="publicApiFactory" ref="basicAuthPublicApiFactory"/>
-        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
-    </bean>
-    <bean id="userService" class="org.alfresco.test.util.UserService">
-        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
-    </bean>   
-    <bean id="contentService" class="org.alfresco.test.util.ContentService">
-        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
-    </bean>
-    <bean id="contentAspects" class="org.alfresco.test.util.ContentAspects">
-        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
-    </bean>
-    <bean id="contentActions" class="org.alfresco.test.util.ContentActions">
-        <constructor-arg name="alfrescoHttpClientFactory" ref="alfrescoHttpClientFactory"/>
-    </bean>
+    <bean id="siteService" class="org.alfresco.test.util.SiteService" />
+    <bean id="userService" class="org.alfresco.test.util.UserService" />
+    <bean id="contentService" class="org.alfresco.test.util.ContentService"/>
+    <bean id="contentAspects" class="org.alfresco.test.util.ContentAspects"/>
+    <bean id="contentActions" class="org.alfresco.test.util.ContentActions"/>
     
     <bean id="alfrescoHttpClientFactory" class="org.alfresco.test.util.AlfrescoHttpClientFactory">
         <constructor-arg name="scheme" value="${alfresco.scheme}"/>

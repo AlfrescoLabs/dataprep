@@ -25,6 +25,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentExcep
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Helper class that provides CMIS utils.
@@ -91,13 +92,8 @@ public class CMISUtil
         }
     }
     
-    protected AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    @Autowired protected  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     Map<String, String> contents = new HashMap<String,String>();
-    
-    public CMISUtil(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
-    }
 
     /**
      * Method to get a CMIS session

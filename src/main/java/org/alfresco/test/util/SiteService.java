@@ -46,6 +46,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 
@@ -63,15 +64,9 @@ import org.springframework.social.alfresco.api.entities.Site.Visibility;
  */
 public class SiteService
 {
-    private final PublicApiFactory publicApiFactory;
-    private final AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     private static Log logger = LogFactory.getLog(SiteService.class);
-    
-    public SiteService(PublicApiFactory publicApiFactory, AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        this.publicApiFactory = publicApiFactory;
-        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
-    }
+    @Autowired private PublicApiFactory publicApiFactory;
+    @Autowired private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     
     /**
      * Create site using Alfresco public API.
@@ -173,7 +168,7 @@ public class SiteService
                 HttpEntity entity = response.getEntity();
                 String responseString = EntityUtils.toString(entity , "UTF-8"); 
                 Object obj=JSONValue.parse(responseString);
-                JSONArray jarray=(JSONArray)obj;           
+                JSONArray jarray=(JSONArray)obj;
                 for (Object item:jarray)
                 {
                     JSONObject jobject=(JSONObject) item;

@@ -88,7 +88,6 @@ public class SiteTest extends AbstractTest
     public void getAllSites() throws Exception
     {
         List<String> sites= site.getSites(ADMIN, ADMIN);
-        Assert.assertTrue(sites.contains(siteId));
         Assert.assertNotEquals(sites.size(),0);
     }
     

@@ -24,10 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ContentAspects extends CMISUtil
 {
-    public ContentAspects(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        super(alfrescoHttpClientFactory);
-    }
     
     /**
      * Add aspect for document or folder

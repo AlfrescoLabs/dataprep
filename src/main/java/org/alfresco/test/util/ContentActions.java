@@ -42,10 +42,6 @@ public class ContentActions extends CMISUtil
             this.bodyParam = bodyParam;
         }
     }     
-    public ContentActions(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        super(alfrescoHttpClientFactory);
-    }
     private static Log logger = LogFactory.getLog(ContentActions.class);
 
     /**

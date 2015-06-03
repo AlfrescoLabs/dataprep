@@ -44,6 +44,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Create user helper class, creates an Alfresco user using public API.
@@ -54,15 +55,10 @@ import org.json.simple.parser.JSONParser;
 public class UserService
 {
     private static Log logger = LogFactory.getLog(UserService.class);
-    private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    @Autowired private  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     public static String DEFAULT_LAST_NAME = "lastName";
     public static String PAGE_ACCEPT_URL = "page/accept-invite";
     public static String PAGE_REJECT_URL = "page/reject-invite";
-    
-    public UserService(AlfrescoHttpClientFactory alfrescoHttpClientFactory)
-    {
-        this.alfrescoHttpClientFactory = alfrescoHttpClientFactory;
-    }
 
     /**
      * Create an Alfresco user on enterprise.
@@ -258,7 +254,7 @@ public class UserService
         String url = client.getApiUrl() + "invite/start?inviteeFirstName=" + userToInvite + 
                      "&inviteeLastName=" + DEFAULT_LAST_NAME + 
                      "&inviteeEmail=" + userToInvite + 
-                     "&inviteeUserName=" + userToInvite +         
+                     "&inviteeUserName=" + userToInvite +
                      "&siteShortName=" + siteName +
                      "&inviteeSiteRole=" + role + 
                      "&serverPath="  + client.getHost()+
