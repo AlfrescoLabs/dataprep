@@ -21,6 +21,7 @@ import java.util.List;
 import org.alfresco.test.util.DashboardCustomization.DashletLayout;
 import org.alfresco.test.util.DashboardCustomization.Page;
 import org.alfresco.test.util.DashboardCustomization.SiteDashlet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;
 import org.testng.Assert;
@@ -36,13 +37,13 @@ public class SiteTest extends AbstractTest
 {
     private static final String MY_DOMAIN = "mydomain";
     private static final String ADMIN = "admin"; 
+    @Autowired
     private SiteService site;
     private String siteId;
     
     @BeforeClass
     public void setup()
     {
-        site = (SiteService) ctx.getBean("siteService");
         siteId = "michael" + System.currentTimeMillis();
     }
     

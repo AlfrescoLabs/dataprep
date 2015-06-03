@@ -14,9 +14,9 @@ import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -27,26 +27,16 @@ import org.testng.annotations.Test;
 
 public class ContentAspectsTests extends AbstractTest
 {
-    UserService userService;
-    SiteService site;
-    ContentService content;
-    ContentAspects contentAspect;
-    ContentActions contentAction;
+    @Autowired private UserService userService;
+    @Autowired private SiteService site;
+    @Autowired private ContentService content;
+    @Autowired private ContentAspects contentAspect;
+    @Autowired private ContentActions contentAction;
     String admin = "admin";
     String password = "password";
     private final String DATE_FORMAT = "EEE MMM dd HH:mm";
     String plainDoc = "testDoc.txt";
     String folder = "cmisFolder"; 
-    
-    @BeforeClass
-    public void setup()
-    {
-        userService = (UserService) ctx.getBean("userService");
-        site = (SiteService) ctx.getBean("siteService");
-        content = (ContentService) ctx.getBean("contentService");
-        contentAspect = (ContentAspects) ctx.getBean("contentAspects");
-        contentAction = (ContentActions) ctx.getBean("contentActions");
-    }
     
     @Test
     public void addDocAspect() throws Exception

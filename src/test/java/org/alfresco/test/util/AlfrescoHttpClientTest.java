@@ -17,6 +17,7 @@ package org.alfresco.test.util;
 import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

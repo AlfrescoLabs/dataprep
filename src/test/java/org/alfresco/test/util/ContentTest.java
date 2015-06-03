@@ -10,9 +10,9 @@ import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -24,21 +24,14 @@ import org.testng.annotations.Test;
 
 public class ContentTest extends AbstractTest
 {    
-    UserService userService;
-    SiteService site;
-    ContentService content;
+    @Autowired private UserService userService;
+    @Autowired private SiteService site;
+    @Autowired private ContentService content;
     String admin = "admin";
     String password = "password";
     String folder = "cmisFolder";
     String plainDoc = "plainDoc";
     
-    @BeforeClass
-    public void setup()
-    {
-        userService = (UserService) ctx.getBean("userService");
-        site = (SiteService) ctx.getBean("siteService");
-        content = (ContentService) ctx.getBean("contentService");
-    }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testCreateFolderTwice() throws Exception

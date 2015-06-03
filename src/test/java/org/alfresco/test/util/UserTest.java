@@ -16,9 +16,9 @@ package org.alfresco.test.util;
 
 import org.alfresco.test.util.DashboardCustomization.DashletLayout;
 import org.alfresco.test.util.DashboardCustomization.UserDashlet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -28,19 +28,13 @@ import org.testng.annotations.Test;
  */
 public class UserTest extends AbstractTest
 {
-    UserService userService;
+    @Autowired private SiteService site;
+    @Autowired private UserService userService;
     String userName = "userm-" + System.currentTimeMillis() + "@test.com";
     String password = "password";
     String email = userName;
     String admin = "admin";
-    SiteService site;
 
-    @BeforeClass
-    public void setup()
-    {
-        userService = (UserService) ctx.getBean("userService");
-        site = (SiteService) ctx.getBean("siteService");
-    }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName() throws Exception

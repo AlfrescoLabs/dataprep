@@ -7,9 +7,9 @@ import org.alfresco.test.util.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -20,24 +20,15 @@ import org.testng.annotations.Test;
 
 public class ContentActionsTests extends AbstractTest
 {   
-    UserService userService;
-    SiteService site;
-    ContentService content;
-    ContentActions contentAction;
+    @Autowired private UserService userService;
+    @Autowired private SiteService site;
+    @Autowired private ContentService content;
+    @Autowired private ContentActions contentAction;
     String admin = "admin";
     String password = "password";
     String tagDoc = "tagDoc";
     String folder = "testFolder"; 
     String commentDoc = "commentDoc";
-    
-    @BeforeClass
-    public void setup()
-    {
-        userService = (UserService) ctx.getBean("userService");
-        site = (SiteService) ctx.getBean("siteService");
-        content = (ContentService) ctx.getBean("contentService");
-        contentAction = (ContentActions) ctx.getBean("contentActions");
-    }
     
     @Test
     public void addSingleTagDocument() throws Exception

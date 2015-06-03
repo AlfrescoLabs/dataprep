@@ -15,30 +15,22 @@
 package org.alfresco.test.util;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.testng.annotations.BeforeSuite;
-
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+@ContextConfiguration("classpath*:util-context.xml")
 /**
  * Abstract that setups spring context.
  * @author Michael Suzuki
  *
  */
-public class AbstractTest
+public class AbstractTest extends AbstractTestNGSpringContextTests
 {
     public static final String SLASH = File.separator;
     private static final String SRC_ROOT = System.getProperty("user.dir") + SLASH;
     protected static final String DATA_FOLDER = SRC_ROOT + "src/test/resources/testdata" + SLASH;
-    
+    @Autowired
     protected static ApplicationContext ctx;
-    @BeforeSuite(alwaysRun = true)
-    public static void setupContext()
-    {
-        List<String> contextXMLList = new ArrayList<String>();
-        contextXMLList.add("util-context.xml");
-        ctx = new ClassPathXmlApplicationContext(contextXMLList.toArray(new String[contextXMLList.size()]));
-    }
 }

@@ -30,7 +30,7 @@
         <developerConnection>scm:git:https://github.com/AlfrescoTestAutomation/dataprep.git</developerConnection>
     </scm>
     <properties>
-        <spring.version>4.1.4.RELEASE</spring.version>
+        <spring.version>4.1.6.RELEASE</spring.version>
         <enterprise.installer.path>/data/bamboo/artifacts/${enterprise.build.plan}/ALL/alfresco-enterprise-*-installer-linux-x64.???</enterprise.installer.path>
     </properties>
     <dependencies>
@@ -56,10 +56,10 @@
         </dependency>
         
         <dependency>
-        	<groupId>org.json</groupId>
-        	<artifactId>json</artifactId>
-        	<version>20140107</version>
-    	</dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20140107</version>
+        </dependency>
         
         <dependency>
             <groupId>commons-io</groupId>
@@ -70,6 +70,28 @@
             <groupId>org.springframework.social</groupId>
             <artifactId>spring-social-alfresco-bm</artifactId>
             <version>0.5.2</version>
+        </dependency>
+         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+             <groupId>org.springframework</groupId>
+             <artifactId>spring-test</artifactId>
+             <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.chemistry.opencmis</groupId>
