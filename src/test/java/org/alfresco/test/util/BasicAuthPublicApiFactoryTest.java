@@ -1,5 +1,6 @@
 package org.alfresco.test.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -7,11 +8,11 @@ import org.testng.annotations.Test;
 
 public class BasicAuthPublicApiFactoryTest extends AbstractTest
 {
+    @Autowired
     PublicApiFactory factory;
     @BeforeClass 
     public void setupFactory()
     {
-        factory = (PublicApiFactory)ctx.getBean("basicAuthPublicApiFactory");
         Assert.assertNotNull(factory);
     }
     @Test
