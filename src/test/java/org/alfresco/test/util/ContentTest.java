@@ -551,9 +551,9 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        String plainDoc = "plain";
-        String html = "html";
-        String xml = "xml";
+        String plainDoc = "plain" + System.currentTimeMillis();
+        String html = "html" + System.currentTimeMillis();
+        String xml = "xml" + System.currentTimeMillis();
         String newContentPlain = "new plain content";
         String newContentHtml = "new html content";
         String newContentXml = "new xml content";      
