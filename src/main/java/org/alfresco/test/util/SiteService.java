@@ -178,8 +178,7 @@ public class SiteService
                 {
                     JSONObject jobject=(JSONObject) item;
                     mySitesList.add(jobject.get("title").toString());
-                    System.out.println("----"+jobject.get("title").toString());
-                }      
+                }
             }
             return mySitesList;
         } 
