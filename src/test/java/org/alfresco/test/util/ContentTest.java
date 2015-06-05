@@ -552,10 +552,8 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain" + System.currentTimeMillis();
-        String html = "html" + System.currentTimeMillis();
         String xml = "xml" + System.currentTimeMillis();
         String newContentPlain = "new plain content";
-        String newContentHtml = "new html content";
         String newContentXml = "new xml content";      
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
@@ -565,16 +563,12 @@ public class ContentTest extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        content.createDocument(userName, password, siteName, DocumentType.HTML, html, html);
         content.createDocument(userName, password, siteName, DocumentType.XML, xml, xml);
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(plainDoc));
-        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, html).equals(html));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(xml));     
-        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, newContentPlain));
-        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.HTML, html, newContentHtml));
+        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, newContentPlain));    
         Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.XML, xml, newContentXml));       
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(newContentPlain));
-        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, html).equals(newContentHtml));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(newContentXml));
     }
     
