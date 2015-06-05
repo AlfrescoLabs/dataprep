@@ -156,6 +156,7 @@ public class ContentService extends CMISUtil
         {       
             contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+            documentLibrary.refresh();
             Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
             return d;
         }
