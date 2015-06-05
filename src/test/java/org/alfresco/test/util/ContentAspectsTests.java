@@ -207,6 +207,7 @@ public class ContentAspectsTests extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
+        String plainDoc = "doc" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password);
         site.create(userName,
                     password,

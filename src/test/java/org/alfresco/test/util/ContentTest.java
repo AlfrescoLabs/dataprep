@@ -355,7 +355,7 @@ public class ContentTest extends AbstractTest
                     siteName, 
                     "my site description", 
                     Visibility.PUBLIC);
-        content.createDocument(userName, password, siteName, DocumentType.XML, "xmlDoc", "contentfwfwfwfwgwegwgw");
+        content.createDocument(userName, password, siteName, DocumentType.XML, "xmlDoc", "contentXmlDoc");
         Folder f = content.createFolder(userName, password, folder, siteName);
         content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);      
         Map<String, String> properties = new HashMap<String, String>();
