@@ -503,7 +503,7 @@ public class ContentService extends CMISUtil
             }
             catch(ClassCastException cce)
             {
-                throw new CmisRuntimeException("Nole: " + folderName + " is not a folder.", cce);
+                throw new CmisRuntimeException("Folder: " + folderName + " is not a folder.", cce);
             }
             finally
             {
@@ -605,6 +605,7 @@ public class ContentService extends CMISUtil
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         request.setEntity(se);
         HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        waitInSeconds(1);
         try
         {
             HttpResponse response = clientWithAuth.execute(request);

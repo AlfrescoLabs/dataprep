@@ -348,5 +348,22 @@ public class CMISUtil
         }
         return categoryNodeRef;
     }
+    
+    /**
+     * Method to wait for given seconds
+     * 
+     * @param seconds
+     */
+    public static void waitInSeconds(int seconds)
+    {
+        long time0;
+        long time1;
+        time0 = System.currentTimeMillis();
+        do
+        {
+            time1 = System.currentTimeMillis();
+        }
+        while (time1 - time0 < seconds * 1000);
+    }
 }
 
