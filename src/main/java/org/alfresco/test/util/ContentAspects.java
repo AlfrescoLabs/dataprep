@@ -32,7 +32,7 @@ public class ContentAspects extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @param aspectToRemove
+     * @param aspect aspect to add
      * @throws Exception 
      */
     public void addAspect(final String userName,

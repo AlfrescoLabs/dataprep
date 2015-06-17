@@ -51,7 +51,7 @@ public class ContentActions extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @param ActionType
+     * @param option - action type
      * @param value
      * @return true if request is successful
      * @throws Exception if error
@@ -116,6 +116,7 @@ public class ContentActions extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
+     * @param optType
      * @param List<String> values
      * @return true if request is successful
      * @throws Exception if error
@@ -176,7 +177,7 @@ public class ContentActions extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @param Action type
+     * @param optType
      * @param actionValue
      * @return boolean 
      * @throws Exception if error
@@ -261,7 +262,7 @@ public class ContentActions extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @param List<String> tags
+     * @param tags
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -281,7 +282,7 @@ public class ContentActions extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @param ActionType
+     * @param actionType
      * @return String Json response
      * @throws Exception if error
      */
@@ -324,7 +325,7 @@ public class ContentActions extends CMISUtil
      * Return a list of tags or comments
      * 
      * @param response
-     * @param ActionType
+     * @param optType
      */
     @SuppressWarnings("unchecked")
     private List<String> getOptionValues(final String response,
@@ -358,7 +359,7 @@ public class ContentActions extends CMISUtil
      * 
      * @param response
      * @param optionValue
-     * @param ActionType
+     * @param optType
      */
     @SuppressWarnings("unchecked")
     private String getOptionNodeRef(final String response,
@@ -479,7 +480,7 @@ public class ContentActions extends CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @param List<String> comments
+     * @param comments - List of comments
      * @return true if request is successful
      * @throws Exception if error
      */

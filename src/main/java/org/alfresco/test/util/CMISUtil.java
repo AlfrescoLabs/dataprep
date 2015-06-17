@@ -134,7 +134,7 @@ public class CMISUtil
      * @param password
      * @param siteName
      * @param contentName
-     * @return String
+     * @return String noderef
      * @throws Exception
      */
     public String getNodeRef(final String userName,
@@ -184,8 +184,8 @@ public class CMISUtil
      *
      * @param userName
      * @param password
-     * @param siteName
-     * @param contentName
+     * @param contentNodeRef
+     * @param documentAspects
      * @throws Exception 
      */
     public void addAspect(final String userName,
@@ -227,8 +227,7 @@ public class CMISUtil
      *
      * @param userName
      * @param password
-     * @param siteName
-     * @param contentName
+     * @param contentNodeRef
      * @param propertiesMap
      */
     public void addProperties(final String userName,

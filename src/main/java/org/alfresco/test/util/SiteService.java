@@ -76,7 +76,7 @@ public class SiteService
      * @param domain the comany or org id
      * @param siteId site identifier
      * @param description site description
-     * @param visability site visability type
+     * @param visibility site visability type
      * @throws IOException io error
      */
     public void create(final String username,
@@ -84,7 +84,7 @@ public class SiteService
                        final String domain, 
                        final String siteId,
                        final String description,
-                       final Visibility visability) throws IOException
+                       final Visibility visibility) throws IOException
     {
         Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
         publicApi.createSite(domain, 
@@ -92,7 +92,7 @@ public class SiteService
                              "site-dashboard", 
                              siteId,
                              description, 
-                             visability);
+                             visibility);
     }
     /**
      * Checks if site exists
@@ -285,7 +285,6 @@ public class SiteService
      * @param userName
      * @param password
      * @param siteName
-     * @param contentName
      * @return true if marked as favorite
      * @throws Exception if error
      */
@@ -498,6 +497,11 @@ public class SiteService
      * 
      * @param userName
      * @param password
+     * @param siteName
+     * @param dashlet
+     * @param layout
+     * @param column
+     * @param position
      * @return true if the dashlet is added
      * @throws Exception if error
      */

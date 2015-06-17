@@ -49,7 +49,9 @@ public class ContentService extends CMISUtil
      * 
      * @param userName
      * @param password
-     * @return Cmis Session
+     * @param folderName
+     * @param siteName
+     * @return Folder
      * @throws Exception if error
      */
     public Folder createFolder(final String userName,
@@ -91,8 +93,8 @@ public class ContentService extends CMISUtil
      * 
      * @param userName
      * @param password
+     * @param siteName
      * @param folderName
-     * @return true if folder is deleted
      * @throws Exception if error
      */
     public void deleteFolder(final String userName,
@@ -126,10 +128,10 @@ public class ContentService extends CMISUtil
      * @param userName
      * @param password
      * @param siteName
-     * @param DocumentType 
+     * @param fileType 
      * @param docName
      * @param docContent
-     * @return document
+     * @return Document
      * @throws Exception if error
      */
     public Document createDocument(final String userName,
@@ -185,8 +187,8 @@ public class ContentService extends CMISUtil
      * @param userName
      * @param password
      * @param siteName
-     * @param DocumentType 
-     * @param File fileName
+     * @param fileType 
+     * @param docName
      * @param docContent
      * @return document
      * @throws Exception if error
@@ -238,7 +240,7 @@ public class ContentService extends CMISUtil
      * @param password
      * @param siteName
      * @param folderName
-     * @param DocumentType 
+     * @param fileType 
      * @param docName
      * @param docContent
      * @return document
@@ -306,7 +308,8 @@ public class ContentService extends CMISUtil
      * 
      * @param userName
      * @param password
-     * @param folderName
+     * @param siteName
+     * @param docName
      * @return true if folder is deleted
      * @throws Exception if error
      */
@@ -338,6 +341,7 @@ public class ContentService extends CMISUtil
      * 
      * @param userName
      * @param password
+     * @param siteName
      * @param folderName
      * @return true if folder is deleted
      * @throws Exception if error
@@ -574,9 +578,9 @@ public class ContentService extends CMISUtil
      * @param userName 
      * @param password
      * @param siteName 
-     * @param DocumentType
+     * @param docType
      * @param docName
-     * @param String new content
+     * @param newContent
      * @throws Exception
      * 
      */

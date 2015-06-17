@@ -235,7 +235,7 @@ public class UserService
      * @param invitingUserPassword user password
      * @param userToInvite user label
      * @param siteName site identifier which invite user.
-     * @param role type
+     * @param role
      * @return true if invite is successful
      * @throws Exception if error
      */
@@ -341,7 +341,6 @@ public class UserService
      * 
      * @param userName
      * @param password
-     * @param domain
      * @param siteId
      * @return true if request is successful
      * @throws Exception if error
@@ -383,7 +382,7 @@ public class UserService
      * Delete a pending request for a Moderated Site
      * 
      * @param siteManager
-     * @param passManager
+     * @param passwordManager
      * @param userName - user that made the request to the Site
      * @param siteId
      * @return true if request is deleted (204 Status)
@@ -424,7 +423,7 @@ public class UserService
      * Remove a user from site
      * 
      * @param siteManager
-     * @param passManager
+     * @param passwordManager
      * @param userName - user that made the request to the Site
      * @param siteId
      * @return true if request is deleted (204 Status)
@@ -606,8 +605,8 @@ public class UserService
      * @param adminUser admin username
      * @param adminPass admin credential
      * @param groupName 
-     * @param userName
-     * @return true if user exists
+     * @param subGroup
+     * @return true if subgroup is created
      * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
@@ -879,7 +878,7 @@ public class UserService
      * 
      * @param userName 
      * @param userPass 
-     * @return total number of site members
+     * @return boolean
      * @throws Exception if error
      */
     public boolean login(final String userName,
@@ -936,8 +935,8 @@ public class UserService
      * 
      * @param userName
      * @param password
-     * @param Dashlet
-     * @param DashletLayout
+     * @param dashlet
+     * @param layout
      * @param column
      * @param position
      * @return true if the dashlet is added
@@ -1010,5 +1009,4 @@ public class UserService
             }
         return false;
     }
-    
 }
