@@ -117,7 +117,7 @@ public class ContentActions extends CMISUtil
      * @param siteName
      * @param contentName
      * @param optType
-     * @param List<String> values
+     * @param values
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -358,7 +358,7 @@ public class ContentActions extends CMISUtil
      * Return the node ref for a tag or comment
      * 
      * @param response
-     * @param optionValue
+     * @param value
      * @param optType
      */
     @SuppressWarnings("unchecked")
