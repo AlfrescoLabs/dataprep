@@ -97,7 +97,7 @@ public class CMISUtil
 
     /**
      * Method to get a CMIS session
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @return Session
      * @throws Exception
@@ -130,7 +130,7 @@ public class CMISUtil
     
     /**
      * Gets the object id for a document or folder.
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -182,7 +182,7 @@ public class CMISUtil
     /**
      * Method to add aspect
      *
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param contentNodeRef
      * @param documentAspects
@@ -225,7 +225,7 @@ public class CMISUtil
     /**
      * Method to add properties for aspects
      *
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param contentNodeRef
      * @param propertiesMap
@@ -250,7 +250,7 @@ public class CMISUtil
     /**
      * Method to get all object properties
      *
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -316,7 +316,7 @@ public class CMISUtil
     
     /**
      * Method to get the ID for a Category
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param categoryName
      * @return

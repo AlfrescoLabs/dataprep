@@ -47,7 +47,7 @@ public class ContentService extends CMISUtil
     /**
      * Create a new folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param folderName
      * @param siteName
@@ -91,7 +91,7 @@ public class ContentService extends CMISUtil
     /**
      * Delete a folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param folderName
@@ -125,7 +125,7 @@ public class ContentService extends CMISUtil
     /**
      * Create a new document using CMIS
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param fileType 
@@ -184,7 +184,7 @@ public class ContentService extends CMISUtil
     /**
      * Create a new document using CMIS
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param fileType 
@@ -236,7 +236,7 @@ public class ContentService extends CMISUtil
     /**
      * Create a new document into a folder using CMIS
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param folderName
@@ -306,7 +306,7 @@ public class ContentService extends CMISUtil
     /**
      * Delete a document using CMIS
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param docName
@@ -339,7 +339,7 @@ public class ContentService extends CMISUtil
     /**
      * Delete a parent folder that has children using CMIS
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param folderName
@@ -381,7 +381,7 @@ public class ContentService extends CMISUtil
      * Upload files from a physical location
      * 
      * @param filesPath physical path where the files are stored
-     * @param userName user name
+     * @param userNam String indetifier
      * @param password user password
      * @param siteName site name
      * @return list of uploaded documents
@@ -443,7 +443,7 @@ public class ContentService extends CMISUtil
      * Upload files in a folder from a physical location
      * 
      * @param filesPath physical path where the files are stored
-     * @param userName user name
+     * @param userNam String indetifier
      * @param password user password
      * @param siteName site name
      * @param folderName folder name where files are uploaded
@@ -517,7 +517,7 @@ public class ContentService extends CMISUtil
     /**
      * Delete multiple files (from root or from folder) using CMIS (in root or in folder)
      * 
-     * @param userName user name 
+     * @param userNam String indetifier 
      * @param password user password
      * @param siteName site name
      * @param fileNames names of files to be deleted
@@ -537,7 +537,7 @@ public class ContentService extends CMISUtil
     /**
      * Get the content from a document
      * 
-     * @param userName 
+     * @param userName String identifier 
      * @param password
      * @param siteName 
      * @param docName
@@ -575,7 +575,7 @@ public class ContentService extends CMISUtil
     /**
      * Update content of a document
      * 
-     * @param userName 
+     * @param userName String identifier 
      * @param password
      * @param siteName 
      * @param docType

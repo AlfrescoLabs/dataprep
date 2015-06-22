@@ -65,7 +65,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass password
-     * @param userName new user
+     * @param userName String identifier new user
      * @param password new user password
      * @param email new user email
      * @return true if successful
@@ -126,7 +126,7 @@ public class UserService
     /**
      * Builds a json object representing the user data.
      * 
-     * @param userName user identifier
+     * @param userName String identifier user identifier
      * @param password user password
      * @param firstName first name
      * @param lastName last name
@@ -186,7 +186,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param userName user identifier
+     * @param userName String identifier user identifier
      * @return true if successful 
      * @throws Exception if error
      */
@@ -339,7 +339,7 @@ public class UserService
     /**
      * Method to request to join a site
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteId
      * @return true if request is successful
@@ -383,7 +383,7 @@ public class UserService
      * 
      * @param siteManager
      * @param passwordManager
-     * @param userName - user that made the request to the Site
+     * @param userName String identifier - user that made the request to the Site
      * @param siteId
      * @return true if request is deleted (204 Status)
      * @throws Exception if error
@@ -424,7 +424,7 @@ public class UserService
      * 
      * @param siteManager
      * @param passwordManager
-     * @param userName - user that made the request to the Site
+     * @param userName String identifier - user that made the request to the Site
      * @param siteId
      * @return true if request is deleted (204 Status)
      * @throws Exception if error
@@ -549,7 +549,7 @@ public class UserService
      * @param adminUser admin username
      * @param adminPass admin credential
      * @param groupName 
-     * @param userName
+     * @param userName String identifier
      * @return true if user exists
      * @throws Exception if error
      */
@@ -667,7 +667,7 @@ public class UserService
      * @param adminUser admin username
      * @param adminPass admin credential
      * @param groupName 
-     * @param userName
+     * @param userName String identifier
      * @return true if user exists
      * @throws Exception if error
      */
@@ -833,7 +833,7 @@ public class UserService
     /**
      * Count members of a site
      * 
-     * @param userName user name that owns the site
+     * @param userNam String indetifier that owns the site
      * @param userPass user password
      * @param siteName
      * @return total number of site members
@@ -876,7 +876,7 @@ public class UserService
     /**
      * Login in alfresco share
      * 
-     * @param userName 
+     * @param userName String identifier 
      * @param userPass 
      * @return boolean
      * @throws Exception if error
@@ -933,7 +933,7 @@ public class UserService
     /**
      * Add dashlet to user dashboard
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param dashlet
      * @param layout

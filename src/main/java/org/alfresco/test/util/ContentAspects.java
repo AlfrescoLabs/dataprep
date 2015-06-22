@@ -28,7 +28,7 @@ public class ContentAspects extends CMISUtil
     /**
      * Add aspect for document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -50,7 +50,7 @@ public class ContentAspects extends CMISUtil
     /**
      * Remove aspect from document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -89,7 +89,7 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Complianceable aspect
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName

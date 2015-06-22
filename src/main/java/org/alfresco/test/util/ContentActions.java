@@ -47,7 +47,7 @@ public class ContentActions extends CMISUtil
     /**
      * Create single tag and comment for document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -112,7 +112,7 @@ public class ContentActions extends CMISUtil
     /**
      * Create multiple tags or comments for document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -173,7 +173,7 @@ public class ContentActions extends CMISUtil
     /**
      * Remove tag or comment from document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -238,7 +238,7 @@ public class ContentActions extends CMISUtil
     /**
      * Create tag for a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -258,7 +258,7 @@ public class ContentActions extends CMISUtil
     /**
      * Create multiple tags for document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -278,7 +278,7 @@ public class ContentActions extends CMISUtil
     /**
      * Get the response from HttpGet for added tags, comments, ratings
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -396,7 +396,7 @@ public class ContentActions extends CMISUtil
     /**
      * Get list of tag names that are set for a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -415,7 +415,7 @@ public class ContentActions extends CMISUtil
     /**
      * Get the node ref from a tag
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -436,7 +436,7 @@ public class ContentActions extends CMISUtil
     /**
      * Remove tag from content
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -456,7 +456,7 @@ public class ContentActions extends CMISUtil
     /**
      * Create a comment for a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -476,7 +476,7 @@ public class ContentActions extends CMISUtil
     /**
      * Create multiple comments for a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -496,7 +496,7 @@ public class ContentActions extends CMISUtil
     /**
      * Get list of comments that are set for a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -516,7 +516,7 @@ public class ContentActions extends CMISUtil
     /**
      * Get the node ref for comment
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -537,7 +537,7 @@ public class ContentActions extends CMISUtil
     /**
      * Remove comment from content
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -557,7 +557,7 @@ public class ContentActions extends CMISUtil
     /**
      * Like a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -575,7 +575,7 @@ public class ContentActions extends CMISUtil
     /**
      * Get the number of likes for a document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -605,7 +605,7 @@ public class ContentActions extends CMISUtil
     /**
      * Remove like from content
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -653,7 +653,7 @@ public class ContentActions extends CMISUtil
     /**
      * Set document or folder as favorite
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentType ('file' or 'folder')
@@ -709,7 +709,7 @@ public class ContentActions extends CMISUtil
     /**
      * Set a document as favorite
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param fileName
@@ -727,7 +727,7 @@ public class ContentActions extends CMISUtil
     /**
      * Set a folder as favorite
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param folderName
@@ -745,7 +745,7 @@ public class ContentActions extends CMISUtil
     /**
      * Remove favorite from document or folder
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
@@ -793,7 +793,7 @@ public class ContentActions extends CMISUtil
     /**
      * Verify if a document or folder is marked as favorite
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName

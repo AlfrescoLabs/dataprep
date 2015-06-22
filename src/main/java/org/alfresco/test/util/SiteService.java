@@ -186,7 +186,7 @@ public class SiteService
     /**
      * Get site node ref 
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @return String
@@ -231,7 +231,7 @@ public class SiteService
     /**
      * Set site as favorite
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @return true if marked as favorite
@@ -282,7 +282,7 @@ public class SiteService
     /**
      * Verify if a document or folder is marked as favorite
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @return true if marked as favorite
@@ -327,7 +327,7 @@ public class SiteService
     /**
      * Remove favorite site
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @return true if favorite is removed
@@ -378,7 +378,7 @@ public class SiteService
     /**
      * Add pages to site dashboard
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param multiplePages
@@ -457,7 +457,7 @@ public class SiteService
      * If there are pages added previously add them to 'oldPages' list in order 
      * to keep them on the site dashboard.
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param page
@@ -477,7 +477,7 @@ public class SiteService
     /**
      * Add pages to site dashboard
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param pages
@@ -495,7 +495,7 @@ public class SiteService
     /**
      * Add dashlet to site dashboard
      * 
-     * @param userName
+     * @param userName String identifier
      * @param password
      * @param siteName
      * @param dashlet
