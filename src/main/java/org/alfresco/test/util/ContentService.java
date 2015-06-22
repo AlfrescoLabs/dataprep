@@ -47,11 +47,11 @@ public class ContentService extends CMISUtil
     /**
      * Create a new folder
      * 
-     * @param userName
-     * @param password
-     * @param folderName
-     * @param siteName
-     * @return Folder
+     * @param userName login username
+     * @param password login password
+     * @param folderName folder name
+     * @param siteName site name
+     * @return Folder CMIS folder object
      * @throws Exception if error
      */
     public Folder createFolder(final String userName,
@@ -91,10 +91,10 @@ public class ContentService extends CMISUtil
     /**
      * Delete a folder
      * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param folderName
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param folderName folder name
      * @throws Exception if error
      */
     public void deleteFolder(final String userName,
@@ -125,13 +125,13 @@ public class ContentService extends CMISUtil
     /**
      * Create a new document using CMIS
      * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param fileType 
-     * @param docName
-     * @param docContent
-     * @return Document
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param fileType file type (e.g. text/plain, text/html)
+     * @param docName file name
+     * @param docContent file content
+     * @return Document CMIS document object
      * @throws Exception if error
      */
     public Document createDocument(final String userName,
@@ -184,13 +184,13 @@ public class ContentService extends CMISUtil
     /**
      * Create a new document using CMIS
      * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param fileType 
-     * @param docName
-     * @param docContent
-     * @return document
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param fileType file type (e.g. text/plain, text/html)
+     * @param docName file name
+     * @param docContent file content
+     * @return Document CMIS document object
      * @throws Exception if error
      */
     public Document createDocument(final String userName,
@@ -236,14 +236,14 @@ public class ContentService extends CMISUtil
     /**
      * Create a new document into a folder using CMIS
      * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param folderName
-     * @param fileType 
-     * @param docName
-     * @param docContent
-     * @return document
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param folderName folder name
+     * @param fileType file type (e.g. text/plain, text/html)
+     * @param docName file name
+     * @param docContent file content
+     * @return Document CMIS document object
      * @throws Exception if error
      */
     public Document createDocumentInFolder(final String userName,
@@ -306,11 +306,10 @@ public class ContentService extends CMISUtil
     /**
      * Delete a document using CMIS
      * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param docName
-     * @return true if folder is deleted
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param docName file name
      * @throws Exception if error
      */
     public void deleteDocument(final String userName,
@@ -339,11 +338,10 @@ public class ContentService extends CMISUtil
     /**
      * Delete a parent folder that has children using CMIS
      * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param folderName
-     * @return true if folder is deleted
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param folderName folder name
      * @throws Exception if error
      */
     public void deleteTree(final String userName,
@@ -537,10 +535,11 @@ public class ContentService extends CMISUtil
     /**
      * Get the content from a document
      * 
-     * @param userName 
-     * @param password
-     * @param siteName 
-     * @param docName
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param docName file name
      * @return String content
      * @throws Exception
      * 
@@ -575,12 +574,12 @@ public class ContentService extends CMISUtil
     /**
      * Update content of a document
      * 
-     * @param userName 
-     * @param password
-     * @param siteName 
-     * @param docType
-     * @param docName
-     * @param newContent
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param docType file type
+     * @param docName file name
+     * @param newContent new content of the file
      * @throws Exception
      * 
      */
