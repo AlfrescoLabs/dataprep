@@ -116,7 +116,7 @@ public class ContentActions extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param contentName file or folder name
-     * @param optType {@link ActionType} 
+     * @param optType action type
      * @param values List of values
      * @return true if request is successful
      * @throws Exception if error
@@ -177,9 +177,9 @@ public class ContentActions extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param contentName file or folder name
-     * @param optType
-     * @param actionValue
-     * @return boolean 
+     * @param optType content actions (e.g. tag, comments, likes)
+     * @param actionValue value of the action(e.g tag value, comment content)
+     * @return true if tag or comment is removed 
      * @throws Exception if error
      */
     private boolean removeAction(final String userName,
@@ -278,11 +278,11 @@ public class ContentActions extends CMISUtil
     /**
      * Get the response from HttpGet for added tags, comments, ratings
      * 
-     * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param actionType
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param actionType content actions (e.g. tag, comments, likes)
      * @return String Json response
      * @throws Exception if error
      */
@@ -324,8 +324,8 @@ public class ContentActions extends CMISUtil
     /**
      * Return a list of tags or comments
      * 
-     * @param response
-     * @param optType
+     * @param response HttpResponse as String
+     * @param optType content actions (e.g. tag, comments, likes)
      */
     @SuppressWarnings("unchecked")
     private List<String> getOptionValues(final String response,
@@ -357,9 +357,9 @@ public class ContentActions extends CMISUtil
     /**
      * Return the node ref for a tag or comment
      * 
-     * @param response
-     * @param value
-     * @param optType
+     * @param response HttpResponse as String
+     * @param value value of tag or comment
+     * @param optType content actions (e.g. tag, comments, likes)
      */
     @SuppressWarnings("unchecked")
     private String getOptionNodeRef(final String response,
