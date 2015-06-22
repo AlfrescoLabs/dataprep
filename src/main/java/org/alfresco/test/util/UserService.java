@@ -876,15 +876,9 @@ public class UserService
     /**
      * Login in alfresco share
      * 
-<<<<<<< HEAD
-     * @param userName String identifier 
-     * @param userPass 
-     * @return boolean
-=======
      * @param userName login user name
      * @param userPass login user password
      * @return true for successful user login
->>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @throws Exception if error
      */
     public boolean login(final String userName,
