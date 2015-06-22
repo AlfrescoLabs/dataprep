@@ -396,19 +396,11 @@ public class ContentActions extends CMISUtil
     /**
      * Get list of tag names that are set for a document or folder
      * 
-<<<<<<< HEAD
-     * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @return List<String> tags
-=======
      * @param userName login username
      * @param password login password
      * @param siteName site name
      * @param contentName file or folder name
      * @return List list of tags for a file or folder
->>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @throws Exception if error
      */
     public List<String> getTagNamesFromContent(final String userName,
@@ -545,19 +537,11 @@ public class ContentActions extends CMISUtil
     /**
      * Remove comment from content
      * 
-<<<<<<< HEAD
-     * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param comment
-=======
      * @param userName login username
      * @param password login password
      * @param siteName site name
      * @param contentName file or folder name
      * @param comment comment of a file or folder
->>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if deleted
      * @throws Exception if error
      */   
