@@ -833,7 +833,7 @@ public class UserService
     /**
      * Count members of a site
      * 
-     * @param userNam String indetifier that owns the site
+     * @param userName login user that owns the site
      * @param userPass user password
      * @param siteName
      * @return total number of site members

@@ -379,7 +379,7 @@ public class ContentService extends CMISUtil
      * Upload files from a physical location
      * 
      * @param filesPath physical path where the files are stored
-     * @param userNam String indetifier
+     * @param userName login username
      * @param password user password
      * @param siteName site name
      * @return list of uploaded documents
@@ -441,7 +441,7 @@ public class ContentService extends CMISUtil
      * Upload files in a folder from a physical location
      * 
      * @param filesPath physical path where the files are stored
-     * @param userNam String indetifier
+     * @param userName login username
      * @param password user password
      * @param siteName site name
      * @param folderName folder name where files are uploaded
@@ -515,7 +515,7 @@ public class ContentService extends CMISUtil
     /**
      * Delete multiple files (from root or from folder) using CMIS (in root or in folder)
      * 
-     * @param userNam String indetifier 
+     * @param userName login username
      * @param password user password
      * @param siteName site name
      * @param fileNames names of files to be deleted
@@ -534,12 +534,12 @@ public class ContentService extends CMISUtil
     
     /**
      * Get the content from a document
+     * 
      * @param userName login username
      * @param password login password
      * @param siteName site name
-     * @param contentName file or folder name
      * @param docName file name
-     * @return String content
+     * @return String content of document
      * @throws Exception if error
      * 
      */

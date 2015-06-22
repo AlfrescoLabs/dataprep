@@ -196,7 +196,8 @@ public class AlfrescoHttpClient
     
     /**
      * Execute HttpClient request.
-     * @param request to send 
+     * @param request the request to execute 
+     * @param context the context to use for the execution 
      * @return {@link HttpResponse} response
      * @throws Exception if error
      */

@@ -28,12 +28,12 @@ public class ContentAspects extends CMISUtil
     /**
      * Add aspect for document or folder
      * 
-     * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
      * @param aspect aspect to add
-     * @throws Exception 
+     * @throws Exception if error 
      */
     public void addAspect(final String userName,
                           final String password,
@@ -50,11 +50,12 @@ public class ContentAspects extends CMISUtil
     /**
      * Remove aspect from document or folder
      * 
-     * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param aspectToRemove
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param aspectToRemove aspect to be removed
+     * @throws Exception if error
      */
     public void removeAspect(final String userName,
                              final String password,
@@ -89,11 +90,12 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Complianceable aspect
      * 
-     * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @param removeAfter
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param removeAfter date value for RemoveAfter property
+     * @throws Exception if error
      */
     public void addComplianceable(final String userName,
                                   final String password,
@@ -111,6 +113,19 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Dublin Core aspect
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param publisher value for publisher property
+     * @param contributor value for contributor property
+     * @param type value for type property
+     * @param identifier value for identifier property
+     * @param source value for source property
+     * @param coverage value for coverage property
+     * @param rights value for rights property
+     * @param subject value for subject property
+     * @throws Exception if error
      */
     public void addDublinCore(final String userName,
                               final String password,
@@ -142,6 +157,14 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Effectivity aspect
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param fromDate date value for From property
+     * @param toDate date value for To property
+     * @throws Exception if error
+     * 
      */
     public void addEffectivity(final String userName,
                                final String password,
@@ -161,6 +184,13 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Geographic Aspect 
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param longitude value for longitude property 
+     * @param latitude value for latitude property 
+     * @throws Exception if error
      */
     public void addGeographicAspect(final String userName,
                                     final String password,
@@ -180,6 +210,13 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Summarizable Aspect 
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param summary value for summary property
+     * @throws Exception if error
+     * 
      */
     public void addSummarizable(final String userName,
                                 final String password,
@@ -196,6 +233,13 @@ public class ContentAspects extends CMISUtil
     
     /**
      * Method to add Templatable Aspect 
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param templateContent name of template
+     * @throws Exception if error
      * 
      */
     public void addTemplatable(final String userName,
@@ -221,8 +265,18 @@ public class ContentAspects extends CMISUtil
     }
     
     /**
-     * Add Emailed Aspect 
-     * 
+     * Add Emailed Aspect
+     *  
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param addressee value of addressee property
+     * @param addressees list of values for addressees property
+     * @param subject value of subject
+     * @param originator value for originator
+     * @param sentDate date for sentDate property
+     * @throws Exception if error
      */
     public void addEmailed(final String userName,
                            final String password,
@@ -248,6 +302,14 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Index Control Aspect 
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param isIndexed value of IsIndexed property
+     * @param contentIndexed value of ContentIndexed property
+     * @throws Exception if error 
+     * 
      */
     public void addIndexControl(final String userName,
                                 final String password,
@@ -267,6 +329,12 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Restrictable Aspect 
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param hours no of hours for OfflineExpiresAfter property
+     * @throws Exception if error  
      */
     public void addRestrictable(final String userName,
                                 final String password,
@@ -285,6 +353,12 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to add Clasifiable Aspect  
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param categoryName list of categories
+     * @throws Exception if error  
      */
     public void addClasifiable(final String userName,
                                final String password,
@@ -305,8 +379,14 @@ public class ContentAspects extends CMISUtil
     }
     
     /**
-     * Method to read all basic Properties of a file  
+     * Method to read all basic Properties of a file 
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @return {@link Map} return map of the basic properties
+     * @throws Exception if error  
      */
     public Map<String, Object> getBasicProperties(final String userName,
                                final String password,
@@ -333,19 +413,28 @@ public class ContentAspects extends CMISUtil
     /**
      * Method to update basic Properties of a file
      * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param docName new value for name of document
+     * @param docTitle new value for title of document
+     * @param docDescription new value for description of document
+     * @param author new value for author od the document
+     * @throws Exception if error  
      */
     public void setBasicProperties(final String userName,
                                   final String password,
                                   final String siteName,
                                   final String contentName,
                                   final String docName,
-                                  final String docTile,
+                                  final String docTitle,
                                   final String docDescription,
                                   final String author) throws Exception
     {       
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put(PropertyIds.NAME, docName);
-        propertyMap.put("cm:title", docTile);
+        propertyMap.put("cm:title", docTitle);
         propertyMap.put(PropertyIds.DESCRIPTION, docDescription);
         propertyMap.put("cm:author", author);
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);

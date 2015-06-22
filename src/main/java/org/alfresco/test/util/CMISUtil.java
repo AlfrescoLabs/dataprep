@@ -134,7 +134,7 @@ public class CMISUtil
      * @param password String password
      * @param siteName String site identifier
      * @param contentName String content identifier
-     * @return String noderef String node ref identifier
+     * @return String node identifier
      * @throws Exception if error
      */
     public String getNodeRef(final String userName,
@@ -229,6 +229,7 @@ public class CMISUtil
      * @param password String password
      * @param contentNodeRef String node identifier
      * @param propertiesMap Map of properties
+     * @throws Exception if error
      */
     public void addProperties(final String userName,
                               final String password,
@@ -254,6 +255,8 @@ public class CMISUtil
      * @param password String password
      * @param siteName String site identifier
      * @param contentName String content identifier
+     * @return {@link Property} list of content properties
+     * @throws Exception if error
      */
     public List<Property<?>> getProperties(final String userName,
                                            final String password,
@@ -319,7 +322,8 @@ public class CMISUtil
      * @param userName String identifier
      * @param password String password
      * @param categoryName String category name
-     * @return
+     * @return String node identifier
+     * @throws Exception if error
      */
     public String getCategoryNodeRef(final String userName,
                                      final String password,
