@@ -876,15 +876,21 @@ public class UserService
     /**
      * Login in alfresco share
      * 
+<<<<<<< HEAD
      * @param userName String identifier 
      * @param userPass 
      * @return boolean
+=======
+     * @param userName login user name
+     * @param userPass login user password
+     * @return true for successful user login
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @throws Exception if error
      */
     public boolean login(final String userName,
-                         final String password) throws Exception
+                         final String userPass) throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(userPass))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
@@ -899,7 +905,7 @@ public class UserService
         localContext.setCookieStore(cookieStore);      
         formParams = (new NameValuePair[]{
                         new NameValuePair("username", userName),
-                        new NameValuePair("password", password),
+                        new NameValuePair("password", userPass),
                         new NameValuePair("success", "/share/page/user/" + userName + "/dashboard"),
                         new NameValuePair("failure", "/share/page/type/login?error=true")});
         post.setRequestBody(formParams);

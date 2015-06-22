@@ -47,10 +47,17 @@ public class ContentActions extends CMISUtil
     /**
      * Create single tag and comment for document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @param option - action type
      * @param value
      * @return true if request is successful
@@ -112,10 +119,17 @@ public class ContentActions extends CMISUtil
     /**
      * Create multiple tags or comments for document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @param optType
      * @param values
      * @return true if request is successful
@@ -173,10 +187,17 @@ public class ContentActions extends CMISUtil
     /**
      * Remove tag or comment from document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @param optType
      * @param actionValue
      * @return boolean 
@@ -238,11 +259,19 @@ public class ContentActions extends CMISUtil
     /**
      * Create tag for a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param tag
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param tag tag for file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -258,11 +287,19 @@ public class ContentActions extends CMISUtil
     /**
      * Create multiple tags for document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param tags
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param tags list of tags for a file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -396,11 +433,19 @@ public class ContentActions extends CMISUtil
     /**
      * Get list of tag names that are set for a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @return List<String> tags
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @return List list of tags for a file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @throws Exception if error
      */
     public List<String> getTagNamesFromContent(final String userName,
@@ -415,11 +460,19 @@ public class ContentActions extends CMISUtil
     /**
      * Get the node ref from a tag
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param tagName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param tagName tag of a file of folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return String nodeRef
      * @throws Exception if error
      */
@@ -436,11 +489,19 @@ public class ContentActions extends CMISUtil
     /**
      * Remove tag from content
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param tagName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param tagName tag of a file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if deleted
      * @throws Exception if error
      */   
@@ -456,11 +517,19 @@ public class ContentActions extends CMISUtil
     /**
      * Create a comment for a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param comment
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param comment comment for a file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -476,11 +545,19 @@ public class ContentActions extends CMISUtil
     /**
      * Create multiple comments for a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param comments - List of comments
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param comments list of comments
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -496,11 +573,19 @@ public class ContentActions extends CMISUtil
     /**
      * Get list of comments that are set for a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @return List<String> comments
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @return List list of comments
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @throws Exception if error
      */
     public List<String> getComments(final String userName,
@@ -516,11 +601,19 @@ public class ContentActions extends CMISUtil
     /**
      * Get the node ref for comment
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param comment
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param comment comment of a file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return String nodeRef
      * @throws Exception if error
      */
@@ -537,11 +630,19 @@ public class ContentActions extends CMISUtil
     /**
      * Remove comment from content
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
      * @param comment
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param comment comment of a file or folder
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if deleted
      * @throws Exception if error
      */   
@@ -557,10 +658,17 @@ public class ContentActions extends CMISUtil
     /**
      * Like a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -575,10 +683,17 @@ public class ContentActions extends CMISUtil
     /**
      * Get the number of likes for a document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return int likes
      * @throws Exception if error
      */
@@ -605,10 +720,17 @@ public class ContentActions extends CMISUtil
     /**
      * Remove like from content
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if removed
      * @throws Exception if error
      */   
@@ -653,11 +775,17 @@ public class ContentActions extends CMISUtil
     /**
      * Set document or folder as favorite
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @param contentType ('file' or 'folder')
-     * @param contentName
+     * @param contentName file of folder name
      * @return true if marked as favorite
      * @throws Exception if error
      */ 
@@ -709,10 +837,17 @@ public class ContentActions extends CMISUtil
     /**
      * Set a document as favorite
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param fileName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param fileName file name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if marked as favorite
      * @throws Exception if error
      */ 
@@ -727,10 +862,17 @@ public class ContentActions extends CMISUtil
     /**
      * Set a folder as favorite
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param folderName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param folderName folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if marked as favorite
      * @throws Exception if error
      */ 
@@ -745,10 +887,17 @@ public class ContentActions extends CMISUtil
     /**
      * Remove favorite from document or folder
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if favorite is removed
      * @throws Exception if error
      */
@@ -793,10 +942,17 @@ public class ContentActions extends CMISUtil
     /**
      * Verify if a document or folder is marked as favorite
      * 
+<<<<<<< HEAD
      * @param userName String identifier
      * @param password
      * @param siteName
      * @param contentName
+=======
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+>>>>>>> 0e1dcbdf1685f2613ac824bcabebf91e0322db98
      * @return true if marked as favorite
      * @throws Exception if error
      */
