@@ -43,7 +43,7 @@ public class CMISUtil
         PDF("application/pdf"),
         MSWORD("application/msword"),
         MSEXCEL( "application/vnd.ms-excel"),
-        MSPOWERPOINT("application/vnd.ms-powerpoint");      
+        MSPOWERPOINT("application/vnd.ms-powerpoint");
         public final String type;
         DocumentType(String type)
         {
@@ -96,11 +96,11 @@ public class CMISUtil
     Map<String, String> contents = new HashMap<String,String>();
 
     /**
-     * Method to get a CMIS session
+     * Method to get a CMIS session.
      * @param userName String identifier
-     * @param password
-     * @return Session
-     * @throws Exception
+     * @param password String password
+     * @return Session the session
+     * @throws Exception if error
      */
     public Session getCMISSession(final String userName, 
                                   final String password) throws Exception
@@ -131,11 +131,11 @@ public class CMISUtil
     /**
      * Gets the object id for a document or folder.
      * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
-     * @return String noderef
-     * @throws Exception
+     * @param password String password
+     * @param siteName String site identifier
+     * @param contentName String content identifier
+     * @return String noderef String node ref identifier
+     * @throws Exception if error
      */
     public String getNodeRef(final String userName,
                              final String password,
@@ -183,10 +183,10 @@ public class CMISUtil
      * Method to add aspect
      *
      * @param userName String identifier
-     * @param password
-     * @param contentNodeRef
-     * @param documentAspects
-     * @throws Exception 
+     * @param password String password
+     * @param contentNodeRef String node identifier
+     * @param documentAspects aspect to apply on node
+     * @throws Exception if error
      */
     public void addAspect(final String userName,
                           final String password,
@@ -226,9 +226,9 @@ public class CMISUtil
      * Method to add properties for aspects
      *
      * @param userName String identifier
-     * @param password
-     * @param contentNodeRef
-     * @param propertiesMap
+     * @param password String password
+     * @param contentNodeRef String node identifier
+     * @param propertiesMap Map of properties
      */
     public void addProperties(final String userName,
                               final String password,
@@ -251,9 +251,9 @@ public class CMISUtil
      * Method to get all object properties
      *
      * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param contentName
+     * @param password String password
+     * @param siteName String site identifier
+     * @param contentName String content identifier
      */
     public List<Property<?>> getProperties(final String userName,
                                            final String password,
@@ -269,9 +269,9 @@ public class CMISUtil
     /**
      * Get a specific value from a property list
      * 
-     * @param propertyList
-     * @param propertyName
-     * @return
+     * @param propertyList List of {@link Property}
+     * @param propertyName String name of property
+     * @return String property value
      */
     public String getPropertyValue(final List<Property<?>> propertyList, 
                                    final String propertyName)
@@ -295,9 +295,9 @@ public class CMISUtil
     /**
      * Get the list of values from a specific property list
      * 
-     * @param propertyList
-     * @param propertyName
-     * @return List<> of values
+     * @param propertyList List of {@link Property}
+     * @param propertyName String name of property
+     * @return List of values 
      */
     public List<?> getValues(final List<Property<?>> propertyList, 
                              final String propertyName)
@@ -317,8 +317,8 @@ public class CMISUtil
     /**
      * Method to get the ID for a Category
      * @param userName String identifier
-     * @param password
-     * @param categoryName
+     * @param password String password
+     * @param categoryName String category name
      * @return
      */
     public String getCategoryNodeRef(final String userName,
@@ -350,9 +350,9 @@ public class CMISUtil
     }
     
     /**
-     * Method to wait for given seconds
+     * Method to wait for given seconds.
      * 
-     * @param seconds
+     * @param seconds time in seconds
      */
     public static void waitInSeconds(int seconds)
     {
