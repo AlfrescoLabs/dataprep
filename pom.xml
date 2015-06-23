@@ -126,13 +126,6 @@
                 <version>2.1</version>
             </plugin>
             <plugin>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.8.1</version>
-                <configuration>
-                    <tag>${project.artifactId}-${project.version}</tag>
-                </configuration>
-            </plugin>
-            <plugin>
                 <!-- Configuration triggered by mvn antrun:run, used by Bamboo to stop server -->
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
