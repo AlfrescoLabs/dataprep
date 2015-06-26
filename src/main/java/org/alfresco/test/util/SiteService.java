@@ -73,10 +73,10 @@ public class SiteService
      * 
      * @param username identifier
      * @param password user password
-     * @param domain the comany or org id
+     * @param domain the company or org id
      * @param siteId site identifier
      * @param description site description
-     * @param visibility site visability type
+     * @param visibility site visibility type
      * @throws IOException io error
      */
     public void create(final String username,
@@ -86,24 +86,18 @@ public class SiteService
                        final String description,
                        final Visibility visibility) throws IOException
     {
-        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
-        publicApi.createSite(domain, 
-                             siteId, 
-                             "site-dashboard", 
-                             siteId,
-                             description, 
-                             visibility);
+        create(username, password, domain, siteId, siteId, description, visibility);
     }
     /**
     * Create site using Alfresco public API.
     * 
     * @param username identifier
     * @param password user password
-    * @param domain the comany or org id
+    * @param domain the company or org id
     * @param siteId site identifier
     * @Param title SiteName
     * @param description site description
-    * @param visability site visability type
+    * @param visability site visibility type
     * @throws IOException io error
     */
    public void create(final String username,
@@ -112,7 +106,7 @@ public class SiteService
                       final String siteId,
                       final String title,
                       final String description,
-                      final Visibility visability) throws IOException
+                      final Visibility visibility) throws IOException
    {
        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
        publicApi.createSite(domain, 
@@ -120,7 +114,7 @@ public class SiteService
                             "site-dashboard", 
                             title,
                             description, 
-                            visability);
+                            visibility);
    }
     /**
      * Checks if site exists
