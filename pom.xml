@@ -5,7 +5,7 @@
     <name>Alfresco Dataprep</name>
     <description>Alfresco dataprep, collection of helpers to prepare and load Alfresco test data</description>
     <groupId>org.alfresco.test</groupId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <organization>
         <name>Alfresco Software</name>
         <url>http://www.alfresco.com/</url>
