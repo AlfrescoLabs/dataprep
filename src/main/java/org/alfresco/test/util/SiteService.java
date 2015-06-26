@@ -97,7 +97,7 @@ public class SiteService
     * @param siteId site identifier
     * @param title SiteName
     * @param description site description
-    * @param visability site visibility type
+    * @param visibility site visibility
     * @throws IOException io error
     */
    public void create(final String username,

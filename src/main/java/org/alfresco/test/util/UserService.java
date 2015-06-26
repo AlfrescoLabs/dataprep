@@ -464,7 +464,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName
+     * @param groupName String group name
      * @return true if user exists
      * @throws Exception if error
      */
@@ -752,7 +752,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName 
+     * @param groupName String group name
      * @return true if user exists
      * @throws Exception if error
      */
@@ -792,7 +792,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName
+     * @param groupName String group name
      * @return true if user exists
      * @throws Exception if error
      */

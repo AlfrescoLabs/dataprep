@@ -579,7 +579,7 @@ public class ContentService extends CMISUtil
      * @param docName file name
      * @param newContent new content of the file
      * @throws Exception if error
-     * 
+     * @return if updated
      */
     public boolean updateDocumentContent(final String userName,
                                          final String password,
