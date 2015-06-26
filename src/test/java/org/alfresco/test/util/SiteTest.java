@@ -64,6 +64,29 @@ public class SiteTest extends AbstractTest
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
     } 
+    /**
+     * Test to create a site with shortname and title 
+     * @throws Exception
+     */
+    @Test
+    public void createWithSiteURLName() throws Exception
+    {
+        siteId = "michael" + System.currentTimeMillis();
+        site.create(ADMIN,
+                    ADMIN,
+                    MY_DOMAIN,
+                    siteId, 
+                    siteId + "_test",
+                    "my site description", 
+                    Visibility.PUBLIC);
+    }
+    
+    @Test(dependsOnMethods="createWithSiteURLName")
+    public void createWithSiteURLNameExists() throws Exception
+    {
+        boolean exists = site.exists(siteId, ADMIN, ADMIN);
+        Assert.assertTrue(exists);
+    } 
     
     @Test
     public void fakeSiteDoesNotExists() throws Exception

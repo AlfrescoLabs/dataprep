@@ -95,6 +95,34 @@ public class SiteService
                              visibility);
     }
     /**
+    * Create site using Alfresco public API.
+    * 
+    * @param username identifier
+    * @param password user password
+    * @param domain the comany or org id
+    * @param siteId site identifier
+    * @Param title SiteName
+    * @param description site description
+    * @param visability site visability type
+    * @throws IOException io error
+    */
+   public void create(final String username,
+                      final String password,
+                      final String domain, 
+                      final String siteId,
+                      final String title,
+                      final String description,
+                      final Visibility visability) throws IOException
+   {
+       Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
+       publicApi.createSite(domain, 
+                            siteId, 
+                            "site-dashboard", 
+                            title,
+                            description, 
+                            visability);
+   }
+    /**
      * Checks if site exists
      * 
      * @param siteId site identifier
