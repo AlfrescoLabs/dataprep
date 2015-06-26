@@ -235,7 +235,7 @@ public class UserService
      * @param invitingUserPassword user password
      * @param userToInvite user label
      * @param siteName site identifier which invite user.
-     * @param role
+     * @param role user role
      * @return true if invite is successful
      * @throws Exception if error
      */
@@ -340,8 +340,8 @@ public class UserService
      * Method to request to join a site
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteId
+     * @param password String password
+     * @param siteId site identifier
      * @return true if request is successful
      * @throws Exception if error
      */
@@ -381,10 +381,10 @@ public class UserService
     /**
      * Delete a pending request for a Moderated Site
      * 
-     * @param siteManager
-     * @param passwordManager
+     * @param siteManager site manager id
+     * @param passwordManager password
      * @param userName String identifier - user that made the request to the Site
-     * @param siteId
+     * @param siteId site identifier
      * @return true if request is deleted (204 Status)
      * @throws Exception if error
      */
@@ -422,10 +422,10 @@ public class UserService
     /**
      * Remove a user from site
      * 
-     * @param siteManager
-     * @param passwordManager
+     * @param siteManager String site manager
+     * @param passwordManager String password
      * @param userName String identifier - user that made the request to the Site
-     * @param siteId
+     * @param siteId String site id
      * @return true if request is deleted (204 Status)
      * @throws Exception if error
      */
@@ -500,7 +500,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName 
+     * @param groupName group name
      * @return true if user exists
      * @throws Exception if error
      */
@@ -548,7 +548,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName 
+     * @param groupName group name 
      * @param userName String identifier
      * @return true if user exists
      * @throws Exception if error
@@ -604,8 +604,8 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName 
-     * @param subGroup
+     * @param groupName group name 
+     * @param subGroup sub group name
      * @return true if subgroup is created
      * @throws Exception if error
      */
@@ -666,7 +666,7 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName 
+     * @param groupName group name
      * @param userName String identifier
      * @return true if user exists
      * @throws Exception if error
@@ -709,8 +709,8 @@ public class UserService
      * 
      * @param adminUser admin username
      * @param adminPass admin credential
-     * @param groupName 
-     * @param subGroup
+     * @param groupName group name 
+     * @param subGroup sub group name
      * @return true if user exists
      * @throws Exception if error
      */
@@ -835,7 +835,7 @@ public class UserService
      * 
      * @param userName login user that owns the site
      * @param userPass user password
-     * @param siteName
+     * @param siteName String site name
      * @return total number of site members
      * @throws Exception if error
      */
@@ -934,11 +934,11 @@ public class UserService
      * Add dashlet to user dashboard
      * 
      * @param userName String identifier
-     * @param password
-     * @param dashlet
-     * @param layout
-     * @param column
-     * @param position
+     * @param password String password
+     * @param dashlet Dashlet dashlet
+     * @param layout dashlet layout 
+     * @param column int column index
+     * @param position position in column
      * @return true if the dashlet is added
      * @throws Exception if error
      */

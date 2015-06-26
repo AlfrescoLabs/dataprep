@@ -209,9 +209,9 @@ public class SiteService
      * Get site node ref 
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @return String
+     * @param password String password
+     * @param siteName String site name
+     * @return String site node ref
      * @throws Exception if error
      */
     public String getSiteNodeRef(final String userName,
@@ -254,8 +254,8 @@ public class SiteService
      * Set site as favorite
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
+     * @param password String password
+     * @param siteName String site name
      * @return true if marked as favorite
      * @throws Exception if error
      */
@@ -305,8 +305,8 @@ public class SiteService
      * Verify if a document or folder is marked as favorite
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
+     * @param password String password
+     * @param siteName String site name
      * @return true if marked as favorite
      * @throws Exception if error
      */
@@ -350,8 +350,8 @@ public class SiteService
      * Remove favorite site
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
+     * @param password String password
+     * @param siteName String site name
      * @return true if favorite is removed
      * @throws Exception if error
      */
@@ -480,9 +480,9 @@ public class SiteService
      * to keep them on the site dashboard.
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param page
+     * @param password String password
+     * @param siteName String site name
+     * @param page to add
      * @param oldPages - pages that were added previously
      * @return true if the page is added
      * @throws Exception if error
@@ -500,9 +500,9 @@ public class SiteService
      * Add pages to site dashboard
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param pages
+     * @param password String password
+     * @param siteName String site name
+     * @param pages to add
      * @return true if pages are added
      * @throws Exception if error
      */
@@ -518,12 +518,12 @@ public class SiteService
      * Add dashlet to site dashboard
      * 
      * @param userName String identifier
-     * @param password
-     * @param siteName
-     * @param dashlet
-     * @param layout
-     * @param column
-     * @param position
+     * @param password String password
+     * @param siteName String site name
+     * @param dashlet Site dashlet
+     * @param layout Dashlet layout
+     * @param column int index of columns
+     * @param position int position in column
      * @return true if the dashlet is added
      * @throws Exception if error
      */
@@ -540,7 +540,7 @@ public class SiteService
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;        
+        String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
         org.json.JSONObject body = new org.json.JSONObject();
         org.json.JSONArray array = new org.json.JSONArray();     
         body.put("dashboardPage", "site/" + siteName + "/dashboard");
