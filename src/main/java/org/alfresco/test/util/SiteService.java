@@ -95,7 +95,7 @@ public class SiteService
     * @param password user password
     * @param domain the company or org id
     * @param siteId site identifier
-    * @Param title SiteName
+    * @param title SiteName
     * @param description site description
     * @param visability site visibility type
     * @throws IOException io error
