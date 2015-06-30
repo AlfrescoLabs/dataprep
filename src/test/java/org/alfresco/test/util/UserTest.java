@@ -482,4 +482,104 @@ public class UserTest extends AbstractTest
     {   
         Assert.assertFalse(userService.addDashlet("fakeUser", "fakePass", UserDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1));
     }
+    
+    @Test
+    public void changeUserRole() throws Exception
+    {
+        String siteId = "siteInvite-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId,  "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer"));
+        Assert.assertTrue(userService.changeUserRole(admin, admin, siteId, userName, "SiteCollaborator"));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void changeRoleInvalidMember() throws Exception
+    {
+        String siteId = "siteInvite-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        userService.changeUserRole(admin, admin, siteId, userName, "SiteCollaborator");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void changeRoleInvalidSite() throws Exception
+    {
+        String siteId = "siteInvite-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer"));
+        userService.changeUserRole(admin, admin, "fakeSite", userName, "SiteCollaborator");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void changeRoleInvalidRole() throws Exception
+    {
+        String siteId = "siteInvite-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer"));
+        userService.changeUserRole(admin, admin, siteId, userName, "Role");
+    }
+    
+    @Test
+    public void inviteGroupToSite() throws Exception
+    {
+        String siteId = "siteinvite-" + System.currentTimeMillis();
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userName2 = "userm2-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName2, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
+        Assert.assertTrue(userService.inviteGroupToSite(admin, admin, siteId, groupName, "SiteContributor"));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void inviteGroupInvalidSite() throws Exception
+    {
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        userService.inviteGroupToSite(admin, admin, "fakeSite", groupName, "SiteContributor");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void inviteGroupInvalidManager() throws Exception
+    {
+        String siteId = "siteinvite-" + System.currentTimeMillis();
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        userService.inviteGroupToSite("fakeManager", "fakePass", siteId, groupName, "SiteContributor");
+    }
+    
+    @Test
+    public void changeGroupRole() throws Exception
+    {
+        String siteId = "siteinvite-" + System.currentTimeMillis();
+        String groupName = "group" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userName2 = "userm2-" + System.currentTimeMillis();
+        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName2, password, userName);
+        Assert.assertTrue(userService.createGroup(admin, admin, groupName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
+        Assert.assertTrue(userService.inviteGroupToSite(admin, admin, siteId, groupName, "SiteConsumer"));
+        Assert.assertTrue(userService.changeGroupRole(admin, admin, siteId, groupName, "SiteCollaborator"));
+    }
 }

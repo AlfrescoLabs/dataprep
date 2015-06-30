@@ -260,7 +260,6 @@ public class UserService
                      "&serverPath="  + client.getHost()+
                      "&acceptUrl="  + PAGE_ACCEPT_URL +
                      "&rejectUrl="  + PAGE_REJECT_URL;
-
         if (logger.isTraceEnabled())
         {
             logger.trace("Invite user: " + userToInvite + " using Url - " + url);
@@ -333,6 +332,68 @@ public class UserService
             put.releaseConnection();
             client.close();
         } 
+        return false;
+    }
+      
+    /**
+     * Method to request to join a site
+     * 
+     * @param siteManager String site manager
+     * @param passwordManager String password
+     * @param siteId site identifier
+     * @param groupName group to be invited
+     * @param role applied for the group
+     * @return true if request is successful
+     * @throws Exception if error
+     */
+    public boolean inviteGroupToSite(final String siteManager,
+                                     final String passwordManager, 
+                                     final String siteId,
+                                     final String groupName,
+                                     final String role) throws Exception 
+    {
+        if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(siteId)
+                || StringUtils.isEmpty(groupName) || StringUtils.isEmpty(role))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }        
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships";
+        HttpPost post  = new HttpPost(reqUrl);    
+        org.json.JSONObject body = new org.json.JSONObject();
+        org.json.JSONObject group = new org.json.JSONObject();
+        group.put("fullName", "GROUP_" + groupName);        
+        body.put("role", role);
+        body.put("group", group);       
+        StringEntity se = new StringEntity(body.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(post);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Group " + groupName + " successfuly invited to site " + siteId);
+                    }
+                    return true;
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new RuntimeException("Invalid site, user or role");
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new RuntimeException("Invalid site manager user name and password");
+                default:
+                    logger.error("Unable to invite group " + groupName + " " +  response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            post.releaseConnection();
+            client.close();
+        }
         return false;
     }
     
@@ -457,6 +518,134 @@ public class UserService
             client.close();
         }
         return false;
+    }
+    
+    /**
+     * Change the role for a user or group 
+     * 
+     * @param siteManager String site manager
+     * @param passwordManager String password
+     * @param siteName String site id
+     * @param entity String identifier - user name or group
+     * @param role String role
+     * @param isGroup boolean user or group
+     * @return true if request is successful (Status: 200)
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    private boolean changeRole(final String siteManager,
+                               final String passwordManager,
+                               final String siteName,
+                               final String entity,
+                               final String role,
+                               final boolean isGroup) throws Exception
+    {
+        String reqUrl;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getApiUrl().replace("/service", "");
+        JSONObject userBody = new JSONObject();
+        org.json.JSONObject grpBody = new org.json.JSONObject();
+        if(!isGroup)
+        {
+            reqUrl = api + "-default-/public/alfresco/versions/1/sites/" + siteName + "/members/" + entity;     
+            userBody.put("role", role);
+        }
+        else
+        {
+            reqUrl = client.getApiUrl() + "sites/" + siteName.toLowerCase() + "/memberships";
+            org.json.JSONObject group = new org.json.JSONObject();
+            group.put("fullName", "GROUP_" + entity);        
+            grpBody.put("role", role);
+            grpBody.put("group", group);                
+        }       
+        HttpPut put = new HttpPut(reqUrl);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
+        if(!isGroup)
+        {
+            put.setEntity(client.setMessageBody(userBody));
+        }
+        else
+        {
+            StringEntity se = new StringEntity(grpBody.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+            put.setEntity(se);
+        }
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(put);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Role " + role + " successfully updated for " + entity);
+                    }
+                    return true;
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new RuntimeException("Invalid site, user or role");
+                case HttpStatus.SC_BAD_REQUEST:
+                    throw new RuntimeException(entity + "is not a member of site " + siteName);
+                default:
+                    logger.error("Unable to change the role for: " + entity + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            put.releaseConnection();
+            client.close();
+        } 
+        return false;
+    }
+    
+    /**
+     * Change the role for a user 
+     * 
+     * @param siteManager String site manager
+     * @param passwordManager String password
+     * @param userName String identifier - user name
+     * @param siteName String site id
+     * @param role String role
+     * @return true if request is successful (Status: 200)
+     * @throws Exception if error
+     */
+    public boolean changeUserRole(final String siteManager,
+                                  final String passwordManager,
+                                  final String siteName,
+                                  final String userName,
+                                  final String role) throws Exception
+    {
+        if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteName) 
+                || StringUtils.isEmpty(userName) || StringUtils.isEmpty(role))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }         
+        return changeRole(siteManager, passwordManager, siteName, userName, role, false);
+    }
+    
+    /**
+     * Change the role for a group 
+     * 
+     * @param siteManager String site manager
+     * @param passwordManager String password
+     * @param groupName String identifier - group name
+     * @param siteName String site id
+     * @param role String role
+     * @return true if request is successful (Status: 200)
+     * @throws Exception if error
+     */
+    public boolean changeGroupRole(final String siteManager,
+                                   final String passwordManager,
+                                   final String siteName,
+                                   final String groupName,
+                                   final String role) throws Exception
+    {
+        if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteName) 
+                || StringUtils.isEmpty(groupName) || StringUtils.isEmpty(role))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }        
+        return changeRole(siteManager, passwordManager, siteName, groupName, role, true);
     }
     
     /**
