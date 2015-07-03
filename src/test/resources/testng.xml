@@ -10,6 +10,7 @@
       <class name="org.alfresco.test.util.BasicAuthPublicApiFactoryTest"/>
       <class name="org.alfresco.test.util.SiteTest"/>
       <class name="org.alfresco.test.util.ContentActionsTests"/>
+      <class name="org.alfresco.test.util.SitePagesActionTests"/>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->
