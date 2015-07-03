@@ -43,6 +43,7 @@
     <bean id="contentService" class="org.alfresco.test.util.ContentService"/>
     <bean id="contentAspects" class="org.alfresco.test.util.ContentAspects"/>
     <bean id="contentActions" class="org.alfresco.test.util.ContentActions"/>
+    <bean id="sitePageService" class="org.alfresco.test.util.SitePagesService"/>
     
     <bean id="alfrescoHttpClientFactory" class="org.alfresco.test.util.AlfrescoHttpClientFactory">
         <constructor-arg name="scheme" value="${alfresco.scheme}"/>

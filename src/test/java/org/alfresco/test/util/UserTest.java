@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
  * 
  * @author Michael Suzuki, Bogdan Bocancea
  */
+
 public class UserTest extends AbstractTest
 {
     @Autowired private SiteService site;
@@ -581,5 +582,29 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
         Assert.assertTrue(userService.inviteGroupToSite(admin, admin, siteId, groupName, "SiteConsumer"));
         Assert.assertTrue(userService.changeGroupRole(admin, admin, siteId, groupName, "SiteCollaborator"));
+    }
+    
+    @Test
+    public void addMemberToModeratedSite() throws Exception
+    {
+        String userManager = "siteManager" + System.currentTimeMillis();
+        String userToAdd = "member" + System.currentTimeMillis();
+        String siteId = "site" + System.currentTimeMillis();
+        userService.create(admin, admin, userManager, password, userManager);
+        userService.create(admin, admin, userToAdd, password, userToAdd);
+        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.MODERATED);
+        Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+    }
+    
+    @Test
+    public void addMemberToPrivateSite() throws Exception
+    { 
+        String userManager = "siteManager" + System.currentTimeMillis();
+        String userToAdd = "member" + System.currentTimeMillis();
+        String siteId = "site" + System.currentTimeMillis();
+        userService.create(admin, admin, userManager, password, userManager);
+        userService.create(admin, admin, userToAdd, password, userToAdd);
+        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
+        Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
     }
 }

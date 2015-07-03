@@ -440,7 +440,55 @@ public class UserService
     }
     
     /**
-     * Delete a pending request for a Moderated Site
+     * Method to add a member to a site (public, moderated or private)
+     * 
+     * @param siteManager String manager of the site
+     * @param passwordManager String password
+     * @param userName String user to be added
+     * @param siteId String site id
+     * @param role String role to be applied
+     * @return true if request is successful
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createSiteMember(final String siteManager,
+                                    final String passwordManager, 
+                                    final String userName,
+                                    final String siteId,
+                                    final String role) throws Exception
+    {
+        if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
+                || StringUtils.isEmpty(userName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl().replace("/service", "") +
+                "-default-/public/alfresco/versions/1/sites/" + siteId + "/members";
+        HttpPost post  = new HttpPost(reqUrl);
+        JSONObject body = new JSONObject();
+        body.put("id", userName);
+        body.put("role", role);
+        post.setEntity(client.setMessageBody(body));
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(post);
+            if(201 == response.getStatusLine().getStatusCode())
+            {
+                return true;
+            }          
+        }
+        finally
+        {
+            post.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Delete a pending request for a Moderated or Private Site
      * 
      * @param siteManager site manager id
      * @param passwordManager password
@@ -533,12 +581,12 @@ public class UserService
      * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
-    private boolean changeRole(final String siteManager,
-                               final String passwordManager,
-                               final String siteName,
-                               final String entity,
-                               final String role,
-                               final boolean isGroup) throws Exception
+    private boolean changeUserRole(final String siteManager,
+                                   final String passwordManager,
+                                   final String siteName,
+                                   final String entity,
+                                   final String role,
+                                   final boolean isGroup) throws Exception
     {
         String reqUrl;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -603,8 +651,8 @@ public class UserService
      * 
      * @param siteManager String site manager
      * @param passwordManager String password
-     * @param userName String identifier - user name
      * @param siteName String site id
+     * @param userName String identifier - user name
      * @param role String role
      * @return true if request is successful (Status: 200)
      * @throws Exception if error
@@ -620,7 +668,7 @@ public class UserService
         {
             throw new IllegalArgumentException("Parameter missing");
         }         
-        return changeRole(siteManager, passwordManager, siteName, userName, role, false);
+        return changeUserRole(siteManager, passwordManager, siteName, userName, role, false);
     }
     
     /**
@@ -628,8 +676,8 @@ public class UserService
      * 
      * @param siteManager String site manager
      * @param passwordManager String password
-     * @param groupName String identifier - group name
      * @param siteName String site id
+     * @param groupName String identifier - group name   
      * @param role String role
      * @return true if request is successful (Status: 200)
      * @throws Exception if error
@@ -645,7 +693,7 @@ public class UserService
         {
             throw new IllegalArgumentException("Parameter missing");
         }        
-        return changeRole(siteManager, passwordManager, siteName, groupName, role, true);
+        return changeUserRole(siteManager, passwordManager, siteName, groupName, role, true);
     }
     
     /**
