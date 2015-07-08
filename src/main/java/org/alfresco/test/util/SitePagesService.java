@@ -17,7 +17,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Service;
+@Service
 public class SitePagesService
 {
     private static Log logger = LogFactory.getLog(SitePagesService.class);
@@ -149,7 +150,7 @@ public class SitePagesService
         {
             body.put("allday", "on");
         }     
-        post.setEntity(client.setMessageBody(body));             
+        post.setEntity(client.setMessageBody(body));
         HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {

@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-@ContextConfiguration("classpath*:util-context.xml")
+@ContextConfiguration("classpath*:dataprep-context.xml")
 /**
  * Abstract that setups spring context.
  * @author Michael Suzuki

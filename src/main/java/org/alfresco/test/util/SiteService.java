@@ -49,7 +49,8 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
-
+import org.springframework.stereotype.Service;
+@Service
 /**
  * Site utility helper that performs crud operation on Site.
  * <ul>

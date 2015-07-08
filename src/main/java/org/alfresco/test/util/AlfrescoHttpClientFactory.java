@@ -15,8 +15,13 @@
 package org.alfresco.test.util;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
-
+@Service
+@PropertySource("classpath:dataprep.properties")
 /**
  * Alfresco HttpClient factory.
  * 
@@ -25,15 +30,13 @@ import org.springframework.beans.factory.FactoryBean;
 public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient>
 {
 
+    @Value("${alfresco.server}")
     private String host;
+    @Value("${alfresco.scheme}")
     private String scheme;
+    @Value("${alfresco.port}")
     private int port;
-    AlfrescoHttpClientFactory(final String scheme, final String host, int port)
-    {
-        this.scheme = scheme;
-        this.host = host;
-        this.port = port;
-    }
+    @Scope("prototype")
     public AlfrescoHttpClient getObject() throws Exception
     {
         return new AlfrescoHttpClient(scheme, host, port);

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util 
+        http://www.springframework.org/schema/util/spring-util.xsd">
+    
+          
+    <context:component-scan base-package="org.alfresco.test" />
+    <!--                     -->
+    <!-- Util Properties    -->
+    <!--                     -->  
+    <bean id="utilProperties" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath*:datape.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true" />
+    </bean>
+
+    <bean id="basicAuthPublicApiFactory" class="org.alfresco.test.util.BasicAuthPublicApiFactory">
+        <constructor-arg name="scheme" value="${alfresco.scheme}"/>
+        <constructor-arg name="host" value="${alfresco.server}"/>
+        <constructor-arg name="port" value="${alfresco.port}"/>
+        <constructor-arg name="maxNumberOfConnections" value="${http.connection.max}"/>
+        <constructor-arg name="connectionTimeoutMs" value="${http.connection.timeoutMs}"/>
+        <constructor-arg name="socketTimeoutMs" value="${http.socket.timeoutMs}"/>
+        <constructor-arg name="socketTtlMs" value="${http.socket.ttlMs}"/>
+        <constructor-arg name="context" value="${alfresco.context}"/>
+        <constructor-arg name="publicApiServletName" value="${alfresco.public.api.servlet.name}"/>
+        <constructor-arg name="serviceServletName" value="${alfresco.service.servlet.name}"/>
+    </bean>
+</beans>

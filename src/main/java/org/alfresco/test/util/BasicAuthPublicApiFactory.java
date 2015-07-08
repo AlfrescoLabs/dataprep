@@ -1,12 +1,15 @@
 package org.alfresco.test.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.social.alfresco.api.Alfresco;
-import org.springframework.social.alfresco.api.CMISEndpoint;
 import org.springframework.social.alfresco.api.impl.ConnectionDetails;
 import org.springframework.social.alfresco.connect.BasicAuthAlfrescoConnectionFactory;
 import org.springframework.social.connect.Connection;
-
+import org.springframework.stereotype.Service;
+@Service
+@PropertySource("classpath:dataprep.properties")
 /**
  * A public api factory that uses basic authentication to communicate with a repository.
  * 
@@ -16,31 +19,29 @@ import org.springframework.social.connect.Connection;
  */
 public class BasicAuthPublicApiFactory implements PublicApiFactory
 {
-    private String scheme;
-    private String host;
-    private int port;
-    private int maxNumberOfConnections;
-    private int connectionTimeoutMs;
-    private int socketTimeoutMs;
-    private int socketTtlMs;
-    private String context;
+    @Value("${alfresco.scheme}") private String scheme;
+    @Value("${alfresco.server}") private String host;
+    @Value("${alfresco.port}") private int port;
+    @Value("${http.connection.max}") private int maxNumberOfConnections;
+    @Value("${http.connection.timeoutMs}") private int connectionTimeoutMs;
+    @Value("${http.socket.timeoutMs}") private int socketTimeoutMs;
+    @Value("${http.socket.ttlMs}") private int socketTtlMs;
+    @Value("${alfresco.context}") private String context;
+    @Value("${alfresco.public.api.servlet.name}") private String publicApiServletName;;
+    @Value("${alfresco.service.servlet.name}") private String serviceServletName;
     private boolean ignoreServletName;
-    private String publicApiServletName;
-    private String serviceServletName;
-    private CMISEndpoint preferredCMISEndPoint;
     private final static String ADMIN_DEFAULT = "admin";
 
     
-    public BasicAuthPublicApiFactory(String scheme, String host, int port, CMISEndpoint preferredCMISEndPoint,
+    public BasicAuthPublicApiFactory(String scheme, String host, int port, 
             int maxNumberOfConnections, int connectionTimeoutMs, 
             int socketTimeoutMs, int socketTtlMs)
     {
-        this(scheme, host, port, preferredCMISEndPoint, maxNumberOfConnections, connectionTimeoutMs, socketTimeoutMs,
+        this(scheme, host, port, maxNumberOfConnections, connectionTimeoutMs, socketTimeoutMs,
                 socketTtlMs, "alfresco", "api", "service");
-        this.preferredCMISEndPoint = preferredCMISEndPoint;
     }
 
-    public BasicAuthPublicApiFactory(String scheme, String host, int port, CMISEndpoint preferredCMISEndPoint,
+    public BasicAuthPublicApiFactory(String scheme, String host, int port, 
             int maxNumberOfConnections, int connectionTimeoutMs,  int socketTimeoutMs, int socketTtlMs,
             String context, String publicApiServletName, String serviceServletName)
     {
@@ -48,7 +49,6 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
         this.scheme = scheme;
         this.host = host;
         this.port = port;
-        this.preferredCMISEndPoint = preferredCMISEndPoint;
         this.maxNumberOfConnections= maxNumberOfConnections;
         this.connectionTimeoutMs = connectionTimeoutMs;
         this.socketTimeoutMs = socketTimeoutMs;
@@ -81,11 +81,6 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
     public int getPort()
     {
         return port;
-    }
-    
-    public CMISEndpoint getPreferredCMISEndPoint()
-    {
-        return preferredCMISEndPoint;
     }
 
     public Alfresco getPublicApi(String username, String password)

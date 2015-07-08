@@ -34,7 +34,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-
+import org.springframework.stereotype.Service;
+@Service
 /**
  * Create documents and folders using CMIS.
  * 
