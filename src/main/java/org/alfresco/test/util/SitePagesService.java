@@ -18,6 +18,13 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ *  Class that performs crud operation on calendar events, blogs, data lists, wiki, discussions and links.
+ * 
+ * @author Bogdan Bocancea
+ */
+
+
 public class SitePagesService
 {
     private static Log logger = LogFactory.getLog(SitePagesService.class);
@@ -27,9 +34,18 @@ public class SitePagesService
     /**
      * Add calendar event
      * 
-     * @param adminUser admin username
-     * @param adminPass admin credential
-     * @param groupName String group name
+     * @param userName String user name
+     * @param password String user password
+     * @param siteName String site name
+     * @param what String what
+     * @param where String event location
+     * @param description String event description
+     * @param startDate Date event start date
+     * @param endDate Date event end date
+     * @param timeStart String event start time
+     * @param timeEnd String event time finish
+     * @param allDay boolean all day event
+     * @param tag String tag the event
      * @return true if user exists
      * @throws Exception if error
      */
@@ -171,6 +187,13 @@ public class SitePagesService
         return false;
     }
     
+    /**
+     * Convert time to 24 hour format
+     * 
+     * @param time String time
+     * @throws ParseException if error
+     * @return String converted hour
+     */
     private String convertTo24Hour(String time) throws ParseException 
     {
         DateFormat f1 = new SimpleDateFormat("hh:mm a"); 
