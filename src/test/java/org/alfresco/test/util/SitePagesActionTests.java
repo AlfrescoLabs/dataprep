@@ -16,6 +16,9 @@ package org.alfresco.test.util;
 
 import java.util.Date;
 
+import org.alfresco.dataprep.SitePagesService;
+import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.UserService;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;

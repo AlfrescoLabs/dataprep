@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.alfresco.test.util;
+package org.alfresco.dataprep;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.test.util.DashboardCustomization.DashletLayout;
-import org.alfresco.test.util.DashboardCustomization.Page;
-import org.alfresco.test.util.DashboardCustomization.SiteDashlet;
+import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
+import org.alfresco.dataprep.DashboardCustomization.Page;
+import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

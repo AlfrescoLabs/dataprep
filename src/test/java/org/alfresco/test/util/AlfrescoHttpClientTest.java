@@ -16,6 +16,7 @@ package org.alfresco.test.util;
 
 import java.io.IOException;
 
+import org.alfresco.dataprep.AlfrescoHttpClient;
 import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;

@@ -12,16 +12,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.alfresco.test.util;
+package org.alfresco.dataprep;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-@Component
-@PropertySource("dataprep.properties")
 /**
  * Alfresco HttpClient factory.
  * 
@@ -29,10 +24,10 @@ import org.springframework.stereotype.Component;
  */
 public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient>
 {
-
-    @Value("${alfresco.server}") private String host;
-    @Value("${alfresco.scheme}") private String scheme;
-    @Value("${alfresco.port}") private int port;
+    private String host;
+    private String scheme;
+    private int port;
+    
     @Scope("prototype")
     public AlfrescoHttpClient getObject()
     {

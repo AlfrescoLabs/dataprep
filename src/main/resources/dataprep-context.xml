@@ -11,16 +11,33 @@
         http://www.springframework.org/schema/util/spring-util.xsd">
     
           
-    <context:component-scan base-package="org.alfresco.test" />
+    <context:component-scan base-package="org.alfresco.dataprep" />
     <!--                     -->
     <!-- Util Properties    -->
     <!--                     -->  
     <bean id="utilProperties" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath*:datape.properties</value>
+                <value>classpath*:dataprep.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="true" />
+    </bean>
+    <bean id="alfrescoHttpClientFactory" class="org.alfresco.dataprep.AlfrescoHttpClientFactory">
+        <property name="host" value="${alfresco.server}"/>
+        <property name="port" value="${alfresco.port}"/>
+        <property name="scheme" value="${alfresco.scheme}"/>
+    </bean>
+    <bean id="publicApiFactory" class="org.alfresco.dataprep.BasicAuthPublicApiFactory" >
+        <property name="scheme" value="${alfresco.scheme}"/>
+        <property name="port" value="${alfresco.port}"/>
+        <property name="host" value="${alfresco.server}"/>
+        <property name="maxNumberOfConnections" value="${http.connection.max}"/>
+        <property name="connectionTimeoutMs" value="${http.connection.timeoutMs}"/>
+        <property name="socketTimeoutMs" value="${http.socket.timeoutMs}"/>
+        <property name="socketTtlMs" value="${http.socket.ttlMs}"/>
+        <property name="context" value="${alfresco.context}"/>
+        <property name="publicApiServletName" value="${alfresco.public.api.servlet.name}"/>
+        <property name="serviceServletName" value="${alfresco.service.servlet.name}"/>
     </bean>
 </beans>

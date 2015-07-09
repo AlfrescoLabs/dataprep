@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.alfresco.test.util;
+package org.alfresco.dataprep;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

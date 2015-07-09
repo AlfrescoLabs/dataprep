@@ -14,8 +14,10 @@
  */
 package org.alfresco.test.util;
 
-import org.alfresco.test.util.DashboardCustomization.DashletLayout;
-import org.alfresco.test.util.DashboardCustomization.UserDashlet;
+import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.UserService;
+import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
+import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;

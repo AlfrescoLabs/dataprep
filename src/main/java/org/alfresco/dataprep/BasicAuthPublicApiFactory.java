@@ -12,18 +12,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.alfresco.test.util;
+package org.alfresco.dataprep;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.impl.ConnectionDetails;
 import org.springframework.social.alfresco.connect.BasicAuthAlfrescoConnectionFactory;
 import org.springframework.social.connect.Connection;
-import org.springframework.stereotype.Component;
-@Component
-@PropertySource(value="dataprep.properties")
 /**
  * A public api factory that uses basic authentication to communicate with a repository.
  * 
@@ -33,20 +28,19 @@ import org.springframework.stereotype.Component;
  */
 public class BasicAuthPublicApiFactory implements PublicApiFactory
 {
-    @Value("${alfresco.scheme}") private String scheme;
-    @Value("${alfresco.server}") private String host;
-    @Value("${alfresco.port}") private int port;
-    @Value("${http.connection.max}") private int maxNumberOfConnections;
-    @Value("${http.connection.timeoutMs}") private int connectionTimeoutMs;
-    @Value("${http.socket.timeoutMs}") private int socketTimeoutMs;
-    @Value("${http.socket.ttlMs}") private int socketTtlMs;
-    @Value("${alfresco.context}") private String context;
-    @Value("${alfresco.public.api.servlet.name}") private String publicApiServletName;;
-    @Value("${alfresco.service.servlet.name}") private String serviceServletName;
+    private String scheme;
+    private String host;
+    private int port;
+    private int maxNumberOfConnections;
+    private int connectionTimeoutMs;
+    private int socketTimeoutMs;
+    private int socketTtlMs;
+    private String context;
+    private String publicApiServletName;;
+    private String serviceServletName;
     private boolean ignoreServletName;
     private final static String ADMIN_DEFAULT = "admin";
     
-    public BasicAuthPublicApiFactory(){}
     public String getContext()
     {
         return context;
@@ -79,11 +73,11 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
             throw new IllegalArgumentException("Valid username and password are required");
         }
         Alfresco alfresco = null;
-            ConnectionDetails connectionDetails = new ConnectionDetails(scheme, host, port, username, password, context,
+        ConnectionDetails connectionDetails = new ConnectionDetails(scheme, host, port, username, password, context,
                     publicApiServletName, serviceServletName, maxNumberOfConnections, connectionTimeoutMs, socketTimeoutMs, socketTtlMs);
-            BasicAuthAlfrescoConnectionFactory basicAuthConnectionFactory = new BasicAuthAlfrescoConnectionFactory(connectionDetails, null);
-            Connection<Alfresco> connection = basicAuthConnectionFactory.createConnection();
-            alfresco = connection.getApi();
+        BasicAuthAlfrescoConnectionFactory basicAuthConnectionFactory = new BasicAuthAlfrescoConnectionFactory(connectionDetails, null);
+        Connection<Alfresco> connection = basicAuthConnectionFactory.createConnection();
+        alfresco = connection.getApi();
         if (alfresco == null)
         {
             throw new RuntimeException("Unable to retrieve API connection to Alfresco.");
@@ -114,5 +108,74 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
         Alfresco alfresco = connection.getApi();
         return alfresco;
     }
+    public int getMaxNumberOfConnections()
+    {
+        return maxNumberOfConnections;
+    }
+    public void setMaxNumberOfConnections(int maxNumberOfConnections)
+    {
+        this.maxNumberOfConnections = maxNumberOfConnections;
+    }
+    public int getConnectionTimeoutMs()
+    {
+        return connectionTimeoutMs;
+    }
+    public void setConnectionTimeoutMs(int connectionTimeoutMs)
+    {
+        this.connectionTimeoutMs = connectionTimeoutMs;
+    }
+    public int getSocketTimeoutMs()
+    {
+        return socketTimeoutMs;
+    }
+    public void setSocketTimeoutMs(int socketTimeoutMs)
+    {
+        this.socketTimeoutMs = socketTimeoutMs;
+    }
+    public int getSocketTtlMs()
+    {
+        return socketTtlMs;
+    }
+    public void setSocketTtlMs(int socketTtlMs)
+    {
+        this.socketTtlMs = socketTtlMs;
+    }
+    public String getPublicApiServletName()
+    {
+        return publicApiServletName;
+    }
+    public void setPublicApiServletName(String publicApiServletName)
+    {
+        this.publicApiServletName = publicApiServletName;
+    }
+    public String getServiceServletName()
+    {
+        return serviceServletName;
+    }
+    public void setServiceServletName(String serviceServletName)
+    {
+        this.serviceServletName = serviceServletName;
+    }
+    public void setScheme(String scheme)
+    {
+        this.scheme = scheme;
+    }
+    public void setHost(String host)
+    {
+        this.host = host;
+    }
+    public void setPort(int port)
+    {
+        this.port = port;
+    }
+    public void setContext(String context)
+    {
+        this.context = context;
+    }
+    public void setIgnoreServletName(boolean ignoreServletName)
+    {
+        this.ignoreServletName = ignoreServletName;
+    }
+    
     
 }

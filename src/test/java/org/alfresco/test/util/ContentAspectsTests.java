@@ -22,8 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.alfresco.test.util.CMISUtil.DocumentAspect;
-import org.alfresco.test.util.CMISUtil.DocumentType;
+import org.alfresco.dataprep.ContentActions;
+import org.alfresco.dataprep.ContentAspects;
+import org.alfresco.dataprep.ContentService;
+import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.UserService;
+import org.alfresco.dataprep.CMISUtil.DocumentAspect;
+import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.commons.PropertyIds;

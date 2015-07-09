@@ -18,9 +18,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alfresco.test.util.DashboardCustomization.DashletLayout;
-import org.alfresco.test.util.DashboardCustomization.Page;
-import org.alfresco.test.util.DashboardCustomization.SiteDashlet;
+import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
+import org.alfresco.dataprep.DashboardCustomization.Page;
+import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;

@@ -17,7 +17,11 @@ package org.alfresco.test.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alfresco.test.util.CMISUtil.DocumentType;
+import org.alfresco.dataprep.ContentActions;
+import org.alfresco.dataprep.ContentService;
+import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.UserService;
+import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;

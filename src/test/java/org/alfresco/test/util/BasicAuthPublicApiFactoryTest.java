@@ -14,6 +14,7 @@
  */
 package org.alfresco.test.util;
 
+import org.alfresco.dataprep.PublicApiFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.testng.Assert;

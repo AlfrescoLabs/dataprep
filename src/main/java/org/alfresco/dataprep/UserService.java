@@ -12,14 +12,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.alfresco.test.util;
+package org.alfresco.dataprep;
 
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.alfresco.test.util.DashboardCustomization.DashletLayout;
-import org.alfresco.test.util.DashboardCustomization.UserDashlet;
+import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
+import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +70,6 @@ public class UserService
      * @param password new user password
      * @param email new user email
      * @return true if successful
-     * @throws Exception if error
      */
     public boolean create(final String adminUser, 
                           final String adminPass, 
@@ -157,7 +156,6 @@ public class UserService
      * @param adminPass admin credential
      * @param username user identifier 
      * @return true if user exists
-     * @throws Exception if error
      */
     public boolean userExists(final String adminUser, 
                               final String adminPass, 
@@ -188,11 +186,10 @@ public class UserService
      * @param adminPass admin credential
      * @param userName String identifier user identifier
      * @return true if successful 
-     * @throws Exception if error
      */
     public boolean delete(final String adminUser, 
                           final String adminPass, 
-                          final String userName) throws Exception
+                          final String userName)
     {
         if (StringUtils.isEmpty(userName) ||  StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
         {
@@ -237,7 +234,7 @@ public class UserService
      * @param siteName site identifier which invite user.
      * @param role user role
      * @return true if invite is successful
-     * @throws Exception if error
+     * @exception if error
      */
     public boolean inviteUserToSiteAndAccept(final String invitingUserName, 
                                              final String invitingUserPassword, 
@@ -284,7 +281,7 @@ public class UserService
                     logger.error("Unable to invite user: " + response.toString());
                     break;
             }
-        }
+        } 
         finally
         {
             get.releaseConnection();
@@ -302,7 +299,7 @@ public class UserService
      * @throws Exception if error
      */
     private boolean acceptSiteInvitation(final String inviteId, 
-                                         final String inviteTicket) throws Exception
+                                         final String inviteTicket)
     {
         if (StringUtils.isEmpty(inviteId) ||  StringUtils.isEmpty(inviteTicket))
         {
