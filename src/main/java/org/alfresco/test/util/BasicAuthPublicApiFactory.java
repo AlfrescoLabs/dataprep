@@ -1,3 +1,17 @@
+/*
+ * Copyright (C) 2005-2015 Alfresco Software Limited.
+ * This file is part of Alfresco
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.alfresco.test.util;
 
 import org.apache.commons.lang3.StringUtils;
@@ -7,9 +21,9 @@ import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.impl.ConnectionDetails;
 import org.springframework.social.alfresco.connect.BasicAuthAlfrescoConnectionFactory;
 import org.springframework.social.connect.Connection;
-import org.springframework.stereotype.Service;
-@Service
-@PropertySource("classpath:dataprep.properties")
+import org.springframework.stereotype.Component;
+@Component
+@PropertySource(value="dataprep.properties")
 /**
  * A public api factory that uses basic authentication to communicate with a repository.
  * 
@@ -31,33 +45,8 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
     @Value("${alfresco.service.servlet.name}") private String serviceServletName;
     private boolean ignoreServletName;
     private final static String ADMIN_DEFAULT = "admin";
-
     
-    public BasicAuthPublicApiFactory(String scheme, String host, int port, 
-            int maxNumberOfConnections, int connectionTimeoutMs, 
-            int socketTimeoutMs, int socketTtlMs)
-    {
-        this(scheme, host, port, maxNumberOfConnections, connectionTimeoutMs, socketTimeoutMs,
-                socketTtlMs, "alfresco", "api", "service");
-    }
-
-    public BasicAuthPublicApiFactory(String scheme, String host, int port, 
-            int maxNumberOfConnections, int connectionTimeoutMs,  int socketTimeoutMs, int socketTtlMs,
-            String context, String publicApiServletName, String serviceServletName)
-    {
-        super();
-        this.scheme = scheme;
-        this.host = host;
-        this.port = port;
-        this.maxNumberOfConnections= maxNumberOfConnections;
-        this.connectionTimeoutMs = connectionTimeoutMs;
-        this.socketTimeoutMs = socketTimeoutMs;
-        this.socketTtlMs= socketTtlMs; 
-        this.context = context;
-        this.publicApiServletName = publicApiServletName;
-        this.serviceServletName = serviceServletName;
-    }
-
+    public BasicAuthPublicApiFactory(){}
     public String getContext()
     {
         return context;
@@ -125,4 +114,5 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
         Alfresco alfresco = connection.getApi();
         return alfresco;
     }
+    
 }

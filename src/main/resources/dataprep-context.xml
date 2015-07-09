@@ -23,17 +23,4 @@
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="true" />
     </bean>
-
-    <bean id="basicAuthPublicApiFactory" class="org.alfresco.test.util.BasicAuthPublicApiFactory">
-        <constructor-arg name="scheme" value="${alfresco.scheme}"/>
-        <constructor-arg name="host" value="${alfresco.server}"/>
-        <constructor-arg name="port" value="${alfresco.port}"/>
-        <constructor-arg name="maxNumberOfConnections" value="${http.connection.max}"/>
-        <constructor-arg name="connectionTimeoutMs" value="${http.connection.timeoutMs}"/>
-        <constructor-arg name="socketTimeoutMs" value="${http.socket.timeoutMs}"/>
-        <constructor-arg name="socketTtlMs" value="${http.socket.ttlMs}"/>
-        <constructor-arg name="context" value="${alfresco.context}"/>
-        <constructor-arg name="publicApiServletName" value="${alfresco.public.api.servlet.name}"/>
-        <constructor-arg name="serviceServletName" value="${alfresco.service.servlet.name}"/>
-    </bean>
 </beans>

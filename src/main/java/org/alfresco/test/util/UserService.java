@@ -76,7 +76,7 @@ public class UserService
                           final String adminPass, 
                           final String userName, 
                           final String password, 
-                          final String email) throws Exception
+                          final String email) 
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(adminUser)
                 || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(email))
@@ -161,7 +161,7 @@ public class UserService
      */
     public boolean userExists(final String adminUser, 
                               final String adminPass, 
-                              final String username) throws Exception
+                              final String username) 
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String ticket = client.getAlfTicket(adminUser, adminPass);
@@ -174,14 +174,13 @@ public class UserService
             {
                 return true;
             }
-        }
+        } 
         finally
         {
             client.close();
         }
         return false;
     }
-
     /**
      * Delete a user from enterprise.
      * 

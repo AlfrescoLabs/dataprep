@@ -91,7 +91,7 @@ public class AlfrescoHttpClient
      * @throws IOException if error
      * @return Sting authentication ticket
      */
-    public String getAlfTicket(String username, String password) throws IOException, ParseException
+    public String getAlfTicket(String username, String password) 
     {
         if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
         {
@@ -111,7 +111,7 @@ public class AlfrescoHttpClient
             JSONObject data = (JSONObject) obj.get("data");
             return (String) data.get("ticket");
         }
-        catch (IOException e)
+        catch (IOException | ParseException e)
         {
             logger.error(String.format("Unable to generate ticket, url: %s",targetUrl), e);
         }
@@ -125,7 +125,7 @@ public class AlfrescoHttpClient
      * @return {@link HttpPost} post request in json format
      * @throws Exception if error
      */
-    public HttpPost generatePostRequest(String requestURL, JSONObject body) throws Exception
+    public HttpPost generatePostRequest(String requestURL, JSONObject body)
     {
         // Parameters check
         if (requestURL.isEmpty())
@@ -141,7 +141,14 @@ public class AlfrescoHttpClient
         String contentType = MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING;
         request.addHeader("Content-Type", contentType);
         // set Body
-        request.setEntity(setMessageBody(body));
+        try
+        {
+            request.setEntity(setMessageBody(body));
+        } 
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Body content error: " ,e);
+        }
 
         return request;
     }
@@ -175,7 +182,7 @@ public class AlfrescoHttpClient
      * @return {@link HttpResponse} response
      * @throws Exception if error
      */
-    public HttpResponse executeRequest(HttpRequestBase request) throws Exception
+    public HttpResponse executeRequest(HttpRequestBase request)
     {
         HttpResponse response = null;
         try
@@ -190,7 +197,7 @@ public class AlfrescoHttpClient
         catch (Exception e)
         {
             logger.error(response);
-            throw new RuntimeException("Error during execute request", e);
+            throw new RuntimeException("Error while executing request", e);
         }
     }
     
@@ -287,9 +294,16 @@ public class AlfrescoHttpClient
      * Closes the HttpClient. 
      * @throws IOException if error
      */
-    public void close() throws IOException
+    public void close() 
     {
-        client.close();
+        try
+        {
+            client.close();
+        } 
+        catch (IOException e)
+        {
+            logger.error("Unable to close http client" ,e);
+        }
     }
     
     public HttpClient getClient()

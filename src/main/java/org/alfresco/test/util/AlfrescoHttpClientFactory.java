@@ -18,10 +18,10 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-@PropertySource("classpath:dataprep.properties")
+@Component
+@PropertySource("dataprep.properties")
 /**
  * Alfresco HttpClient factory.
  * 
@@ -30,14 +30,11 @@ import org.springframework.stereotype.Service;
 public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient>
 {
 
-    @Value("${alfresco.server}")
-    private String host;
-    @Value("${alfresco.scheme}")
-    private String scheme;
-    @Value("${alfresco.port}")
-    private int port;
+    @Value("${alfresco.server}") private String host;
+    @Value("${alfresco.scheme}") private String scheme;
+    @Value("${alfresco.port}") private int port;
     @Scope("prototype")
-    public AlfrescoHttpClient getObject() throws Exception
+    public AlfrescoHttpClient getObject()
     {
         return new AlfrescoHttpClient(scheme, host, port);
     }
@@ -51,6 +48,36 @@ public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient
     public boolean isSingleton()
     {
         return false;
+    }
+
+    public String getHost()
+    {
+        return host;
+    }
+
+    public void setHost(String host)
+    {
+        this.host = host;
+    }
+
+    public String getScheme()
+    {
+        return scheme;
+    }
+
+    public void setScheme(String scheme)
+    {
+        this.scheme = scheme;
+    }
+
+    public int getPort()
+    {
+        return port;
+    }
+
+    public void setPort(int port)
+    {
+        this.port = port;
     }
 
 }
