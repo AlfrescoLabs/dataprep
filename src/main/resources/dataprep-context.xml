@@ -10,20 +10,9 @@
         http://www.springframework.org/schema/util 
         http://www.springframework.org/schema/util/spring-util.xsd">
     
-          
+    <context:property-placeholder location="dataprep.properties" ignore-unresolvable="true" />
     <context:component-scan base-package="org.alfresco.dataprep" />
-    <!--                     -->
-    <!-- Util Properties    -->
-    <!--                     -->  
-    <bean id="utilProperties" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath*:dataprep.properties</value>
-            </list>
-        </property>
-        <property name="ignoreUnresolvablePlaceholders" value="true" />
-    </bean>
-    <bean id="alfrescoHttpClientFactory" class="org.alfresco.dataprep.AlfrescoHttpClientFactory">
+    <bean id="alfrescoHttpClientFactory" class="org.alfresco.dataprep.AlfrescoHttpClientFactory" >
         <property name="host" value="${alfresco.server}"/>
         <property name="port" value="${alfresco.port}"/>
         <property name="scheme" value="${alfresco.scheme}"/>
