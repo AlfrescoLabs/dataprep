@@ -14,6 +14,7 @@
  */
 package org.alfresco.dataprep;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -441,8 +442,8 @@ public class UserService
      * 
      * @param siteManager String manager of the site
      * @param passwordManager String password
-     * @param userName String user to be added
-     * @param siteId String site id
+     * @param userName String user to added
+     * @param siteId  site id
      * @param role String role to be applied
      * @return true if request is successful
      * @throws Exception if error
@@ -452,7 +453,7 @@ public class UserService
                                     final String passwordManager, 
                                     final String userName,
                                     final String siteId,
-                                    final String role) throws Exception
+                                    final String role)
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
                 || StringUtils.isEmpty(userName))
@@ -466,15 +467,19 @@ public class UserService
         JSONObject body = new JSONObject();
         body.put("id", userName);
         body.put("role", role);
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
         try
         {
+            post.setEntity(client.setMessageBody(body));
+            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
             HttpResponse response = clientWithAuth.execute(post);
             if(201 == response.getStatusLine().getStatusCode())
             {
                 return true;
-            }          
+            }
+        } 
+        catch (IOException e)
+        {
+            throw new RuntimeException("Unable to create site member", e);
         }
         finally
         {
@@ -592,7 +597,7 @@ public class UserService
         org.json.JSONObject grpBody = new org.json.JSONObject();
         if(!isGroup)
         {
-            reqUrl = api + "-default-/public/alfresco/versions/1/sites/" + siteName + "/members/" + entity;     
+            reqUrl = api + "-default-/public/alfresco/versions/1/sites/" + siteName + "/members/" + entity;
             userBody.put("role", role);
         }
         else
