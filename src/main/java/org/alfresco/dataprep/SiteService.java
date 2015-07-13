@@ -69,6 +69,17 @@ public class SiteService
     @Autowired private PublicApiFactory publicApiFactory;
     @Autowired private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     
+    public enum RMSiteCompliance
+    {
+        STANDARD("{http://www.alfresco.org/model/recordsmanagement/1.0}rmsite"),
+        DOD_5015_2_STD("{http://www.alfresco.org/model/dod5015/1.0}site");
+        public final String compliance;
+        RMSiteCompliance(String compliance)
+        {
+            this.compliance = compliance;
+        }
+    }
+    
     /**
      * Create site using Alfresco public API.
      * 
@@ -596,6 +607,92 @@ public class SiteService
                 post.releaseConnection();
                 client.close();
             }
+        return false;
+    }
+    
+    /**
+     * Create Record Management site
+     * 
+     * @param userName String identifier
+     * @param password String password
+     * @param title String site title
+     * @param description String site description
+     * @param compliance RMSiteCompliance site compliance
+     * @return true if site is created
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createRMSite(final String userName,
+                                final String password,
+                                final String title,
+                                final String description,
+                                final RMSiteCompliance compliance) throws Exception
+    {
+        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(title))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "sites";
+        HttpPost post  = new HttpPost(reqUrl);
+        JSONObject body = new JSONObject();
+        body.put("visibility", "PUBLIC");
+        body.put("title", title);
+        body.put("shortName", "rm");
+        body.put("description", description);
+        body.put("sitePreset", "rm-site-dashboard");
+        body.put("compliance", compliance.compliance);
+        body.put("type", compliance.compliance);
+        post.setEntity(client.setMessageBody(body));      
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(post);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:             
+                    String xmlBody = AlfrescoHttpClient.contentRmSite.replaceAll("<shortName>", "rm");
+                    String secondPostUrl = client.getAlfrescoUrl() + "alfresco/service/remoteadm/createmulti?s=sitestore";
+                    HttpPost secondPost  = new HttpPost(secondPostUrl);                 
+                    secondPost.setHeader("Content-Type", "application/xml");
+                    StringEntity xmlEntity = new StringEntity(xmlBody, AlfrescoHttpClient.UTF_8_ENCODING);
+                    xmlEntity.setContentType("application/xml");
+                    secondPost.setEntity(xmlEntity); 
+                    clientWithAuth.execute(secondPost);
+                    secondPost.releaseConnection();
+                    String url = client.getAlfrescoUrl() + "alfresco/service/slingshot/doclib2/doclist/all/site/rm/documentLibrary/";
+                    HttpGet get = new HttpGet(url);
+                    response = clientWithAuth.execute(get); 
+                    if(200 == response.getStatusLine().getStatusCode())
+                    {
+                        if (logger.isTraceEnabled())
+                        {
+                            logger.info("Successfully created RM site");
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        if (logger.isTraceEnabled())
+                        {
+                            logger.error("Failed to open RM site");
+                        }
+                        return false;
+                    }
+                case HttpStatus.SC_BAD_REQUEST:
+                    throw new RuntimeException("RM Site already created");
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new RuntimeException("Invalid credentials");
+                default:
+                    logger.error("Unable to create RM site: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            post.releaseConnection();
+            client.close();
+        } 
         return false;
     }
 }

@@ -289,7 +289,6 @@ public class AlfrescoHttpClient
         return (String) obj.get(param);
     }
     
-
     /**
      * Closes the HttpClient. 
      * @throws IOException if error
@@ -337,4 +336,81 @@ public class AlfrescoHttpClient
         return alfrescoUrl;
     }
 
+    public static String contentRmSite = 
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<master>" +
+              "<document path=\"/alfresco/site-data/components/page.title.site~" + "<shortName>" + "~dashboard.xml\">" +
+                "<component>"+
+                  "<guid>page.title.site~" + "<shortName>" + "~dashboard</guid>"+
+                  "<scope>page</scope>"+
+                  "<region-id>title</region-id>"+
+                  "<source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
+                  "<url>/components/title/collaboration-title</url>"+
+                "</component>"+
+              "</document>"+
+              "<document path=\"/alfresco/site-data/components/page.navigation.site~" + "<shortName>" + "~dashboard.xml\">"+
+                "<component>"+
+            "      <guid>page.navigation.site~" + "<shortName>" + "~dashboard</guid> "+
+             "     <scope>page</scope> "+
+             "     <region-id>navigation</region-id>"+
+             "     <source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
+             "     <url>/components/navigation/collaboration-navigation</url>"+
+             "   </component>"+
+             " </document>"+
+             " <document path=\"/alfresco/site-data/components/page.full-width-dashlet.site~" + "<shortName>" + "~dashboard.xml\">"+
+             "   <component>"+
+             "     <guid>page.full-width-dashlet.site~" + "<shortName>" + "~dashboard</guid>"+
+             "     <scope>page</scope>"+
+             "     <region-id>full-width-dashlet</region-id>"+
+             "     <source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
+             "     <url>/components/dashlets/dynamic-welcome</url>"+
+             "     <properties>"+
+             "       <dashboardType>site</dashboardType>"+
+             "     </properties> "+
+             "   </component>"+
+             " </document>"+
+             " <document path=\"/alfresco/site-data/components/page.component-1-1.site~" + "<shortName>" + "~dashboard.xml\">"+
+"                   <component>"+
+    "             <guid>page.component-1-1.site~" + "<shortName>" + "~dashboard</guid>"+
+    "             <scope>page</scope>"+
+    "             <region-id>component-1-1</region-id>"+
+    "             <source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
+    "             <url>/components/dashlets/colleagues</url>"+
+    "             <properties>"+
+    "               <height>504</height>"+
+    "             </properties>"+
+    "           </component>"+
+    "         </document>"+
+    "         <document path=\"/alfresco/site-data/components/page.component-2-1.site~" + "<shortName>" + "~dashboard.xml\">"+
+    "           <component>"+
+    "             <guid>page.component-2-1.site~" + "<shortName>" + "~dashboard</guid>"+
+    "             <scope>page</scope>"+
+    "             <region-id>component-2-1</region-id>"+
+    "             <source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
+    "             <url>/components/dashlets/docsummary</url>"+
+    "           </component>"+
+    "         </document>"+
+    "         <document path=\"/alfresco/site-data/components/page.component-2-2.site~" + "<shortName>" + "~dashboard.xml\">"+
+    "           <component>"+
+    "             <guid>page.component-2-2.site~" + "<shortName>" + "~dashboard</guid>"+
+    "             <scope>page</scope>"+
+    "             <region-id>component-2-2</region-id>"+
+    "             <source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
+    "             <url>/components/dashlets/activityfeed</url>"+
+    "           </component>"+
+    "         </document>"+
+    "         <document path=\"/alfresco/site-data/pages/site/" + "<shortName>" + "/dashboard.xml\">"+
+    "           <page>"+
+    "             <title>Collaboration Site Dashboard</title>"+
+    "             <title-id>page.siteDashboard.title</title-id>"+
+    "             <description>Collaboration site's dashboard page</description>"+
+    "             <description-id>page.siteDashboard.description</description-id>"+
+    "             <authentication>user</authentication>"+
+    "             <template-instance>dashboard-2-columns-wide-right</template-instance>"+
+    "             <properties>"+
+    "               <sitePages>[{\"pageId\":\"documentlibrary\"}]</sitePages>"+
+    "             </properties>"+
+    "           </page>"+
+    "         </document>"+
+    "       </master>";
 }
