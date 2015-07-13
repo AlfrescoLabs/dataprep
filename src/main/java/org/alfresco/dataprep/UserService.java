@@ -70,21 +70,27 @@ public class UserService
      * @param userName String identifier new user
      * @param password new user password
      * @param email new user email
+     * @param firstName first name
+     * @param lastName last name
      * @return true if successful
      */
     public boolean create(final String adminUser, 
                           final String adminPass, 
                           final String userName, 
                           final String password, 
-                          final String email) 
+                          final String email,
+                          final String firstName,
+                          final String lastName) 
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(adminUser)
-                || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(email))
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) ||
+            StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass) || 
+            StringUtils.isEmpty(email) || StringUtils.isEmpty(firstName) ||
+            StringUtils.isEmpty(lastName))
         {
             throw new IllegalArgumentException("User detail is required");
         }
-        String firstName = userName;
-        JSONObject body = encode(userName, password, firstName, DEFAULT_LAST_NAME, email);
+
+        JSONObject body = encode(userName, password, firstName, lastName, email);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "people?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
         if (logger.isTraceEnabled())

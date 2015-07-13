@@ -54,8 +54,8 @@ public class ContentTest extends AbstractTest
     public void testCreateFolderTwice() throws Exception
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();    
-        userService.create(admin, admin, userName, password, password);
+        String userName = "cmisUser" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -71,7 +71,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -90,7 +90,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String symbolFolder = "*/.:?|\\`\"";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -105,7 +105,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();   
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -119,7 +119,7 @@ public class ContentTest extends AbstractTest
     public void createFolderInvalidSite() throws Exception
     {
         String userName = "cmisUser" + System.currentTimeMillis();    
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         content.createFolder(userName, password, folder, "fakeSite");
     }
     
@@ -130,7 +130,7 @@ public class ContentTest extends AbstractTest
         String userName = "cmisUserDelete" + System.currentTimeMillis();
         String rootFolder = "cmisFolderDelete";
         String secondFolder = "cmisSecondFolder";   
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -155,7 +155,7 @@ public class ContentTest extends AbstractTest
     {
         String userName = "cmisUserDelete" + System.currentTimeMillis(); 
         String siteName = "siteCMISDelete" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);            
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");            
         site.create(userName,
                     password,
                     "mydomain",
@@ -175,7 +175,7 @@ public class ContentTest extends AbstractTest
         String msExcel = "msExcel";
         String html = "html";
         String xml = "xml";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -200,7 +200,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String symbolDoc = "*/.:?|\\`\"";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -214,7 +214,7 @@ public class ContentTest extends AbstractTest
     public void createDocFakeSite() throws Exception
     {
         String userName = "cmisUser" + System.currentTimeMillis();  
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         content.createDocument(userName, password, "fakeSite", DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
     }
     
@@ -223,7 +223,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -239,7 +239,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -258,7 +258,7 @@ public class ContentTest extends AbstractTest
         String userName = "cmisUser" + System.currentTimeMillis();
         String symbolDoc = "*/.:?|\\`\"";
         String folder = "cmisFolder";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -274,7 +274,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -290,7 +290,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String subFolderDoc = "cmisDoc" + System.currentTimeMillis();       
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -312,7 +312,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -329,7 +329,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -347,7 +347,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -365,7 +365,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String folder1 = "cmisFolder1" +  System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -389,7 +389,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -411,7 +411,7 @@ public class ContentTest extends AbstractTest
         String userName = "cmisUser" + System.currentTimeMillis();
         String fileName = "cmisFile" + System.currentTimeMillis();
         String fileFromPath = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -428,7 +428,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String folderName = "cmisFolder" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -449,7 +449,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -465,7 +465,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String fileName = "cmisFile" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -482,7 +482,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain" +  System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -502,7 +502,7 @@ public class ContentTest extends AbstractTest
         String plainFile = "UploadFile-plaintext.txt" ;
         String xmlFile = "UploadFile-xml.xml";
         String htmlFile = "UploadFile-html.html";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -522,7 +522,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String plainFile = "UploadFile-plaintext.txt" ;
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -544,7 +544,7 @@ public class ContentTest extends AbstractTest
         String xmlFile = "UploadFile-xml.xml";
         String htmlFile = "UploadFile-html.html";
         String xlxsFile = "UploadFile-xlsx.xlsx" ;
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -572,7 +572,7 @@ public class ContentTest extends AbstractTest
         String xml = "xml" + System.currentTimeMillis();
         String newContentPlain = "new plain content";
         String newContentXml = "new xml content";      
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -595,7 +595,7 @@ public class ContentTest extends AbstractTest
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain";     
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -612,7 +612,7 @@ public class ContentTest extends AbstractTest
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();  
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",

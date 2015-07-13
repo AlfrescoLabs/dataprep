@@ -54,7 +54,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -74,7 +74,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "!@#$%^&*()_+<>?:{}[]";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -95,7 +95,7 @@ public class ContentActionsTests extends AbstractTest
         String tag1 = "tag1";
         String tag2 = "tag2";
         String tag3 = "tag3";     
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -120,7 +120,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -136,7 +136,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -154,7 +154,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -171,7 +171,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag-" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";      
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -193,7 +193,7 @@ public class ContentActionsTests extends AbstractTest
         String tag1 = "tag1";
         String tag2 = "tag2";
         String tag3 = "tag3";     
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -218,7 +218,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -239,7 +239,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -258,7 +258,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -277,7 +277,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -296,7 +296,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
         String comment = "test comment";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -315,7 +315,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
         String commentFolder = "comment on folder";
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -334,7 +334,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
         String comment = "Comment";
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -350,7 +350,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
         String comment = "Comment" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -376,7 +376,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
         String comment = "test comment";
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -400,7 +400,7 @@ public class ContentActionsTests extends AbstractTest
         String comment1 = "comment1";
         String comment2 = "comment2";
         String comment3 = "comment3";     
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -426,8 +426,8 @@ public class ContentActionsTests extends AbstractTest
         String userName = "likeUser" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
         String likeDoc = "likeDoc";
-        userService.create(admin, admin, userName, password, userName);
-        userService.create(admin, admin, userToInvite, password, userToInvite);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
+        userService.create(admin, admin, userToInvite, password, userToInvite, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -447,7 +447,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -462,7 +462,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -481,8 +481,8 @@ public class ContentActionsTests extends AbstractTest
         String userName = "likeUser" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
         String likeDoc = "likeDoc";
-        userService.create(admin, admin, userName, password, userName);
-        userService.create(admin, admin, userToInvite, password, userToInvite);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
+        userService.create(admin, admin, userToInvite, password, userToInvite, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -504,7 +504,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -519,7 +519,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -538,8 +538,8 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName);
-        userService.create(admin, admin, userToInvite, password, userToInvite);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
+        userService.create(admin, admin, userToInvite, password, userToInvite, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -562,7 +562,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
         String favDoc = "favDoc";
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -579,7 +579,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -596,7 +596,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -611,7 +611,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -625,7 +625,7 @@ public class ContentActionsTests extends AbstractTest
     public void favoriteFakeSite() throws Exception
     {
         String userName = "favUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         contentAction.setFolderAsFavorite(userName, password, "fakeSite", "doc");
     }
     
@@ -635,7 +635,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
         String favDoc = "favDoc";
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -653,7 +653,7 @@ public class ContentActionsTests extends AbstractTest
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
         String favDoc = "favDoc";
-        userService.create(admin, admin, userName, password, userName);
+        userService.create(admin, admin, userName, password, userName, "fname", "lname");
         site.create(userName,
                     password,
                     "mydomain",
@@ -671,7 +671,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password);
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
                     "mydomain",

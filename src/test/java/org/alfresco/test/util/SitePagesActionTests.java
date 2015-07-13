@@ -46,7 +46,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "calendar-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName);
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         
         Date today = new Date();
@@ -60,7 +60,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "calendar-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName);
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         
         Date today = new Date();
@@ -73,7 +73,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "calendar-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName);
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null, 
                 null, null, false, "tag1"));  
@@ -84,7 +84,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "calendar-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName);
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null, 
                 null, null, true, null));  
@@ -94,7 +94,7 @@ public class SitePagesActionTests extends AbstractTest
     public void addCalendarEventFakeSite() throws Exception
     {
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName);
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
         Assert.assertTrue(pageService.addCalendarEvent(userName, userName, "fakeSite", "what", "where", "description", null, null, 
                 null, null, true, null));  
     }  
