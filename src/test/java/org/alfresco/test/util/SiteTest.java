@@ -18,11 +18,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
-import org.alfresco.dataprep.SiteService.RMSiteCompliance;
+import org.alfresco.dataprep.SiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;
@@ -38,7 +37,6 @@ import org.testng.annotations.Test;
 public class SiteTest extends AbstractTest 
 {
     private static final String MY_DOMAIN = "mydomain";
-    private static final String ADMIN = "admin"; 
     @Autowired
     private SiteService site;
     private String siteId;
@@ -204,25 +202,5 @@ public class SiteTest extends AbstractTest
         site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertFalse(exists);
-    }
-    
-    //@Test
-    public void createRMSite() throws Exception
-    {
-        Assert.assertTrue(site.createRMSite(ADMIN, ADMIN, "FirstRMSite", "RM Site Description", RMSiteCompliance.STANDARD));
-        site.delete(ADMIN, ADMIN, "domain", "rm");
-        Assert.assertTrue(site.createRMSite(ADMIN, ADMIN, "FirstRMSite", "RM Site Description", RMSiteCompliance.DOD_5015_2_STD));
-    }
-    
-    //@Test(expectedExceptions = RuntimeException.class, dependsOnMethods="createRMSite")
-    public void addRMSiteTwice() throws Exception
-    {   
-        site.createRMSite(ADMIN, ADMIN, "FirstRMSite", "description", RMSiteCompliance.STANDARD);
-    }
-    
-    //@Test(expectedExceptions = RuntimeException.class)
-    public void createRMSiteFakeCredentials() throws Exception
-    {
-        Assert.assertTrue(site.createRMSite(ADMIN, "fakepass", "FirstRMSite", "", RMSiteCompliance.STANDARD));
     }
 }

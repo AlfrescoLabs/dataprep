@@ -643,17 +643,17 @@ public class SiteService
         body.put("sitePreset", "rm-site-dashboard");
         body.put("compliance", compliance.compliance);
         body.put("type", compliance.compliance);
-        post.setEntity(client.setMessageBody(body));      
+        post.setEntity(client.setMessageBody(body));
         HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {
             HttpResponse response = clientWithAuth.execute(post);
             switch (response.getStatusLine().getStatusCode())
             {
-                case HttpStatus.SC_OK:             
+                case HttpStatus.SC_OK:
                     String xmlBody = AlfrescoHttpClient.contentRmSite.replaceAll("<shortName>", "rm");
                     String secondPostUrl = client.getAlfrescoUrl() + "alfresco/service/remoteadm/createmulti?s=sitestore";
-                    HttpPost secondPost  = new HttpPost(secondPostUrl);                 
+                    HttpPost secondPost  = new HttpPost(secondPostUrl);
                     secondPost.setHeader("Content-Type", "application/xml");
                     StringEntity xmlEntity = new StringEntity(xmlBody, AlfrescoHttpClient.UTF_8_ENCODING);
                     xmlEntity.setContentType("application/xml");
