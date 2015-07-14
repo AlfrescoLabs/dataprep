@@ -408,7 +408,7 @@ public class AlfrescoHttpClient
     "             <authentication>user</authentication>"+
     "             <template-instance>dashboard-2-columns-wide-right</template-instance>"+
     "             <properties>"+
-    "               <sitePages>[{\"pageId\":\"documentlibrary\"}]</sitePages>"+
+    "               <sitePages>[{\"pageId\":\"documentlibrary\", \"sitePageTitle\":\"File Plan\"}, {\"pageId\":\"rmsearch\"}]</sitePages>"+     
     "             </properties>"+
     "           </page>"+
     "         </document>"+
