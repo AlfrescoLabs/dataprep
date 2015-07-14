@@ -654,11 +654,12 @@ public class SiteService
                     String xmlBody = AlfrescoHttpClient.contentRmSite.replaceAll("<shortName>", "rm");
                     String secondPostUrl = client.getAlfrescoUrl() + "alfresco/service/remoteadm/createmulti?s=sitestore";
                     HttpPost secondPost  = new HttpPost(secondPostUrl);
-                    secondPost.setHeader("Content-Type", "application/xml");
-                    StringEntity xmlEntity = new StringEntity(xmlBody, AlfrescoHttpClient.UTF_8_ENCODING);
-                    xmlEntity.setContentType("application/xml");
+                    secondPost.setHeader("Content-Type", "application/xml;charset=UTF-8");
+                    StringEntity xmlEntity = new StringEntity(xmlBody, "UTF-8");
+                    xmlEntity.setContentType("application/xml");     
                     secondPost.setEntity(xmlEntity); 
-                    clientWithAuth.execute(secondPost);
+                    
+                    response = clientWithAuth.execute(secondPost);
                     secondPost.releaseConnection();
                     String url = client.getAlfrescoUrl() + "alfresco/service/slingshot/doclib2/doclist/all/site/rm/documentLibrary/";
                     HttpGet get = new HttpGet(url);
