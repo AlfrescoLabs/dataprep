@@ -42,10 +42,8 @@ public class RMServiceTest extends AbstractTest
     }
     @Test
     public void createRMSite() throws Exception
-    {
-        Assert.assertTrue(site.createRMSite(ADMIN, ADMIN, "FirstRMSite", "RM Site Description", RMSiteCompliance.STANDARD));
-        site.delete(ADMIN, ADMIN, "domain", "rm");
-        Assert.assertTrue(site.createRMSite(ADMIN, ADMIN, "FirstRMSite", "RM Site Description", RMSiteCompliance.DOD_5015_2_STD));
+    {   
+        Assert.assertTrue(site.createRMSite(ADMIN, ADMIN, "Records Management", "RM Site Description", RMSiteCompliance.STANDARD));
     }
     
     @Test(expectedExceptions = RuntimeException.class, dependsOnMethods="createRMSite")

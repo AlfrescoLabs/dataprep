@@ -376,9 +376,6 @@ public class AlfrescoHttpClient
     "             <region-id>component-1-1</region-id>"+
     "             <source-id>site/" + "<shortName>" + "/dashboard</source-id>"+
     "             <url>/components/dashlets/colleagues</url>"+
-    "             <properties>"+
-    "               <height>504</height>"+
-    "             </properties>"+
     "           </component>"+
     "         </document>"+
     "         <document path=\"/alfresco/site-data/components/page.component-2-1.site~" + "<shortName>" + "~dashboard.xml\">"+

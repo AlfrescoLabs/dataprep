@@ -657,8 +657,7 @@ public class SiteService
                     secondPost.setHeader("Content-Type", "application/xml;charset=UTF-8");
                     StringEntity xmlEntity = new StringEntity(xmlBody, "UTF-8");
                     xmlEntity.setContentType("application/xml");     
-                    secondPost.setEntity(xmlEntity); 
-                    
+                    secondPost.setEntity(xmlEntity);                   
                     response = clientWithAuth.execute(secondPost);
                     secondPost.releaseConnection();
                     String url = client.getAlfrescoUrl() + "alfresco/service/slingshot/doclib2/doclist/all/site/rm/documentLibrary/";
