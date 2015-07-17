@@ -17,6 +17,7 @@ package org.alfresco.dataprep;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.httpclient.HttpStatus;
@@ -25,7 +26,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -59,7 +63,7 @@ public class SitePagesService
      * @param timeEnd String event time finish
      * @param allDay boolean all day event
      * @param tag String tag the event
-     * @return true if user exists
+     * @return true if event is created
      * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
@@ -195,6 +199,159 @@ public class SitePagesService
         finally
         {
             post.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
+     * Get the name (ID) of the event
+     * 
+     * @param userName String user name
+     * @param password String user password
+     * @param siteName String site name
+     * @param what String what
+     * @param where String event location
+     * @param from Date event start date
+     * @param to Date event end date
+     * @param timeStart String event start time
+     * @param timeEnd String event time finish
+     * @param allDay boolean all day event
+     * @return String name (id) of event
+     * @throws Exception if error
+     */
+    public String getEventName(final String userName,
+                               final String password,
+                               final String siteName,
+                               final String what,
+                               final String where,
+                               Date from,
+                               Date to,
+                               String timeStart,
+                               String timeEnd,
+                               final boolean allDay) throws Exception
+    {
+        String name = "";
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
+        Calendar calendar = Calendar.getInstance();     
+        calendar.add(Calendar.DATE, 1);
+        to = calendar.getTime();   
+        String strFrom = dateFormat.format(from);
+        String strTo = dateFormat.format(to);        
+        String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/events/" + siteName + 
+                "/user?from=" + strFrom + "&to" + strTo + "&repeating=all";
+        HttpGet get = new HttpGet(reqURL);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(get);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    org.json.JSONObject items = new org.json.JSONObject(EntityUtils.toString(response.getEntity()));
+                    org.json.JSONArray events = items.getJSONArray("events");  
+                    for (int i = 0; i < events.length(); i++) 
+                    {               
+                        String itemWhat = items.getJSONArray("events").getJSONObject(i).getString("title");
+                        String itemWhere = items.getJSONArray("events").getJSONObject(i).getString("where");
+                        if(allDay)
+                        {
+                            if (itemWhat.equals(what) || itemWhere.equals(where)) 
+                            {
+                                name = items.getJSONArray("events").getJSONObject(i).getString("name");
+                            }
+                        }
+                        else
+                        {               
+                            String sTime = events.getJSONObject(i).getJSONObject("startAt").getString("legacyTime");
+                            String eTime = events.getJSONObject(i).getJSONObject("endAt").getString("legacyTime");
+                            if(timeStart.contains("AM") || timeStart.contains("PM"))
+                            {
+                                timeStart = convertTo24Hour(timeStart);
+                            }
+                            if(timeEnd.contains("AM") || timeEnd.contains("PM"))
+                            {
+                                timeEnd = convertTo24Hour(timeEnd);
+                            }
+                            
+                            if (itemWhat.equals(what) && sTime.equals(timeStart) && eTime.equals(timeEnd)) 
+                            {
+                                name = items.getJSONArray("events").getJSONObject(i).getString("name");
+                            }              
+                        }                    
+                    }
+                    return name;
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new RuntimeException("Invalid credentials");
+                default:
+                    logger.error("Unable to find event " + response.toString());
+                    break;
+            }
+        } 
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        }  
+        return name;
+    }
+    
+    /**
+     * Remove an event
+     * 
+     * @param userName String user name
+     * @param password String user password
+     * @param siteName String site name
+     * @param what String what
+     * @param where String event location
+     * @param from Date event start date
+     * @param to Date event end date
+     * @param timeStart String event start time
+     * @param timeEnd String event time finish
+     * @param allDay boolean all day event
+     * @return boolean true if event is removed
+     * @throws Exception if error
+     */
+    public boolean removeEvent(final String userName,
+                               final String password,
+                               final String siteName,
+                               final String what,
+                               final String where,
+                               Date from,
+                               Date to,
+                               String timeStart,
+                               String timeEnd,
+                               final boolean allDay) throws Exception
+    {
+        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName) || StringUtils.isEmpty(what)
+                || StringUtils.isEmpty(from.toString()) || StringUtils.isEmpty(to.toString()))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        String eventName = getEventName(userName, password, siteName, what, where, from, to, timeStart, timeEnd, allDay);
+        if(StringUtils.isEmpty(eventName))
+        {
+            throw new RuntimeException("Event not found");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/event/" + siteName + "/" + eventName;
+        HttpDelete request = new HttpDelete(reqURL);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(request);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_NO_CONTENT:
+                    return true;
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new RuntimeException("Invalid site " + siteName);
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
             client.close();
         }
         return false;
