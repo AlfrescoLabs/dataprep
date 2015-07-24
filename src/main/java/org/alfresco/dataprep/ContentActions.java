@@ -229,24 +229,15 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + optType.name + "/" + optionNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);          
+        if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(delete);           
-            if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace(actionValue + " is removed successfully");
-                }
-                return true;
+                logger.trace(actionValue + " is removed successfully");
             }
+            return true;
         }
-        finally
-        {
-            delete.releaseConnection();
-            client.close();
-        }    
         return false;
     } 
     
@@ -319,20 +310,12 @@ public class ContentActions extends CMISUtil
         {
             reqUrl = reqUrl + "/likes";
         }
-        try
+        HttpGet get = new HttpGet(reqUrl);    
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
+        if(HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
-            HttpGet get = new HttpGet(reqUrl);
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(get);
-            if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
-            {
-                return client.readStream(response.getEntity()).toJSONString(); 
-            }
+            return client.readStream(response.getEntity()).toJSONString(); 
         }
-        finally
-        {
-            client.close();
-        } 
         return "";
     }
     
@@ -642,25 +625,17 @@ public class ContentActions extends CMISUtil
         {
             throw new RuntimeException("Content doesn't exists");
         }
-        String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + "/ratings/likes";        
-        try
+        String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + "/ratings/likes";
+        HttpDelete delete = new HttpDelete(reqUrl);  
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);      
+        if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
-            HttpDelete delete = new HttpDelete(reqUrl);
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(delete);           
-            if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("Like is removed successfully from " + contentName);
-                }
-                return true;
+                logger.trace("Like is removed successfully from " + contentName);
             }
+            return true;
         }
-        finally
-        {
-            client.close();
-        }    
         return false;
     }
     
@@ -782,25 +757,17 @@ public class ContentActions extends CMISUtil
         {
             throw new RuntimeException("Content doesn't exists");
         }
-        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;;        
-        try
+        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
+        HttpDelete delete = new HttpDelete(reqUrl);
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);         
+        if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
-            HttpDelete delete = new HttpDelete(reqUrl);
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(delete);           
-            if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("favorite is removed successfully");
-                }
-                return true;
+                logger.trace("Favorite is removed successfully from " + contentName);
             }
-        }
-        finally
-        {
-            client.close();
-        }    
+            return true;
+        }   
         return false;
     }
     
@@ -830,28 +797,17 @@ public class ContentActions extends CMISUtil
         {
             throw new RuntimeException("Content doesn't exists");
         }
-        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;;        
-        try
+        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
+        HttpGet get = new HttpGet(reqUrl);
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);        
+        if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
-            HttpGet get = new HttpGet(reqUrl);
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(get);           
-            if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace( "Content " + contentName + "is marked as favorite");
-                }
-                return true;
+                logger.trace( "Content " + contentName + "is marked as favorite");
             }
-            else
-            {
-                return false;
-            }
+            return true;
         }
-        finally
-        {
-            client.close();
-        }    
+        return false;
     }
 }

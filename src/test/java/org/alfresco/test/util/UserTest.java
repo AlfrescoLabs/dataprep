@@ -209,7 +209,7 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.removePendingSiteRequest(admin, admin, userName, siteId));
     }
     
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void removePendingRequestPublicSite() throws Exception
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
@@ -223,6 +223,14 @@ public class UserTest extends AbstractTest
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
         Assert.assertFalse(userService.removePendingSiteRequest(admin, admin, userName, siteId));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void removePendingReqNonExistentSite() throws Exception
+    {
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        userService.removePendingSiteRequest(admin, admin, userName, "fakeSite");
     }
     
     @Test
@@ -288,12 +296,28 @@ public class UserTest extends AbstractTest
         Assert.assertFalse(userService.removeSiteMembership(admin, admin, "fakeUser", siteId));
     }
     
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
+    public void removeSiteMembFakeSiteManager() throws Exception
+    {
+        String siteId = "siteMembership-" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        site.create(admin,
+                    admin,
+                    "myDomain",
+                    siteId, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        userService.removeSiteMembership("fakeSiteManager", "fakePass", userName, siteId);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
     public void removeSiteMembershipNoExistentSite() throws Exception
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertFalse(userService.removeSiteMembership(admin, admin, userName, "fakeSite"));
+        userService.removeSiteMembership(admin, admin, userName, "fakeSite");
     }
     
     @Test
@@ -476,10 +500,10 @@ public class UserTest extends AbstractTest
         userService.create(admin, admin, theUser, password, theUser, firstName, lastName);
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_MEETING_WORKSPACES, DashletLayout.THREE_COLUMNS, 3, 1));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DISCUSSIONS, DashletLayout.THREE_COLUMNS, 3, 2));
-        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.FOUR_COLUMNS, 4, 2));
-        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DOC_WORKSPACES, DashletLayout.FOUR_COLUMNS, 4, 3));
-        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.RSS_FEED, DashletLayout.FOUR_COLUMNS, 4, 4));
-        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.SITE_SEARCH, DashletLayout.FOUR_COLUMNS, 4, 5));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.FOUR_COLUMNS, 4, 1));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DOC_WORKSPACES, DashletLayout.FOUR_COLUMNS, 4, 2));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.RSS_FEED, DashletLayout.FOUR_COLUMNS, 4, 3));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.SITE_SEARCH, DashletLayout.FOUR_COLUMNS, 4, 4));
     }
     
     @Test

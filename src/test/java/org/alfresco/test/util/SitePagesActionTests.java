@@ -14,11 +14,14 @@
  */
 package org.alfresco.test.util;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.alfresco.dataprep.SitePagesService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
+import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
@@ -148,5 +151,52 @@ public class SitePagesActionTests extends AbstractTest
         String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
         Assert.assertNotNull(nameEvent);       
         pageService.removeEvent(userName, userName, "fakeSite", "what", "where", today, today, "12:00", "13:00", false);
+    }
+    
+    @Test
+    public void createWikiPage() throws Exception
+    {
+        String siteId = "wiki-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String wikiTitle1 = "wiki_1" + + System.currentTimeMillis();
+        String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.WIKI, null);
+        List<String>tags = new ArrayList<String>();
+        tags.add("tag1");
+        tags.add("tag2");
+        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, tags));
+        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle2, wikiTitle2, tags));
+        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle1));       
+        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle2));       
+        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, "fakeWiki"));
+    }
+    
+    @Test
+    public void removeWikiPage() throws Exception
+    {
+        String siteId = "wiki-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String wikiTitle1 = "wiki_1" + + System.currentTimeMillis();
+        String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, null));
+        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle2, wikiTitle2, null));
+        Assert.assertTrue(pageService.deleteWikiPage(userName, userName, siteId, wikiTitle1));
+        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle1));        
+        Assert.assertTrue(pageService.deleteWikiPage(userName, userName, siteId, wikiTitle2));
+        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle2));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void removeNonExistentWikiPage() throws Exception
+    {
+        String siteId = "wiki-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        pageService.deleteWikiPage(userName, userName, siteId, "fakeWiki");      
     }
 }

@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
@@ -29,10 +30,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -257,13 +260,13 @@ public class SitePagesService
                         String itemWhere = items.getJSONArray("events").getJSONObject(i).getString("where");
                         if(allDay)
                         {
-                            if (itemWhat.equals(what) || itemWhere.equals(where)) 
+                            if (itemWhat.equals(what) || itemWhere.equals(where))
                             {
                                 name = items.getJSONArray("events").getJSONObject(i).getString("name");
                             }
                         }
                         else
-                        {               
+                        {
                             String sTime = events.getJSONObject(i).getJSONObject("startAt").getString("legacyTime");
                             String eTime = events.getJSONObject(i).getJSONObject("endAt").getString("legacyTime");
                             if(timeStart.contains("AM") || timeStart.contains("PM"))
@@ -273,9 +276,8 @@ public class SitePagesService
                             if(timeEnd.contains("AM") || timeEnd.contains("PM"))
                             {
                                 timeEnd = convertTo24Hour(timeEnd);
-                            }
-                            
-                            if (itemWhat.equals(what) && sTime.equals(timeStart) && eTime.equals(timeEnd)) 
+                            }                         
+                            if(itemWhat.equals(what) && sTime.equals(timeStart) && eTime.equals(timeEnd))
                             {
                                 name = items.getJSONArray("events").getJSONObject(i).getString("name");
                             }              
@@ -337,22 +339,160 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/event/" + siteName + "/" + eventName;
         HttpDelete request = new HttpDelete(reqURL);
+        HttpResponse response = client.executeRequest(client, userName, password, reqURL, request);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_NO_CONTENT:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            default:
+                logger.error("Unable to delete event: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Create a new wiki page
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param wikiTitle String wiki title
+     * @param content String wiki content
+     * @param tags List of tags
+     * @return true if wiki page is created (200 Status)
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createWiki(final String userName,
+                              final String password,
+                              final String siteName,
+                              String wikiTitle,
+                              final String content,
+                              final List<String>tags) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
+                || StringUtils.isEmpty(wikiTitle))
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        if (wikiTitle.contains(" ")) 
+        {
+            wikiTitle = wikiTitle.replace(" ", "%20");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
+        HttpPut put = new HttpPut(url);    
+        JSONObject body = new JSONObject();
+        body.put("page", "wiki-page");
+        body.put("pageTitle", wikiTitle);
+        body.put("pagecontent", content);
+        JSONArray array = new JSONArray();
+        if(tags != null)
+        {
+            for(int i = 0; i < tags.size(); i++)
+            {
+                array.put(tags.get(i));
+            }
+        }
+        body.put("tags", array);
+        put.setEntity(client.setMessageBody(body));
         HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {
-            HttpResponse response = clientWithAuth.execute(request);
+            HttpResponse response = clientWithAuth.execute(put);
             switch (response.getStatusLine().getStatusCode())
             {
-                case HttpStatus.SC_NO_CONTENT:
+                case HttpStatus.SC_OK:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Wiki page " + wikiTitle + " is created successfuly");
+                    }
                     return true;
                 case HttpStatus.SC_NOT_FOUND:
                     throw new RuntimeException("Invalid site " + siteName);
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new RuntimeException("Invalid user name or password");
+                default:
+                    logger.error("Unable to create wiki page: " + response.toString());
+                    break;
             }
         }
         finally
         {
-            request.releaseConnection();
+            put.releaseConnection();
             client.close();
+        } 
+        return false;
+    }
+    
+    /**
+     * Verify if wiki exists
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param wikiTitle String wiki title
+     * @return true if wiki exists (200 Status)
+     * @throws Exception if error
+     */
+    public boolean wikiExists(final String userName,
+                              final String password,
+                              final String siteName,
+                              String wikiTitle) throws Exception
+    {
+        if (wikiTitle.contains(" ")) 
+        {
+            wikiTitle = wikiTitle.replaceAll(" ", "_");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;       
+        HttpGet get = new HttpGet(url);
+        HttpResponse response = client.executeRequest(client, userName, password, url, get);
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    /**
+     * Delete wiki page
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param wikiTitle String wiki title
+     * @return true if wiki is removed (204 Status)
+     * @throws Exception if error
+     */
+    public boolean deleteWikiPage(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  String wikiTitle) throws Exception
+    {
+        if (wikiTitle.contains(" ")) 
+        {
+            wikiTitle = wikiTitle.replaceAll(" ", "_");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;       
+        HttpDelete delete = new HttpDelete(url);
+        HttpResponse response = client.executeRequest(client, userName, password, url, delete);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_NO_CONTENT:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Wiki doesn't exists " + wikiTitle);
+            default:
+                logger.error("Unable to delete wiki page: " + response.toString());
+                break;
         }
         return false;
     }

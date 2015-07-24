@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -199,6 +200,45 @@ public class AlfrescoHttpClient
             logger.error(response);
             throw new RuntimeException("Error while executing request", e);
         }
+    }
+    
+    /**
+     * Execute HttpClient request.
+     * @param client AlfrescoHttpClient client
+     * @param userName String user name 
+     * @param password String password
+     * @param url String api url
+     * @param request HttpRequestBase the request
+     * @return {@link HttpResponse} response
+     * @throws Exception if error
+     */
+    public HttpResponse executeRequest(AlfrescoHttpClient client,
+                                      final String userName,
+                                      final String password,
+                                      final String url,
+                                      HttpRequestBase request) throws Exception
+    {
+        HttpResponse response = null;
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            response = clientWithAuth.execute(request);
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
+            {
+                throw new RuntimeException("Invalid user name or password");   
+            }      
+        } 
+        catch(Exception e)
+        {
+            logger.error(response);
+            throw new RuntimeException("Error while executing request", e);
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return response;
     }
     
     /**

@@ -36,10 +36,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -163,26 +160,19 @@ public class UserService
      * @param adminPass admin credential
      * @param username user identifier 
      * @return true if user exists
+     * @throws Exception if error
      */
     public boolean userExists(final String adminUser, 
                               final String adminPass, 
-                              final String username) 
+                              final String username) throws Exception 
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String ticket = client.getAlfTicket(adminUser, adminPass);
-        String url = client.getApiUrl() + "people/" + username + "?alf_ticket=" + ticket;
+        String url = client.getApiUrl() + "people/" + username;
         HttpGet get = new HttpGet(url);
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, url, get);
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(get);
-            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-            {
-                return true;
-            }
-        } 
-        finally
-        {
-            client.close();
+            return true;
         }
         return false;
     }
@@ -193,41 +183,33 @@ public class UserService
      * @param adminPass admin credential
      * @param userName String identifier user identifier
      * @return true if successful 
+     * @throws Exception if error
      */
     public boolean delete(final String adminUser, 
                           final String adminPass, 
-                          final String userName)
+                          final String userName) throws Exception
     {
         if (StringUtils.isEmpty(userName) ||  StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
         {
             throw new IllegalArgumentException("Null Parameters: Please correct");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String ticket = client.getAlfTicket(adminUser, adminPass);
-        String url = client.getApiUrl() + "people/" + userName + "?alf_ticket=" + ticket;
+        String url = client.getApiUrl() + "people/" + userName;
         HttpDelete httpDelete = new HttpDelete(url);
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, url, httpDelete);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(httpDelete);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("User deleted successfully: " + userName);
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("User: " + userName + " doesn't exists");
-                default:
-                    logger.error("Unable to delete user: " + response.toString());
-                    break;
-            }
-        }
-        finally
-        {
-            httpDelete.releaseConnection();
-            client.close();
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("User deleted successfully: " + userName);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("User: " + userName + " doesn't exists");
+            default:
+                logger.error("Unable to delete user: " + response.toString());
+                break;
         }
         return false;
     }
@@ -350,6 +332,7 @@ public class UserService
      * @return true if request is successful
      * @throws Exception if error
      */
+    @SuppressWarnings("unchecked")
     public boolean inviteGroupToSite(final String siteManager,
                                      final String passwordManager, 
                                      final String siteId,
@@ -364,14 +347,12 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships";
         HttpPost post  = new HttpPost(reqUrl);    
-        org.json.JSONObject body = new org.json.JSONObject();
-        org.json.JSONObject group = new org.json.JSONObject();
+        JSONObject body = new JSONObject();
+        JSONObject group = new JSONObject();
         group.put("fullName", "GROUP_" + groupName);        
         body.put("role", role);
-        body.put("group", group);       
-        StringEntity se = new StringEntity(body.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
-        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
-        post.setEntity(se);
+        body.put("group", group);
+        post.setEntity(client.setMessageBody(body));
         HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
         try
         {
@@ -516,22 +497,18 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }        
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String api = client.getApiUrl().replace("/service", "");
-        String reqUrl = api + "-default-/public/alfresco/versions/1/people/" + userName + "/site-membership-requests/" + siteId;
+        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/site-membership-requests/" + siteId;
         HttpDelete delete  = new HttpDelete(reqUrl);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
-        try
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, delete);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(delete);
-            if(204 == response.getStatusLine().getStatusCode())
-            {
+            case HttpStatus.SC_NO_CONTENT:
                 return true;
-            }
-        }
-        finally
-        {
-            delete.releaseConnection();
-            client.close();
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Site doesn't exists or the site is PUBLIC " + siteId);
+            default:
+                logger.error("Unable to remove pending request: " + response.toString());
+                break;
         }
         return false;
     }
@@ -559,19 +536,16 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships/" + userName;
         HttpDelete delete  = new HttpDelete(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
-        try
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, url, delete);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(delete);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-            {
+            case HttpStatus.SC_OK:
                 return true;
-            }
-        }
-        finally
-        {
-            delete.releaseConnection();
-            client.close();
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Site doesn't exists " + siteId);
+            default:
+                logger.error("Unable to remove pending request: " + response.toString());
+                break;
         }
         return false;
     }
@@ -600,7 +574,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String api = client.getApiUrl().replace("/service", "");
         JSONObject userBody = new JSONObject();
-        org.json.JSONObject grpBody = new org.json.JSONObject();
+        JSONObject grpBody = new JSONObject();
         if(!isGroup)
         {
             reqUrl = api + "-default-/public/alfresco/versions/1/sites/" + siteName + "/members/" + entity;
@@ -609,7 +583,7 @@ public class UserService
         else
         {
             reqUrl = client.getApiUrl() + "sites/" + siteName.toLowerCase() + "/memberships";
-            org.json.JSONObject group = new org.json.JSONObject();
+            JSONObject group = new JSONObject();
             group.put("fullName", "GROUP_" + entity);        
             grpBody.put("role", role);
             grpBody.put("group", group);                
@@ -622,9 +596,7 @@ public class UserService
         }
         else
         {
-            StringEntity se = new StringEntity(grpBody.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
-            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
-            put.setEntity(se);
+            put.setEntity(client.setMessageBody(grpBody));
         }
         try
         {
@@ -722,20 +694,12 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName + "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "groups/" + groupName;
         HttpGet request = new HttpGet(reqURL);
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-            {
-                return true;
-            }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
+            return true;
         }
         return false;
     }
@@ -926,25 +890,16 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName + 
-                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName;
         HttpDelete request = new HttpDelete(reqURL);
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("User: " + userName + " is removed from " + groupName);
-                }
-                return true;
+                logger.trace("User: " + userName + " is removed from " + groupName);
             }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
+            return true;
         }
         return false;
     }
@@ -969,25 +924,16 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup + 
-                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup;
         HttpDelete request = new HttpDelete(reqURL);
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("Sub group: " + subGroup + " is removed from " + groupName);
-                }
-                return true;
+                logger.trace("Sub group: " + subGroup + " is removed from " + groupName);
             }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
+            return true;
         }
         return false;
     }
@@ -1005,29 +951,21 @@ public class UserService
                                final String adminPass,
                                final String groupName) throws Exception
     {
-        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        if (StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass) || StringUtils.isEmpty(groupName))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "rootgroups/" + groupName + "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "rootgroups/" + groupName;
         HttpDelete request = new HttpDelete(reqURL);
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("Group: " + groupName + " is removed successfully");
-                }
-                return true;
+                logger.trace("Group: " + groupName + " is removed successfully");
             }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
+            return true;
         }
         return false;
     }
@@ -1088,34 +1026,32 @@ public class UserService
                                 final String userPass,
                                 final String siteName) throws Exception
     { 
-           int count=0;
-           if (StringUtils .isEmpty(userName) || StringUtils .isEmpty(userPass) || StringUtils.isEmpty(siteName))
-           {
-               throw new IllegalArgumentException("Parameter missing");
-           }
-           
-           AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-           String reqURL = client.getApiUrl() + "sites/" + siteName + "/memberships?alf_ticket=" + client.getAlfTicket(userName, userPass);
-           HttpGet request = new HttpGet(reqURL);
-           try
-           {
-               HttpResponse response = client.executeRequest(request);
-               if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-               {
-                   HttpEntity entity = response.getEntity();
-                   String responseString = EntityUtils.toString(entity , "UTF-8"); 
-                   Object obj = JSONValue.parse(responseString);
-                   JSONArray array = (JSONArray)obj;
-                   count = array.size();
-               }
-           }
-           finally
-           {
-               request.releaseConnection();
-               client.close();
-           }
-           
-           return count;
+        int count=0;
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(userPass) || StringUtils.isEmpty(siteName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "sites/" + siteName + "/memberships?alf_ticket=" + client.getAlfTicket(userName, userPass);
+        HttpGet request = new HttpGet(reqURL);
+        try
+        {
+            HttpResponse response = client.executeRequest(request);
+            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                HttpEntity entity = response.getEntity();
+                String responseString = EntityUtils.toString(entity, "UTF-8"); 
+                Object obj = JSONValue.parse(responseString);
+                JSONArray array = (JSONArray)obj;
+                count = array.size();
+            }
+        }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }     
+        return count;
     }
     
     /**
@@ -1187,6 +1123,7 @@ public class UserService
      * @return true if the dashlet is added
      * @throws Exception if error
      */
+    @SuppressWarnings("unchecked")
     public boolean addDashlet(final String userName,
                               final String password,
                               final UserDashlet dashlet,
@@ -1197,8 +1134,8 @@ public class UserService
         login(userName, password);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();           
         String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
-        org.json.JSONObject body = new org.json.JSONObject();
-        org.json.JSONArray array = new org.json.JSONArray();     
+        JSONObject body = new JSONObject();
+        JSONArray array = new JSONArray();     
         body.put("dashboardPage", "user/" + userName + "/dashboard");
         body.put("templateId", layout.id);
         
@@ -1213,24 +1150,21 @@ public class UserService
         while (entries.hasNext())
         {
             Map.Entry<String, String> entry = entries.next();
-            org.json.JSONObject jDashlet = new org.json.JSONObject();
+            JSONObject jDashlet = new JSONObject();
             jDashlet.put("url", entry.getKey());
             jDashlet.put("regionId", entry.getValue());
             jDashlet.put("originalRegionId", entry.getValue());
-            array.put(jDashlet);
+            array.add(jDashlet);
         }    
         
-        org.json.JSONObject newDashlet = new org.json.JSONObject();
+        JSONObject newDashlet = new JSONObject();
         newDashlet.put("url", dashlet.id);
         String region = "component-" + column + "-" + position;
         newDashlet.put("regionId", region);
-        array.put(newDashlet);
-        body.put("dashlets", array);
-        
+        array.add(newDashlet);
+        body.put("dashlets", array);       
         HttpPost post  = new HttpPost(url);
-        StringEntity se = new StringEntity(body.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
-        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
-        post.setEntity(se);
+        post.setEntity(client.setMessageBody(body));
         try
         {
             HttpResponse response = client.executeRequest(post);
