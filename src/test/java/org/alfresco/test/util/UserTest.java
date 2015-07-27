@@ -172,15 +172,15 @@ public class UserTest extends AbstractTest
         Assert.assertFalse(userService.requestSiteMembership(userName, password, siteId));
     }
     
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void requestSiteMembershipNoExistentSite() throws Exception
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertFalse(userService.requestSiteMembership(userName, password, "fakeSite"));
+        userService.requestSiteMembership(userName, password, "fakeSite");
     }
     
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void requestSiteMembershipNoExistentUser() throws Exception
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
@@ -190,7 +190,7 @@ public class UserTest extends AbstractTest
                     siteId, 
                     "my site description", 
                     Visibility.PUBLIC);
-        Assert.assertFalse(userService.requestSiteMembership("fakeUser", password, "fakeSite"));
+        userService.requestSiteMembership("fakeUser", password, "fakeSite");
     }
     
     @Test
@@ -634,5 +634,40 @@ public class UserTest extends AbstractTest
         userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
         site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
         Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addMemberToInvalidSite() throws Exception
+    { 
+        String userManager = "siteManager" + System.currentTimeMillis();
+        String userToAdd = "member" + System.currentTimeMillis();
+        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
+        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
+        userService.createSiteMember(userManager, password, userToAdd, "fakeSite", "SiteContributor");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addMemberInvalidRole() throws Exception
+    { 
+        String userManager = "siteManager" + System.currentTimeMillis();
+        String userToAdd = "member" + System.currentTimeMillis();
+        String siteId = "site" + System.currentTimeMillis();
+        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
+        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
+        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
+        userService.createSiteMember(userManager, password, userToAdd, siteId, "fakeRole");
+    }
+    
+    @Test
+    public void addMemberToSiteTwice() throws Exception
+    { 
+        String userManager = "siteManager" + System.currentTimeMillis();
+        String userToAdd = "member" + System.currentTimeMillis();
+        String siteId = "site" + System.currentTimeMillis();
+        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
+        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
+        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
+        Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+        Assert.assertFalse(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
     }
 }

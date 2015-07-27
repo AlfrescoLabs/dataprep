@@ -14,7 +14,6 @@
  */
 package org.alfresco.dataprep;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -70,6 +69,7 @@ public class UserService
      * @param firstName first name
      * @param lastName last name
      * @return true if successful
+     * @throws Exception 
      */
     public boolean create(final String adminUser, 
                           final String adminPass, 
@@ -77,7 +77,7 @@ public class UserService
                           final String password, 
                           final String email,
                           final String firstName,
-                          final String lastName) 
+                          final String lastName) throws Exception 
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) ||
             StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass) || 
@@ -89,40 +89,30 @@ public class UserService
 
         JSONObject body = encode(userName, password, firstName, lastName, email);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "people?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "people";
         if (logger.isTraceEnabled())
         {
             logger.trace("Create user using Url - " + reqURL);
         }
-        HttpPost request = null;
-        HttpResponse response = null;
-        try
+        HttpPost post = new HttpPost(reqURL);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, post);         
+        switch (response.getStatusLine().getStatusCode())
         {
-            request = client.generatePostRequest(reqURL, body);
-            response = client.executeRequest(request);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("User created successfully: " + userName);
-                    }
-                    return true;
-                case HttpStatus.SC_CONFLICT:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("User: " + userName + " alreary created");
-                    }
-                    break;
-                default:
-                    logger.error("Unable to create user: " + response.toString());
-                    break;
-            }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("User created successfully: " + userName);
+                }
+                return true;
+            case HttpStatus.SC_CONFLICT:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("User: " + userName + " alreary created");
+                }
+                break;
+            default:
+                logger.error("Unable to create user: " + response.toString());
+                break;
         }
         return false;
     }
@@ -352,32 +342,20 @@ public class UserService
         group.put("fullName", "GROUP_" + groupName);        
         body.put("role", role);
         body.put("group", group);
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
-        try
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, body, post);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Group " + groupName + " successfuly invited to site " + siteId);
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Invalid site, user or role");
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid site manager user name and password");
-                default:
-                    logger.error("Unable to invite group " + groupName + " " +  response.toString());
-                    break;
-            }
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Group " + groupName + " successfuly invited to site " + siteId);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site, user or role");
+            default:
+                logger.error("Unable to invite group " + groupName + " " +  response.toString());
+                break;
         }
         return false;
     }
@@ -406,20 +384,22 @@ public class UserService
         HttpPost post  = new HttpPost(reqUrl);
         JSONObject body = new JSONObject();
         body.put("id", siteId);
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            if(201 == response.getStatusLine().getStatusCode())
-            {
+            case HttpStatus.SC_CREATED:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly requested membership to site " + siteId);
+                }
                 return true;
-            }
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteId);
+            case HttpStatus.SC_BAD_REQUEST:
+                logger.error("Request to site: " + siteId + " has been already done");
+            default:
+                logger.error("Unable to  request membership to " + siteId + " " +  response.toString());
+                break;
         }
         return false;
     }
@@ -440,10 +420,10 @@ public class UserService
                                     final String passwordManager, 
                                     final String userName,
                                     final String siteId,
-                                    final String role)
+                                    final String role) throws Exception
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
-                || StringUtils.isEmpty(userName))
+                || StringUtils.isEmpty(userName) || StringUtils.isEmpty(role))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
@@ -454,24 +434,25 @@ public class UserService
         JSONObject body = new JSONObject();
         body.put("id", userName);
         body.put("role", role);
-        try
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, body, post);
+        switch (response.getStatusLine().getStatusCode())
         {
-            post.setEntity(client.setMessageBody(body));
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
-            HttpResponse response = clientWithAuth.execute(post);
-            if(201 == response.getStatusLine().getStatusCode())
-            {
+            case HttpStatus.SC_CREATED:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly added member to site " + siteId);
+                }
                 return true;
-            }
-        } 
-        catch (IOException e)
-        {
-            throw new RuntimeException("Unable to create site member", e);
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteId);
+            case HttpStatus.SC_BAD_REQUEST:
+                throw new RuntimeException("Invalid role " + role);
+            case HttpStatus.SC_CONFLICT:
+                logger.error("User " + userName + " is already member of site " + siteId);
+                break;
+            default:
+                logger.error("Unable to  request membership to " + siteId + " " +  response.toString());
+                break;
         }
         return false;
     }
@@ -589,40 +570,33 @@ public class UserService
             grpBody.put("group", group);                
         }       
         HttpPut put = new HttpPut(reqUrl);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(siteManager, passwordManager);
+        HttpResponse response = null;
         if(!isGroup)
         {
             put.setEntity(client.setMessageBody(userBody));
+            response = client.executeRequest(client, siteManager, passwordManager, reqUrl, userBody, put);
         }
         else
         {
             put.setEntity(client.setMessageBody(grpBody));
+            response = client.executeRequest(client, siteManager, passwordManager, reqUrl, grpBody, put);
         }
-        try
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(put);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Role " + role + " successfully updated for " + entity);
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Invalid site, user or role");
-                case HttpStatus.SC_BAD_REQUEST:
-                    throw new RuntimeException(entity + "is not a member of site " + siteName);
-                default:
-                    logger.error("Unable to change the role for: " + entity + response.toString());
-                    break;
-            }
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Role " + role + " successfully updated for " + entity);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            case HttpStatus.SC_BAD_REQUEST:
+                throw new RuntimeException(entity + "is not a member of site " + siteName);
+            default:
+                logger.error("Unable to change the role for: " + entity + response.toString());
+                break;
         }
-        finally
-        {
-            put.releaseConnection();
-            client.close();
-        } 
         return false;
     }
     
@@ -723,7 +697,7 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "rootgroups/" + groupName + "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "rootgroups/" + groupName;
         if (logger.isTraceEnabled())
         {
             logger.trace ("Create group using url - " + reqURL);
@@ -731,24 +705,15 @@ public class UserService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("displayName", groupName);
-        request.setEntity(client.setMessageBody(body));
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, request);
+        if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
+            if(logger.isTraceEnabled())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("Group: " + groupName + " is created successfully");
-                }
-                return true;
+                logger.trace("Group: " + groupName + " is created successfully");
             }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
-        }
+            return true;
+        }      
         return false;
     }
     
@@ -774,37 +739,28 @@ public class UserService
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName + 
-                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+                "?alf_ticket=";
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
-        request.setEntity(client.setMessageBody(body));
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, request);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("User " + userName + " was added to " + groupName);
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Root group " + groupName + " not found");
-                    }
-                default:
-                    logger.error("Unable to add user to group: " + response.toString());
-                    break;
-            }
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("User " + userName + " was added to " + groupName);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Root group " + groupName + " not found");
+                }
+            default:
+                logger.error("Unable to add user to group: " + response.toString());
+                break;
         }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
-        } 
         return false;
     }
     
@@ -829,44 +785,34 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup + 
-                "?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup;
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
-        request.setEntity(client.setMessageBody(body));
-        try
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, request);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = client.executeRequest(request);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_CREATED:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Sub group " + subGroup + " was added to " + groupName);
-                    }
-                    return true;
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Sub group " + subGroup + " was added to " + groupName);
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Root group " + groupName + " not found");
-                    }
-                default:
-                    logger.error("Unable to add sub group to group: " + response.toString());
-                    break;
-            }
+            case HttpStatus.SC_CREATED:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Sub group " + subGroup + " was added to " + groupName);
+                }
+                return true;
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Sub group " + subGroup + " was added to " + groupName);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Root group " + groupName + " not found");
+                }
+            default:
+                logger.error("Unable to add sub group to group: " + response.toString());
+                break;
         }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
-        } 
         return false;
     }
     
@@ -1156,7 +1102,6 @@ public class UserService
             jDashlet.put("originalRegionId", entry.getValue());
             array.add(jDashlet);
         }    
-        
         JSONObject newDashlet = new JSONObject();
         newDashlet.put("url", dashlet.id);
         String region = "component-" + column + "-" + position;

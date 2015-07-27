@@ -145,8 +145,7 @@ public class SitePagesService
             startAt = fullFormat.format(startDate);
             DateTime dateTime = dtf.parseDateTime(startAt);
             startAt = dateTime.toString().replaceFirst("00:00", timeStart24);
-        }
-        
+        }      
         if(endDate == null)
         {
             // set the current date
@@ -185,25 +184,15 @@ public class SitePagesService
         {
             body.put("allday", "on");
         }     
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, reqURL, body, post);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if (logger.isTraceEnabled())
             {
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("Event created successfully");
-                }
-                return true;
-            }          
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
-        }
+                logger.trace("Event created successfully");
+            }
+            return true;
+        }          
         return false;
     }
     
@@ -354,6 +343,23 @@ public class SitePagesService
     }
     
     /**
+     * Convert time to 24 hour format
+     * 
+     * @param time String time
+     * @throws ParseException if error
+     * @return String converted hour
+     */
+    private String convertTo24Hour(String time) throws ParseException 
+    {
+        DateFormat f1 = new SimpleDateFormat("hh:mm a"); 
+        Date d = null;
+        d = f1.parse(time);
+        DateFormat f2 = new SimpleDateFormat("HH:mm");
+        String x = f2.format(d);
+        return x;
+    }
+    
+    /**
      * Create a new wiki page
      * 
      * @param userName String user name
@@ -398,33 +404,23 @@ public class SitePagesService
             }
         }
         body.put("tags", array);
-        put.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, url, body, put);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(put);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace("Wiki page " + wikiTitle + " is created successfuly");
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Invalid site " + siteName);
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid user name or password");
-                default:
-                    logger.error("Unable to create wiki page: " + response.toString());
-                    break;
-            }
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Wiki page " + wikiTitle + " is created successfuly");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            case HttpStatus.SC_UNAUTHORIZED:
+                throw new RuntimeException("Invalid user name or password");
+            default:
+                logger.error("Unable to create wiki page: " + response.toString());
+                break;
         }
-        finally
-        {
-            put.releaseConnection();
-            client.close();
-        } 
         return false;
     }
     
@@ -495,22 +491,5 @@ public class SitePagesService
                 break;
         }
         return false;
-    }
-    
-    /**
-     * Convert time to 24 hour format
-     * 
-     * @param time String time
-     * @throws ParseException if error
-     * @return String converted hour
-     */
-    private String convertTo24Hour(String time) throws ParseException 
-    {
-        DateFormat f1 = new SimpleDateFormat("hh:mm a"); 
-        Date d = null;
-        d = f1.parse(time);
-        DateFormat f2 = new SimpleDateFormat("HH:mm");
-        String x = f2.format(d);
-        return x;
     }
 }

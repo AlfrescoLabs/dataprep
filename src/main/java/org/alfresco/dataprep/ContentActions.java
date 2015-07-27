@@ -94,33 +94,23 @@ public class ContentActions extends CMISUtil
         {
             body.put("myRating", true);
         }
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_CREATED:
-                    if (logger.isTraceEnabled())
-                    {
-                        logger.trace(value + " was added successfully");
-                    }
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Content doesn't exists " + contentName);
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid user name or password");
-                default:
-                    logger.error("Unable to add new action: " + response.toString());
-                    break;
-            }
+            case HttpStatus.SC_CREATED:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace(value + " was added successfully");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Content doesn't exists " + contentName);
+            case HttpStatus.SC_UNAUTHORIZED:
+                throw new RuntimeException("Invalid user name or password");
+            default:
+                logger.error("Unable to add new action: " + response.toString());
+                break;
         }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
-        } 
         return false;
     }
     

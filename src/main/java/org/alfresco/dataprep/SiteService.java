@@ -199,7 +199,7 @@ public class SiteService
             String url = String.format("%ssites?alf_ticket=%s",apiUrl, ticket);
             HttpGet get = new HttpGet(url);
             HttpResponse response = client.executeRequest(get);
-            if( 200 == response.getStatusLine().getStatusCode())
+            if(200 == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();
                 String responseString = EntityUtils.toString(entity , "UTF-8"); 
@@ -413,8 +413,7 @@ public class SiteService
         JSONArray array = new JSONArray();      
         body.put("siteId", siteName);
         // set the default page (Document Library)
-        array.add(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));
-        
+        array.add(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));       
         if(pages != null)
         {
             for(int i = 0; i < pages.size(); i++)
@@ -433,30 +432,21 @@ public class SiteService
         body.put("pages", array);
         body.put("themeId", "");   
         HttpPost post  = new HttpPost(url);
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if (logger.isTraceEnabled())
             {
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("Page " + page.pageId + " was added to site " + siteName);
-                }
-                return true;
+                logger.trace("Page " + page.pageId + " was added to site " + siteName);
             }
-            else
-            {
-                logger.error("Unable to add page to site " + siteName);
-                return false;
-            }
-            }
-            finally
-            {
-                post.releaseConnection();
-                client.close();
-            }  
+            return true;
+        }
+        else
+        {
+            logger.error("Unable to add page to site " + siteName);
+            return false;
+        }
+            
     }            
     
     /**
@@ -534,8 +524,7 @@ public class SiteService
         Hashtable<String, String> defaultDashlets = new Hashtable<String, String>();
         defaultDashlets.put(SiteDashlet.SITE_MEMBERS.id, "component-1-1");
         defaultDashlets.put(SiteDashlet.SITE_CONNTENT.id, "component-2-1");
-        defaultDashlets.put(SiteDashlet.SITE_ACTIVITIES.id, "component-2-2");
-        
+        defaultDashlets.put(SiteDashlet.SITE_ACTIVITIES.id, "component-2-2");       
         Iterator<Map.Entry<String, String>> entries = defaultDashlets.entrySet().iterator();
         while (entries.hasNext()) 
         {
@@ -554,29 +543,19 @@ public class SiteService
         array.add(newDashlet);
         body.put("dashlets", array);      
         HttpPost post  = new HttpPost(url);
-        post.setEntity(client.setMessageBody(body));
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            if (logger.isTraceEnabled())
             {
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);
-                }
-                return true;
+                logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);
             }
-            else
-            {
-                logger.error("Unable to add dashlet to site " + siteName);
-            }
-            }
-            finally
-            {
-                post.releaseConnection();
-                client.close();
-            }
+            return true;
+        }
+        else
+        {
+            logger.error("Unable to add dashlet to site " + siteName);
+        }
         return false;
     }
     

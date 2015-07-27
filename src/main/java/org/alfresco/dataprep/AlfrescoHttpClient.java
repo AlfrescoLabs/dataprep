@@ -31,7 +31,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -39,7 +39,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -118,42 +117,6 @@ public class AlfrescoHttpClient
         }
         throw new RuntimeException("Unable to get ticket");
     }
-
-    /**
-     * Creates the post request message body.
-     * @param requestURL url end point
-     * @param body content of request
-     * @return {@link HttpPost} post request in json format
-     * @throws Exception if error
-     */
-    public HttpPost generatePostRequest(String requestURL, JSONObject body)
-    {
-        // Parameters check
-        if (requestURL.isEmpty())
-        {
-            throw new IllegalArgumentException("Empty Request URL: Please correct");
-        }
-        if(body == null)
-        {
-            throw new IllegalArgumentException("JSON body is required");
-        }
-        HttpPost request = new HttpPost(requestURL);
-        // set Headers
-        String contentType = MIME_TYPE_JSON + ";charset=" + UTF_8_ENCODING;
-        request.addHeader("Content-Type", contentType);
-        // set Body
-        try
-        {
-            request.setEntity(setMessageBody(body));
-        } 
-        catch (UnsupportedEncodingException e)
-        {
-            throw new RuntimeException("Body content error: " ,e);
-        }
-
-        return request;
-    }
-
 
     /**
      * Populate HTTP message call with given content.
@@ -242,30 +205,55 @@ public class AlfrescoHttpClient
     }
     
     /**
-     * Execute HttpClient request.
-     * @param request the request to execute 
-     * @param context the context to use for the execution 
+     * Execute HttpClient POST OR PUT
+     * 
+     * @param client AlfrescoHttpClient client
+     * @param userName String user name 
+     * @param password String password
+     * @param url String api url
+     * @param body JSONObject body of the request
+     * @param request HttpEntityEnclosingRequestBase the request
      * @return {@link HttpResponse} response
      * @throws Exception if error
      */
-    public HttpResponse executeRequest(HttpRequestBase request, HttpContext context) throws Exception
+    public HttpResponse executeRequest(AlfrescoHttpClient client,
+                                      final String userName,
+                                      final String password,
+                                      final String url,
+                                      final JSONObject body,
+                                      HttpEntityEnclosingRequestBase request) throws Exception
     {
         HttpResponse response = null;
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {
-            response = client.execute(request, context);
-            if(logger.isTraceEnabled())
-            {
-                logger.trace("Status Received:" + response.getStatusLine());
-            }
-            return response;
+            request.setEntity(setMessageBody(body));
+        } 
+        catch(UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Body content error: " ,e);
         }
-        catch (Exception e)
+        try
+        {   
+            response = clientWithAuth.execute(request);
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
+            {
+                throw new RuntimeException("Invalid user name or password");   
+            }      
+        } 
+        catch(Exception e)
         {
             logger.error(response);
-            throw new RuntimeException("Error during execute request", e);
+            throw new RuntimeException("Error while executing request", e);
         }
+        finally
+        {
+            request.releaseConnection();
+            client.close();
+        }
+        return response;
     }
+    
     /**
      * Get basic http client with basic credential.
      * @param username String username 
