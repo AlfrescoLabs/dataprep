@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.httpclient.HttpStatus;
@@ -37,6 +38,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
@@ -415,8 +417,6 @@ public class SitePagesService
                 return true;
             case HttpStatus.SC_NOT_FOUND:
                 throw new RuntimeException("Invalid site " + siteName);
-            case HttpStatus.SC_UNAUTHORIZED:
-                throw new RuntimeException("Invalid user name or password");
             default:
                 logger.error("Unable to create wiki page: " + response.toString());
                 break;
@@ -450,11 +450,8 @@ public class SitePagesService
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
-        }
-        else
-        {
-            return false;
-        }
+        }  
+        return false;  
     }
     
     /**
@@ -485,9 +482,175 @@ public class SitePagesService
             case HttpStatus.SC_NO_CONTENT:
                 return true;
             case HttpStatus.SC_NOT_FOUND:
-                throw new RuntimeException("Wiki doesn't exists " + wikiTitle);
+                throw new RuntimeException("Wiki " + wikiTitle + " or site " + siteName + " doesn't exists");
             default:
                 logger.error("Unable to delete wiki page: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Create a new blog post
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param content String wiki content
+     * @param draft boolean create blog as draft. If not it will be published
+     * @param tags List of tags
+     * @return true if blog post is created (200 Status)
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createBlogPost(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  final String blogTitle,
+                                  final String content,
+                                  final boolean draft,
+                                  final List<String>tags) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
+                || StringUtils.isEmpty(blogTitle))
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts";
+        HttpPost post = new HttpPost(url);    
+        JSONObject body = new JSONObject();
+        body.put("title", blogTitle);
+        body.put("content", content);
+        body.put("draft", draft);
+        JSONArray array = new JSONArray();
+        if(tags != null)
+        {
+            for(int i = 0; i < tags.size(); i++)
+            {
+                array.put(tags.get(i));
+            }
+        }
+        body.put("tags", array);
+        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Blog " + blogTitle + " is created successfuly");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            default:
+                logger.error("Unable to create wiki page: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Get the name (id) of a blog post
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param isDraft boolean is draft
+     * @return String name of blog post
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public String getBlogName(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String blogTitle,
+                              final boolean draft) throws Exception
+    {
+        String name = "";
+        String url;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        if(draft)
+        {
+            url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mydrafts";
+        }
+        else
+        {
+            url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mypublished";
+        }
+        HttpGet get = new HttpGet(url);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(get);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    String strResponse = EntityUtils.toString(response.getEntity());
+                    JSONParser parser = new JSONParser();  
+                    Object obj = parser.parse(strResponse);
+                    JSONObject jsonObject = (JSONObject) obj;  
+                    org.json.simple.JSONArray jArray = (org.json.simple.JSONArray) jsonObject.get("items");
+                    Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
+                    while (iterator.hasNext()) 
+                    {
+                        JSONObject factObj = (JSONObject) iterator.next();
+                        String title = (String) factObj.get("title");
+                        if(title.toString().equalsIgnoreCase(blogTitle))
+                        {
+                            return (String) factObj.get("name");
+                        }
+                    }                   
+                    return "";
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new RuntimeException("Invalid site " + siteName);
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new RuntimeException("Invalid credentials");
+                default:
+                    logger.error("Unable to find blog post: " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        }
+        return name;
+    }
+    
+    /**
+     * Delete wiki page
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param isDraft boolean is draft
+     * @return true if blog is removed (200 Status)
+     * @throws Exception if error
+     */
+    public boolean deleteBlogPost(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  final String blogTitle,
+                                  final boolean isDraft) throws Exception
+    {
+        String blogName = getBlogName(userName, password, siteName, blogTitle, isDraft);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";      
+        HttpDelete delete = new HttpDelete(url);
+        HttpResponse response = client.executeRequest(client, userName, password, url, delete);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Blog doesn't exists " + blogTitle);
+            default:
+                logger.error("Unable to delete blog post: " + response.toString());
                 break;
         }
         return false;

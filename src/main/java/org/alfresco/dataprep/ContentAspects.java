@@ -60,7 +60,7 @@ public class ContentAspects extends CMISUtil
         aspectsToAdd.add(aspect);      
         addAspect(userName, password, contentNodeRef, aspectsToAdd);
     }
-    
+     
     /**
      * Remove aspect from document or folder
      * 
@@ -403,9 +403,9 @@ public class ContentAspects extends CMISUtil
      * @throws Exception if error  
      */
     public Map<String, Object> getBasicProperties(final String userName,
-                               final String password,
-                               final String siteName,
-                               final String contentName) throws Exception
+                                                  final String password,
+                                                  final String siteName,
+                                                  final String contentName) throws Exception
     {             
         List<Property<?>> basicProperties=getProperties(userName, password, siteName, contentName);
         
@@ -420,7 +420,6 @@ public class ContentAspects extends CMISUtil
         propertiesMap.put("CreatedDate", getPropertyValue(basicProperties, PropertyIds.CREATION_DATE));
         propertiesMap.put("Modifier", getPropertyValue(basicProperties, PropertyIds.LAST_MODIFIED_BY));
         propertiesMap.put("ModifiedDate", getPropertyValue(basicProperties, PropertyIds.LAST_MODIFICATION_DATE));
-
         return propertiesMap;
     }
     
@@ -438,13 +437,13 @@ public class ContentAspects extends CMISUtil
      * @throws Exception if error  
      */
     public void setBasicProperties(final String userName,
-                                  final String password,
-                                  final String siteName,
-                                  final String contentName,
-                                  final String docName,
-                                  final String docTitle,
-                                  final String docDescription,
-                                  final String author) throws Exception
+                                   final String password,
+                                   final String siteName,
+                                   final String contentName,
+                                   final String docName,
+                                   final String docTitle,
+                                   final String docDescription,
+                                   final String author) throws Exception
     {       
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put(PropertyIds.NAME, docName);
