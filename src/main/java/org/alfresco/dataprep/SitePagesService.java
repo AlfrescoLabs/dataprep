@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -361,6 +362,19 @@ public class SitePagesService
         return x;
     }
     
+    private JSONArray createTagsArray(List<String>tags)
+    {
+        JSONArray array = new JSONArray();
+        if(tags != null)
+        {
+            for(int i = 0; i < tags.size(); i++)
+            {
+                array.put(tags.get(i));
+            }
+        }
+        return array;
+    }
+    
     /**
      * Create a new wiki page
      * 
@@ -397,15 +411,7 @@ public class SitePagesService
         body.put("page", "wiki-page");
         body.put("pageTitle", wikiTitle);
         body.put("pagecontent", content);
-        JSONArray array = new JSONArray();
-        if(tags != null)
-        {
-            for(int i = 0; i < tags.size(); i++)
-            {
-                array.put(tags.get(i));
-            }
-        }
-        body.put("tags", array);
+        body.put("tags", createTagsArray(tags));
         HttpResponse response = client.executeRequest(client, userName, password, url, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
@@ -497,7 +503,7 @@ public class SitePagesService
      * @param password String password
      * @param siteName String site name
      * @param blogTitle String blog title
-     * @param content String wiki content
+     * @param content String blog content
      * @param draft boolean create blog as draft. If not it will be published
      * @param tags List of tags
      * @return true if blog post is created (200 Status)
@@ -524,15 +530,7 @@ public class SitePagesService
         body.put("title", blogTitle);
         body.put("content", content);
         body.put("draft", draft);
-        JSONArray array = new JSONArray();
-        if(tags != null)
-        {
-            for(int i = 0; i < tags.size(); i++)
-            {
-                array.put(tags.get(i));
-            }
-        }
-        body.put("tags", array);
+        body.put("tags", createTagsArray(tags));
         HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
@@ -545,7 +543,7 @@ public class SitePagesService
             case HttpStatus.SC_NOT_FOUND:
                 throw new RuntimeException("Invalid site " + siteName);
             default:
-                logger.error("Unable to create wiki page: " + response.toString());
+                logger.error("Unable to create blog page: " + response.toString());
                 break;
         }
         return false;
@@ -562,67 +560,44 @@ public class SitePagesService
      * @return String name of blog post
      * @throws Exception if error
      */
-    @SuppressWarnings("unchecked")
     public String getBlogName(final String userName,
                               final String password,
                               final String siteName,
                               final String blogTitle,
                               final boolean draft) throws Exception
     {
-        String name = "";
-        String url;
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        if(draft)
-        {
-            url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mydrafts";
-        }
-        else
-        {
-            url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mypublished";
-        }
-        HttpGet get = new HttpGet(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            HttpResponse response = clientWithAuth.execute(get);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_OK:
-                    String strResponse = EntityUtils.toString(response.getEntity());
-                    JSONParser parser = new JSONParser();  
-                    Object obj = parser.parse(strResponse);
-                    JSONObject jsonObject = (JSONObject) obj;  
-                    org.json.simple.JSONArray jArray = (org.json.simple.JSONArray) jsonObject.get("items");
-                    Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
-                    while (iterator.hasNext()) 
-                    {
-                        JSONObject factObj = (JSONObject) iterator.next();
-                        String title = (String) factObj.get("title");
-                        if(title.toString().equalsIgnoreCase(blogTitle))
-                        {
-                            return (String) factObj.get("name");
-                        }
-                    }                   
-                    return "";
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Invalid site " + siteName);
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid credentials");
-                default:
-                    logger.error("Unable to find blog post: " + response.toString());
-                    break;
-            }
-        }
-        finally
-        {
-            get.releaseConnection();
-            client.close();
-        }
-        return name;
+        return getName(userName, password, siteName, blogTitle, draft, Page.BLOG);
     }
     
     /**
-     * Delete wiki page
+     * Verify if blog post exists
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param isDraft boolean is draft
+     * @return boolean true if blog post exists
+     * @throws Exception if error
+     */
+    public boolean blogExists(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String blogTitle,
+                              final boolean draft) throws Exception
+    {
+        if(getBlogName(userName, password, siteName, blogTitle, draft).isEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
+    /**
+     * Delete blog post
      * 
      * @param userName String user name
      * @param password String password
@@ -651,6 +626,227 @@ public class SitePagesService
                 throw new RuntimeException("Blog doesn't exists " + blogTitle);
             default:
                 logger.error("Unable to delete blog post: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Create a new blog post
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String link title
+     * @param url String link url
+     * @param description String link description
+     * @param internal boolean internal
+     * @param tags List of tags
+     * @return true if link is created (200 Status)
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createLink(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String linkTitle,
+                              final String url,
+                              final String description,
+                              final boolean internal,
+                              final List<String>tags) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
+                || StringUtils.isEmpty(linkTitle))
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "links/site/" + siteName + "/links/posts";
+        HttpPost post = new HttpPost(reqUrl);    
+        JSONObject body = new JSONObject();
+        body.put("title", linkTitle);
+        body.put("url", url);
+        body.put("description", description);
+        if(internal)
+        {
+            body.put("internal", internal);
+        }
+        body.put("tags", createTagsArray(tags));
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Link " + linkTitle + " is created successfuly");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            default:
+                logger.error("Unable to create link: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Get the name (id) of a link
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String blog title
+     * @return String name of blog post
+     * @throws Exception if error
+     */
+    public String getLinkName(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String linkTitle) throws Exception
+    {
+        return getName(userName, password, siteName, linkTitle, false, Page.LINKS);
+    }
+    
+    /**
+     * Verify if link exists
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String blog title
+     * @return boolean true if link exists
+     * @throws Exception if error
+     */
+    public boolean linkExists(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String linkTitle) throws Exception
+    {
+        if(getLinkName(userName, password, siteName, linkTitle).isEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
+    /**
+     * Get the name (id) for blog post, link, discussion
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param title String blog title
+     * @param draftBlog boolean is blog draft
+     * @return String name (id)
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    private String getName(final String userName,
+                           final String password,
+                           final String siteName,
+                           final String title,
+                           boolean draftBlog,
+                           final Page page) throws Exception
+    {
+        String name = "";
+        String url = "";
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        switch(page)
+        {
+            case LINKS:
+                url = client.getApiUrl() + "links/site/" + siteName + "/links?filter=all&contentLength=512&page=1&pageSize=10&startIndex=0";
+                break;
+            case BLOG:
+                if(draftBlog)
+                {
+                    url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mydrafts";
+                }
+                else
+                {
+                    url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mypublished";
+                }
+                break;
+            default:
+                break;
+        }
+        HttpGet get = new HttpGet(url);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            HttpResponse response = clientWithAuth.execute(get);
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_OK:
+                    String strResponse = EntityUtils.toString(response.getEntity());
+                    JSONParser parser = new JSONParser();  
+                    Object obj = parser.parse(strResponse);
+                    JSONObject jsonObject = (JSONObject) obj;  
+                    org.json.simple.JSONArray jArray = (org.json.simple.JSONArray) jsonObject.get("items");
+                    Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
+                    while (iterator.hasNext()) 
+                    {
+                        JSONObject factObj = (JSONObject) iterator.next();
+                        String theTitle = (String) factObj.get("title");
+                        if(title.toString().equalsIgnoreCase(theTitle))
+                        {
+                            return (String) factObj.get("name");
+                        }
+                    }         
+                    return "";
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new RuntimeException("Invalid site " + siteName);
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new RuntimeException("Invalid credentials");
+                default:
+                    logger.error("Unable to find: " + title + " " + response.toString());
+                    break;
+            }
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        }
+        return name;
+    }
+    
+    /**
+     * Delete link
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String blog title
+     * @return true if link is removed (200 Status)
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean deleteLink(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String linkTitle) throws Exception
+    {
+        String linkName = getLinkName(userName, password, siteName, linkTitle);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "links/delete/site/" + siteName + "/links";      
+        HttpPost post = new HttpPost(url);
+        JSONObject body = new JSONObject();
+        JSONArray array = new JSONArray();
+        array.put(linkName);
+        body.put("items", array);
+        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Link doesn't exists " + linkTitle);
+            default:
+                logger.error("Unable to delete link: " + response.toString());
                 break;
         }
         return false;

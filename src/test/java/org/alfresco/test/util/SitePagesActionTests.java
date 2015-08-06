@@ -227,10 +227,8 @@ public class SitePagesActionTests extends AbstractTest
         tags.add("tag2");
         Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, publishBlog, publishBlog, false, tags));
         Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, tags));     
-        String nameDraft = pageService.getBlogName(userName, userName, siteId, draftBlog, true);
-        String namePublished = pageService.getBlogName(userName, userName, siteId, publishBlog, false);
-        Assert.assertFalse(nameDraft.isEmpty());
-        Assert.assertFalse(namePublished.isEmpty());
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, publishBlog, false));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -240,6 +238,16 @@ public class SitePagesActionTests extends AbstractTest
         String draftBlog = "draft" + + System.currentTimeMillis(); 
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         pageService.createBlogPost(userName, userName, "fakeSite", draftBlog, draftBlog, false, null);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createBlogInvalidUser() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String draftBlog = "draft" + + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        pageService.createBlogPost("fakeUser", "fakePass", siteId, draftBlog, draftBlog, false, null);
     }
     
     @Test
@@ -252,11 +260,9 @@ public class SitePagesActionTests extends AbstractTest
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
         Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));     
-        String nameDraft = pageService.getBlogName(userName, userName, siteId, draftBlog, true);
-        Assert.assertFalse(nameDraft.isEmpty());     
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
         Assert.assertTrue(pageService.deleteBlogPost(userName, userName, siteId, draftBlog, true));
-        nameDraft = pageService.getBlogName(userName, userName, siteId, draftBlog, true);
-        Assert.assertTrue(nameDraft.isEmpty());
+        Assert.assertFalse(pageService.blogExists(userName, userName, siteId, draftBlog, true));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -267,9 +273,7 @@ public class SitePagesActionTests extends AbstractTest
         String draftBlog = "draft" + + System.currentTimeMillis();       
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));     
-        String nameDraft = pageService.getBlogName(userName, userName, siteId, draftBlog, true);
-        Assert.assertFalse(nameDraft.isEmpty());          
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));      
         pageService.deleteBlogPost(userName, userName, siteId, "invalidblog", true);
     }
     
@@ -281,9 +285,81 @@ public class SitePagesActionTests extends AbstractTest
         String draftBlog = "draft" + + System.currentTimeMillis();       
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));     
-        String nameDraft = pageService.getBlogName(userName, userName, siteId, draftBlog, true);
-        Assert.assertFalse(nameDraft.isEmpty());          
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));             
         pageService.deleteBlogPost(userName, userName, "invalidBlog", draftBlog, true);
+    }
+    
+    @Test
+    public void createLink() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String linkTitle = "link-" + + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
+        List<String>tags = new ArrayList<String>();
+        tags.add("tag1");
+        tags.add("tag2");
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, tags));
+        Assert.assertTrue(pageService.linkExists(userName, userName, siteId, linkTitle));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createLinkInvalidSite() throws Exception
+    {
+        String userName = "userm-" + System.currentTimeMillis();
+        String linkTitle = "link" + + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        pageService.createLink(userName, userName, "fakeSite", linkTitle, linkTitle, linkTitle, true, null);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createLinkInvalidUser() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String linkTitle = "link" + + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        pageService.createLink("fakeUser", "fakePass", siteId, linkTitle, linkTitle, linkTitle, true, null);
+    }
+    
+    @Test
+    public void deleteLink() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String linkTitle = "link-" + + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, null));
+        Assert.assertTrue(pageService.linkExists(userName, userName, siteId, linkTitle));
+        Assert.assertTrue(pageService.deleteLink(userName, userName, siteId, linkTitle));
+        Assert.assertFalse(pageService.linkExists(userName, userName, siteId, linkTitle));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteLinkInvalidLink() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String link = "link" + + System.currentTimeMillis();       
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));      
+        pageService.deleteLink(userName, userName, siteId, "fakeLink");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteLinkInvalidSite() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String link = "link" + + System.currentTimeMillis();       
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));              
+        pageService.deleteLink(userName, userName, "fakeSite", link);
     }
 }

@@ -738,8 +738,7 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName + 
-                "?alf_ticket=";
+        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName;
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
