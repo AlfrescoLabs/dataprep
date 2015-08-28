@@ -16,6 +16,7 @@ package org.alfresco.dataprep;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +112,7 @@ public class CMISUtil
 
     /**
      * Method to get a CMIS session.
+     * 
      * @param userName String identifier
      * @param password String password
      * @return Session the session
@@ -145,6 +147,7 @@ public class CMISUtil
     
     /**
      * Gets the object id for a document or folder.
+     * 
      * @param userName String identifier
      * @param password String password
      * @param siteName String site identifier
@@ -192,6 +195,51 @@ public class CMISUtil
             getId(t, contentName);
         }       
         return contents;
+    }
+    
+    /**
+     * Gets the object id for a document or folder in repository
+     * 
+     * @param userName String identifier
+     * @param password String password
+     * @param contentName String content identifier
+     * @param path String path to the object(e.g. 'Shared'). If empty or null 'Company home' is set.   
+     * @return String node identifier
+     * @throws Exception if error
+     */
+    public String getNodeRefFromRepo(final String userName,
+                                     final String password,
+                                     final String contentName,
+                                     String path) throws Exception
+    {
+        String nodeRef = "";
+        Session session = getCMISSession(userName, password);
+        if(path == null)
+        {
+            path = "";
+        }
+        try
+        {
+            CmisObject repo = session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
+            Folder folder = (Folder) repo;
+            ItemIterable<CmisObject> children = folder.getChildren();
+            ItemIterable<CmisObject> page = children.getPage();
+            Iterator<CmisObject> pageItems = page.iterator();
+            while(pageItems.hasNext()) 
+            {
+                CmisObject item = pageItems.next();
+                if(item.getName().equalsIgnoreCase(contentName))
+                {
+                    nodeRef = item.getId();
+                    break;
+                }
+            }
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Invalid path -> " + path, nf);
+        }  
+        return nodeRef;
     }
     
     /**

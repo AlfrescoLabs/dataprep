@@ -36,6 +36,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExists
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -66,16 +67,18 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param folderName folder name
      * @param siteName site name
+     * @param inRepository if folder is created in repository
      * @return Folder CMIS folder object
      * @throws Exception if error
      */
-    public Folder createFolder(final String userName,
-                               final String password,
-                               final String folderName,
-                               final String siteName) throws Exception
+    private Folder addFolder(final String userName,
+                             final String password,
+                             final String folderName,
+                             final String siteName,
+                             final boolean inRepository,
+                             String path) throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName)
-                || StringUtils.isEmpty(siteName))
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
             throw new IllegalArgumentException("Parameter missing");
         }      
@@ -83,15 +86,35 @@ public class ContentService extends CMISUtil
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folderName);
         Session session = getCMISSession(userName, password);
+        Folder newFolder;
         try
         {
-            Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
-            Folder newFolder = documentLibrary.createFolder(properties);
+            if(!inRepository)
+            {
+                Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+                newFolder = documentLibrary.createFolder(properties);
+            }
+            else
+            {
+                if(path == null)
+                {
+                    path = "";
+                }
+                Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
+                newFolder = repository.createFolder(properties);
+            }
             return newFolder;
         }
         catch(CmisObjectNotFoundException nf)
         {
-            throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+            if(siteName != null)
+            {
+                throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+            }
+            else
+            {
+                throw new CmisRuntimeException("Invalid path -> " + path, nf);
+            }
         }  
         catch(CmisContentAlreadyExistsException ae)
         {
@@ -101,10 +124,70 @@ public class ContentService extends CMISUtil
         {
             throw new CmisRuntimeException("Invalid symbols in folder name " + folderName, ce);
         }
+        catch (CmisUnauthorizedException ue) 
+        {
+            throw new CmisRuntimeException("User " + userName + " is not authorized to create folder in repository");
+        }
     }
     
     /**
-     * Delete a folder
+     * Create a new folder in site
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param folderName folder name
+     * @param siteName site name
+     * @return Folder CMIS folder object
+     * @throws Exception if error
+     */
+    public Folder createFolder(final String userName,
+                               final String password,
+                               final String folderName,
+                               final String siteName) throws Exception
+    {
+        return addFolder(userName, password, folderName, siteName, false, null);
+    }
+    
+    /**
+     * Create a new folder in root of repository.
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param folderName folder name
+     * @return Folder CMIS folder object
+     * @throws Exception if error
+     */
+    public Folder createFolderInRepository(final String userName,
+                                           final String password,
+                                           final String folderName) throws Exception
+    {
+        return addFolder(userName, password, folderName, null, true, "");
+    }
+    
+    /**
+     * Create a new folder by path in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param folderName folder name
+     * @param path (e.g: 'Shared', 'Data Dictionary/Scripts)
+     * @return Folder CMIS folder object
+     * @throws Exception if error
+     */
+    public Folder createFolderInRepository(final String userName,
+                                           final String password,
+                                           final String folderName,
+                                           final String path) throws Exception
+    {
+        if(StringUtils.isEmpty(userName))
+        {
+            throw new IllegalArgumentException("Please provide a path!");
+        }
+        return addFolder(userName, password, folderName, null, true, path);
+    }                       
+    
+    /**
+     * Delete a folder from site
      * 
      * @param userName login username
      * @param password login password
@@ -138,12 +221,73 @@ public class ContentService extends CMISUtil
     }
     
     /**
-     * Create a new document using CMIS
+     * Delete a folder from site.
+     * If the folder is in ROOT(Company Home) set path to NULL.
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param folderName folder name
+     * @param path String path to folder(e.g.: Shared, Guest Home)
+     * @throws Exception if error
+     */
+    public void deleteFolderFromRepository(final String userName,
+                                           final String password,
+                                           final String folderName,
+                                           final String path) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        try
+        {
+            Session session = getCMISSession(userName, password); 
+            String folderId = getNodeRefFromRepo(userName, password, folderName, path);
+            session.getObject(folderId).delete();         
+        }
+        catch(CmisInvalidArgumentException nf)
+        {
+            throw new CmisRuntimeException("Invalid folder " + folderName, nf);
+        }    
+        catch(CmisConstraintException ce)
+        {
+            throw new CmisRuntimeException("Cannot delete folder with at least one child", ce);
+        }
+        catch (CmisUnauthorizedException ue) 
+        {
+            throw new CmisRuntimeException("User " + userName + " is not authorized to create folder in repository");
+        }
+    }
+    
+    /**
+     * Create a new document
      * 
      * @param userName login username
      * @param password login password
      * @param siteName site name
      * @param fileType file type (e.g. text/plain, text/html)
+     * @param docName String file name
+     * @param docContent file content
+     * @return Document CMIS document object
+     * @throws Exception if error
+     */
+    public Document createDocument(final String userName,
+                                   final String password,
+                                   final String siteName,
+                                   final DocumentType fileType,
+                                   final File docName,
+                                   final String docContent) throws Exception
+    {
+        return createDoc(userName, password, siteName, fileType, true, null, docName, docContent, false, null);
+    }
+    
+    /**
+     * Create a new document
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param fileType file type
      * @param docName file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -156,89 +300,162 @@ public class ContentService extends CMISUtil
                                    final String docName,
                                    final String docContent) throws Exception
     {
-        ContentStream contentStream = null;
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName)
-                || StringUtils.isEmpty(siteName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }  
-        Map<String, String> properties = new HashMap<String, String>();
-        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-        properties.put(PropertyIds.NAME, docName);     
-        Session session = getCMISSession(userName, password);
-        byte[] content = docContent.getBytes();
-        InputStream stream = new ByteArrayInputStream(content);
-        try
-        {
-            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
-            Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
-            documentLibrary.refresh();
-            Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);        
-            return d;
-        }
-        catch(CmisObjectNotFoundException nf)
-        {
-            throw new CmisRuntimeException("Invalid Site " + siteName, nf);
-        }
-        catch(CmisContentAlreadyExistsException ae)
-        {
-            throw new CmisRuntimeException("Document already exits " + docName, ae);
-        }
-        catch(CmisConstraintException ce)
-        {
-            throw new CmisRuntimeException("Invalid symbols in file name " + docName, ce);
-        }
-        finally
-        {
-            stream.close();
-            contentStream.getStream().close();
-        }
+        return createDoc(userName, password, siteName, fileType, false, docName, null, docContent, false, null);
     }
     
     /**
-     * Create a new document using CMIS
+     * Create a new document in repository
+     * If the document is in ROOT(Company Home) set path to NULL.
      * 
      * @param userName login username
      * @param password login password
-     * @param siteName site name
-     * @param fileType file type (e.g. text/plain, text/html)
+     * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
+     * @param fileType file type
      * @param docName file name
      * @param docContent file content
      * @return Document CMIS document object
      * @throws Exception if error
      */
-    public Document createDocument(final String userName,
-                                   final String password,
-                                   final String siteName,
-                                   final DocumentType fileType,
-                                   final File docName,
-                                   final String docContent) throws Exception
+    public Document createDocumentInRepository(final String userName,
+                                               final String password,
+                                               final String path,
+                                               final DocumentType fileType,
+                                               final String docName,
+                                               final String docContent) throws Exception
     {
+        return createDoc(userName, password, null, fileType, false, docName, null, docContent, true, path);
+    }
+    
+    /**
+     * Create a new document in repository
+     * If the document is in ROOT(Company Home) set path to NULL.
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
+     * @param fileType file type
+     * @param docName file name
+     * @param docContent file content
+     * @return Document CMIS document object
+     * @throws Exception if error
+     */
+    public Document createDocumentInRepository(final String userName,
+                                               final String password,
+                                               final String path,
+                                               final DocumentType fileType,
+                                               final File docName,
+                                               final String docContent) throws Exception
+    {
+        return createDoc(userName, password, null, fileType, true, null, docName, docContent, true, path);
+    }
+    
+    /**
+     * Create a new document
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param fileType file type
+     * @param isFile file name type String or File
+     * @param docName file name
+     * @param docFile file doc
+     * @param docContent file content
+     * @param inRepository create in repository
+     * @param path path in repository
+     * @return Document CMIS document object
+     * @throws Exception if error
+     */
+    private Document createDoc(final String userName,
+                               final String password,
+                               final String siteName,
+                               final DocumentType fileType,
+                               final boolean isFile,
+                               final String docName,
+                               final File docFile,
+                               final String docContent,
+                               final boolean inRepository,
+                               String path) throws Exception
+    {    
         ContentStream contentStream = null;
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }   
+        }  
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-        properties.put(PropertyIds.NAME, docName.getName());     
+        if(!isFile)
+        {
+            properties.put(PropertyIds.NAME, docName);
+        }
+        else
+        {
+            properties.put(PropertyIds.NAME, docFile.getName());
+        }
         Session session = getCMISSession(userName, password);
         byte[] content = docContent.getBytes();
         InputStream stream = new ByteArrayInputStream(content);
+        Document d;
         try
-        {
-            contentStream = session.getObjectFactory().createContentStream(docName.getName(), Long.valueOf(content.length), fileType.type, stream);
-            Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
-            Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
+        { 
+            if(!isFile)
+            {
+                contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+            }
+            else
+            {
+                contentStream = session.getObjectFactory().createContentStream(docFile.getName(), Long.valueOf(content.length), fileType.type, stream);
+            }
+
+            if(!inRepository)
+            {
+                Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+                documentLibrary.refresh();
+                d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
+            }
+            else
+            {
+                if(path == null)
+                {
+                    path = "";
+                }
+                Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
+                d = repository.createDocument(properties, contentStream, VersioningState.MAJOR);
+            }
+            
             return d;
         }
         catch(CmisObjectNotFoundException nf)
         {
-            throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+            if(!isFile)
+            {
+                throw new CmisRuntimeException("Invalid Site " + siteName, nf);
+            }
+            else
+            {
+                throw new CmisRuntimeException("Invalid path ->" + path, nf);
+            }
         }
         catch(CmisContentAlreadyExistsException ae)
         {
-            throw new CmisRuntimeException("Document already exits " + siteName, ae);
+            if(!isFile)
+            {
+                throw new CmisRuntimeException("Document already exits " + docName, ae);
+            }
+            else
+            {
+                throw new CmisRuntimeException("Document already exits " + docFile, ae);
+            }
+        }
+        catch(CmisConstraintException ce)
+        {
+            if(!isFile)
+            {
+                throw new CmisRuntimeException("Invalid symbols in file name " + docName, ce);
+            }
+            else
+            {
+                throw new CmisRuntimeException("Invalid symbols in file name " + docFile.getName(), ce);
+            }
         }
         finally
         {

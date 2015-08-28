@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
  * @author Bogdan Bocancea
  * @author Cristina Axinte
  */
-
 public class ContentTest extends AbstractTest
 {    
     @Autowired private UserService userService;
@@ -48,8 +47,7 @@ public class ContentTest extends AbstractTest
     String password = "password";
     String folder = "cmisFolder";
     String plainDoc = "plainDoc";
-    
-    
+
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testCreateFolderTwice() throws Exception
     {
@@ -620,5 +618,113 @@ public class ContentTest extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);  
         content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, "fakeDoc", "new content");    
+    }
+    
+    @Test 
+    public void createFolderInRepository() throws Exception
+    {
+        String userName = "cmisUser" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        String folder = "newFolder" + System.currentTimeMillis();
+        Folder newFolder = content.createFolderInRepository(admin, admin, folder);
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        Assert.assertEquals(newFolder.getFolderParent().getName(), "Company Home");
+        Assert.assertFalse(content.getNodeRefFromRepo(admin, admin, folder, "").isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createFolderInRepositoryTwice() throws Exception
+    {
+        content.createFolderInRepository(admin, admin, folder);
+        content.createFolderInRepository(admin, admin, folder);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createFolderInRepositoryUnauthorized() throws Exception
+    {
+        String userName = "cmisUser" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        String folder = "newFolder" + System.currentTimeMillis();
+        content.createFolderInRepository(userName, password, folder);    
+    }
+    
+    @Test
+    public void createFolderInRepositoryByPath() throws Exception
+    {
+        String folder = "newFolder" + System.currentTimeMillis();
+        Folder newFolder = content.createFolderInRepository(admin, admin, folder, "Guest Home");
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        Assert.assertEquals(newFolder.getFolderParent().getName(), "Guest Home");
+        Assert.assertFalse(content.getNodeRefFromRepo(admin, admin, folder, "Guest Home").isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createFolderInRepositoryInvalidPath() throws Exception
+    {
+        String folder = "newFolder" + System.currentTimeMillis();
+        content.createFolderInRepository(admin, admin, folder, "Shared/InvalidPath");     
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteFolderFromRepoUnauthorized() throws Exception
+    {
+        String userName = "cmisUser" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        String folder = "newFolder" + System.currentTimeMillis();
+        Folder newFolder = content.createFolderInRepository(admin, admin, folder);
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        content.deleteFolderFromRepository(userName, password, folder, null);
+    }
+    
+    @Test
+    public void deleteFolderFromRepo() throws Exception
+    {
+        String folder = "newFolder" + System.currentTimeMillis();
+        Folder newFolder = content.createFolderInRepository(admin, admin, folder);
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        content.deleteFolderFromRepository(admin, admin, folder, null);
+        Assert.assertTrue(content.getNodeRefFromRepo(admin, admin, folder, null).isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteFolderFromRepoInvalidPath() throws Exception
+    {
+        String folder = "newFolder" + System.currentTimeMillis();
+        Folder newFolder = content.createFolderInRepository(admin, admin, folder);
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        content.deleteFolderFromRepository(admin, admin, folder, "Shared/Invalid");
+    }
+    
+    @Test
+    public void createDocInRepository() throws Exception
+    {
+        String doc = "repoDoc-" + System.currentTimeMillis();
+        Document theDoc = content.createDocumentInRepository(admin, admin, null, DocumentType.TEXT_PLAIN, doc, "doc content");
+        Assert.assertFalse(theDoc.getId().isEmpty());
+    }
+    
+    @Test
+    public void createDocInRepositoryByPath() throws Exception
+    {
+        String doc = "repoDoc-" + System.currentTimeMillis();
+        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared", DocumentType.TEXT_PLAIN, doc, "shared doc content");
+        Assert.assertFalse(theDoc.getId().isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void createDocInRepositoryInvalidPath() throws Exception
+    {
+        String doc = "repoDoc-" + System.currentTimeMillis();
+        Document theDoc = content.createDocumentInRepository(admin, admin, "invalidPath", DocumentType.TEXT_PLAIN, doc, "shared doc content");
+        Assert.assertFalse(theDoc.getId().isEmpty());
+    }
+    
+    @Test
+    public void createFileInRepository() throws Exception
+    {
+        String doc = "repoDoc-" + System.currentTimeMillis();
+        File file = new File(doc);
+        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
+        Assert.assertFalse(theDoc.getId().isEmpty());
     }
 }
