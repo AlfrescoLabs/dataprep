@@ -161,8 +161,7 @@ public class ContentService extends CMISUtil
                 || StringUtils.isEmpty(siteName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }
-        
+        }  
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         properties.put(PropertyIds.NAME, docName);     
@@ -170,11 +169,11 @@ public class ContentService extends CMISUtil
         byte[] content = docContent.getBytes();
         InputStream stream = new ByteArrayInputStream(content);
         try
-        {       
+        {
             contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
             documentLibrary.refresh();
-            Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
+            Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);        
             return d;
         }
         catch(CmisObjectNotFoundException nf)
@@ -227,7 +226,7 @@ public class ContentService extends CMISUtil
         byte[] content = docContent.getBytes();
         InputStream stream = new ByteArrayInputStream(content);
         try
-        {        
+        {
             contentStream = session.getObjectFactory().createContentStream(docName.getName(), Long.valueOf(content.length), fileType.type, stream);
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
             Document d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
@@ -312,8 +311,8 @@ public class ContentService extends CMISUtil
         }
         finally
         {
-           stream.close();
-           contentStream.getStream().close();
+            stream.close();
+            contentStream.getStream().close();
         }
         return d;
     }
@@ -351,7 +350,7 @@ public class ContentService extends CMISUtil
     }
     
     /**
-     * Delete a parent folder that has children using CMIS
+     * Delete a parent folder that has children
      * 
      * @param userName login username
      * @param password login password

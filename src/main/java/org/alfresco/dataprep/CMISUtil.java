@@ -128,11 +128,12 @@ public class CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/browser";
         parameter.put(SessionParameter.BROWSER_URL, serviceUrl);
-        parameter.put(SessionParameter.BINDING_TYPE, BindingType.BROWSER.value());
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.BROWSER.value());                                                         
         try
         {
             // create session
             List<Repository> repositories = factory.getRepositories(parameter);
+            parameter.put(SessionParameter.REPOSITORY_ID, repositories.get(0).getId());
             Session session = repositories.get(0).createSession();
             return session;
         }
@@ -228,7 +229,7 @@ public class CMISUtil
             {
                 properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondaryTypes);
             }
-            contentObj.updateProperties(properties);
+            contentObj.updateProperties(properties); 
         }
         catch(CmisInvalidArgumentException ia)
         {

@@ -1024,10 +1024,10 @@ public class UserService
         HttpClientContext localContext = HttpClientContext.create();
         localContext.setCookieStore(cookieStore);      
         formParams = (new NameValuePair[]{
-                        new NameValuePair("username", userName),
-                        new NameValuePair("password", userPass),
-                        new NameValuePair("success", "/share/page/user/" + userName + "/dashboard"),
-                        new NameValuePair("failure", "/share/page/type/login?error=true")});
+                      new NameValuePair("username", userName),
+                      new NameValuePair("password", userPass),
+                      new NameValuePair("success", "/share/page/user/" + userName + "/dashboard"),
+                      new NameValuePair("failure", "/share/page/type/login?error=true")});
         post.setRequestBody(formParams);
         int postStatus = theClient.executeMethod(post);
         if(302 == postStatus)
