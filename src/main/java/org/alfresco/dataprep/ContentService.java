@@ -68,6 +68,7 @@ public class ContentService extends CMISUtil
      * @param folderName folder name
      * @param siteName site name
      * @param inRepository if folder is created in repository
+     * @param path path from repository (e.g. Shared)
      * @return Folder CMIS folder object
      * @throws Exception if error
      */
@@ -885,7 +886,7 @@ public class ContentService extends CMISUtil
      * @return list of uploaded documents
      * @throws Exception if error
      */
-    public List<Document> uploadFilesInFolder(final String filesPath, 
+    public List<Document> uploadFilesInFolder(final String filesPath,
                                               final String userName,
                                               final String password,
                                               final String siteName,
