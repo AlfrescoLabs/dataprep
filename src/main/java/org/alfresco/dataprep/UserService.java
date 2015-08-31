@@ -339,7 +339,7 @@ public class UserService
         HttpPost post  = new HttpPost(reqUrl);    
         JSONObject body = new JSONObject();
         JSONObject group = new JSONObject();
-        group.put("fullName", "GROUP_" + groupName);        
+        group.put("fullName", "GROUP_" + groupName);
         body.put("role", role);
         body.put("group", group);
         HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, body, post);
@@ -565,9 +565,9 @@ public class UserService
         {
             reqUrl = client.getApiUrl() + "sites/" + siteName.toLowerCase() + "/memberships";
             JSONObject group = new JSONObject();
-            group.put("fullName", "GROUP_" + entity);        
+            group.put("fullName", "GROUP_" + entity);
             grpBody.put("role", role);
-            grpBody.put("group", group);                
+            grpBody.put("group", group);
         }       
         HttpPut put = new HttpPut(reqUrl);
         HttpResponse response = null;
@@ -692,7 +692,7 @@ public class UserService
                                final String adminPass,
                                final String groupName) throws Exception
     {
-        if (StringUtils .isEmpty( adminUser) || StringUtils .isEmpty( adminPass) || StringUtils.isEmpty (groupName))
+        if (StringUtils.isEmpty( adminUser) || StringUtils.isEmpty( adminPass) || StringUtils.isEmpty (groupName))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
@@ -738,7 +738,7 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName;
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/" + userName;
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
@@ -784,7 +784,7 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup;
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/GROUP_" + subGroup;
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
@@ -835,7 +835,7 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/" + userName;
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/" + userName;
         HttpDelete request = new HttpDelete(reqURL);
         HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
@@ -869,7 +869,7 @@ public class UserService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName.toLowerCase() + "/children/GROUP_" + subGroup;
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/GROUP_" + subGroup;
         HttpDelete request = new HttpDelete(reqURL);
         HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
@@ -941,9 +941,9 @@ public class UserService
             if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response. getEntity();
-                String responseString = EntityUtils.toString(entity , "UTF-8");        
+                String responseString = EntityUtils.toString(entity , "UTF-8");
                 JSONParser parser = new JSONParser();
-                JSONObject obj = (JSONObject) parser.parse(responseString);       
+                JSONObject obj = (JSONObject) parser.parse(responseString);
                 JSONObject data = (JSONObject) obj.get("paging");
                 long count = (Long) data.get("totalItems");
                 Integer i = (int) (long) count;
@@ -1017,7 +1017,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         HttpState state;
         org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
-        String reqURL = client.getAlfrescoUrl() + "share/page/dologin";        
+        String reqURL = client.getAlfrescoUrl() + "share/page/dologin";
         org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
         NameValuePair[] formParams;
         CookieStore cookieStore = new BasicCookieStore();
@@ -1077,10 +1077,10 @@ public class UserService
                               final int position) throws Exception
     {     
         login(userName, password);
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();           
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
         JSONObject body = new JSONObject();
-        JSONArray array = new JSONArray();     
+        JSONArray array = new JSONArray();
         body.put("dashboardPage", "user/" + userName + "/dashboard");
         body.put("templateId", layout.id);
         

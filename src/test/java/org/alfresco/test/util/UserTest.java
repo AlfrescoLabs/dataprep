@@ -34,12 +34,11 @@ public class UserTest extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private UserService userService;
     String userName = "userm-" + System.currentTimeMillis();
-    String firstName = "fname-" + System.currentTimeMillis() ;
-    String lastName = "lname-" + System.currentTimeMillis() ;
+    String firstName = "fname-" + System.currentTimeMillis();
+    String lastName = "lname-" + System.currentTimeMillis();
     String password = "password";
     String email = userName;
     String admin = "admin";
-
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName() throws Exception
@@ -349,7 +348,7 @@ public class UserTest extends AbstractTest
     @Test
     public void addUserToGroup() throws Exception
     {
-        String groupName = "group" + System.currentTimeMillis();
+        String groupName = "Group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         String userName2 = "userm2-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
@@ -358,6 +357,14 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
         Assert.assertEquals(userService.countAuthoritiesFromGroup(admin, admin, groupName), 2);
+    }
+    
+    @Test
+    public void addUserToSystemGroup() throws Exception
+    {
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        Assert.assertTrue(userService.addUserToGroup(admin, admin, "ALFRESCO_SEARCH_ADMINISTRATORS", userName));
     }
     
     @Test
