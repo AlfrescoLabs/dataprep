@@ -168,7 +168,7 @@ public class CMISUtil
             Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
             for (Tree<FileableCmisObject> t : documentLibrary.getDescendants(-1)) 
             {
-                contents = getId(t, contentName);      
+                contents = getId(t, contentName);
             }      
             for (Map.Entry<String, String> entry : contents.entrySet()) 
             {
@@ -191,9 +191,9 @@ public class CMISUtil
     { 
         contents.put(tree.getItem().getName(), tree.getItem().getId());
         for (Tree<FileableCmisObject> t : tree.getChildren()) 
-        {   
+        {
             getId(t, contentName);
-        }       
+        }
         return contents;
     }
     
@@ -277,7 +277,7 @@ public class CMISUtil
             {
                 properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondaryTypes);
             }
-            contentObj.updateProperties(properties); 
+            contentObj.updateProperties(properties);
         }
         catch(CmisInvalidArgumentException ia)
         {
@@ -397,7 +397,7 @@ public class CMISUtil
         Session session = getCMISSession(userName, password);
        
         // execute query
-        ItemIterable<QueryResult> results = session.query("select cmis:objectId from cm:category where cmis:name = '" + categoryName + "'", false); 
+        ItemIterable<QueryResult> results = session.query("select cmis:objectId from cm:category where cmis:name = '" + categoryName + "'", false);
         for (QueryResult qResult : results) 
         {
             String objectId = "";
@@ -411,7 +411,7 @@ public class CMISUtil
             if(result.getName().equalsIgnoreCase(categoryName))
             {
                 categoryNodeRef = result.getId();
-            }     
+            }
         }
         return categoryNodeRef;
     }
