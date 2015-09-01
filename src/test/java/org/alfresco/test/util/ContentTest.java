@@ -663,6 +663,7 @@ public class ContentTest extends AbstractTest
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
         Document d = content.uploadFileInRepository(admin, admin, "Shared", pathToFile);
         Assert.assertFalse(d.getId().isEmpty());
+        content.deleteDocumentRepository(admin, admin, "Shared", "UploadFile-xml.xml");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
