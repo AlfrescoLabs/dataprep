@@ -1035,7 +1035,7 @@ public class ContentService extends CMISUtil
         String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/atom/content?id=" + docNodeRef;
         HttpPut request = new HttpPut(serviceUrl);
         String contentType = docType.type + ";charset=" + AlfrescoHttpClient.UTF_8_ENCODING;
-        request.addHeader("Content-Type", contentType);    
+        request.addHeader("Content-Type", contentType);
         StringEntity se = new StringEntity(newContent.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         request.setEntity(se);

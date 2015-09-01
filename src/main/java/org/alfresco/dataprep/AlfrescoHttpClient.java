@@ -32,6 +32,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -116,6 +117,34 @@ public class AlfrescoHttpClient
             logger.error(String.format("Unable to generate ticket, url: %s",targetUrl), e);
         }
         throw new RuntimeException("Unable to get ticket");
+    }
+    
+    /**
+     * Get the alfresco version
+     * @return String version of alfresco
+     * @throws Exception if error
+     */
+    public String getAlfrescoVersion() throws Exception
+    {
+        String url = apiUrl + "server";
+        HttpGet get = new HttpGet(url);
+        HttpResponse response = client.execute(get);
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            try
+            {
+                String json_string = EntityUtils.toString(response.getEntity());
+                JSONParser parser = new JSONParser();
+                JSONObject obj = (JSONObject) parser.parse(json_string);
+                JSONObject data = (JSONObject) obj.get("data");
+                return (String) data.get("version");
+            }
+            catch (IOException | ParseException e)
+            {
+                return "";
+            }
+        }
+        return "";
     }
 
     /**

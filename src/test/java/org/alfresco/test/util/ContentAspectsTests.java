@@ -599,8 +599,6 @@ public class ContentAspectsTests extends AbstractTest
                   Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docContent);
         Assert.assertFalse(doc1.getId().isEmpty());
-        
-
         contentAspect.setBasicProperties(userName, password, siteName, docName, newName, newTitle, newDescription, newAuthor);
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, newName);
         Assert.assertEquals(contentAspect.getPropertyValue(properties, PropertyIds.NAME), newName);

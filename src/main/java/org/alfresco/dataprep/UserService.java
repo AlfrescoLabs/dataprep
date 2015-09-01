@@ -255,7 +255,15 @@ public class UserService
                     String result = client.readStream(response.getEntity()).toJSONString();
                     String inviteId = client.getParameterFromJSON(result, "inviteId");
                     String inviteTicket = client.getParameterFromJSON(result, "inviteTicket");
-                    return acceptSiteInvitation(inviteId, inviteTicket);
+                    String alfVersion = client.getAlfrescoVersion();
+                    if(alfVersion.contains("5.1"))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return acceptSiteInvitation(inviteId, inviteTicket);
+                    }
                 default:
                     logger.error("Unable to invite user: " + response.toString());
                     break;
@@ -286,7 +294,7 @@ public class UserService
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "invite/" + inviteId + "/" + inviteTicket + "/accept";
-        HttpPut put = new HttpPut(url);      
+        HttpPut put = new HttpPut(url);
         try
         {
             HttpResponse response = client.executeRequest(put);
