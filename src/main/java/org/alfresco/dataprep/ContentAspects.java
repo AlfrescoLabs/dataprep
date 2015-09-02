@@ -38,7 +38,6 @@ import org.springframework.stereotype.Service;
  */
 public class ContentAspects extends CMISUtil
 {
-    
     /**
      * Add aspect for document or folder
      * 
@@ -57,10 +56,10 @@ public class ContentAspects extends CMISUtil
     {
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         List<DocumentAspect> aspectsToAdd = new ArrayList<DocumentAspect>();
-        aspectsToAdd.add(aspect);      
+        aspectsToAdd.add(aspect);
         addAspect(userName, password, contentNodeRef, aspectsToAdd);
     }
-     
+
     /**
      * Remove aspect from document or folder
      * 
@@ -116,14 +115,14 @@ public class ContentAspects extends CMISUtil
                                   final String siteName,
                                   final String contentName,
                                   final Date removeAfter) throws Exception
-    {       
+    {
         addAspect(userName, password, siteName, contentName, DocumentAspect.COMPLIANCEABLE);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:removeAfter", removeAfter);
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         addProperties(userName, password, contentNodeRef, propertyMap);
     }
-    
+
     /**
      * Method to add Dublin Core aspect
      * 
@@ -154,7 +153,7 @@ public class ContentAspects extends CMISUtil
                               final String rights,
                               final String subject) throws Exception
     {       
-        addAspect(userName, password, siteName, contentName, DocumentAspect.DUBLIN_CORE);     
+        addAspect(userName, password, siteName, contentName, DocumentAspect.DUBLIN_CORE);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:contributor", contributor);
         propertyMap.put("cm:publisher", publisher);
@@ -379,9 +378,9 @@ public class ContentAspects extends CMISUtil
                                final String siteName,
                                final String contentName,
                                final List<String> categoryName) throws Exception
-    {   
+    {
         addAspect(userName, password, siteName, contentName, DocumentAspect.CLASSIFIABLE); 
-        List<String> nodeRefs = new ArrayList<String>();       
+        List<String> nodeRefs = new ArrayList<String>();
         for(int i = 0; i < categoryName.size(); i++)
         {       
             nodeRefs.add("workspace://SpacesStore/" + getCategoryNodeRef(userName, password, categoryName.get(i)));
@@ -389,7 +388,7 @@ public class ContentAspects extends CMISUtil
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:categories", nodeRefs);
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);     
+        addProperties(userName, password, contentNodeRef, propertyMap);
     }
     
     /**
@@ -406,9 +405,8 @@ public class ContentAspects extends CMISUtil
                                                   final String password,
                                                   final String siteName,
                                                   final String contentName) throws Exception
-    {             
+    {
         List<Property<?>> basicProperties=getProperties(userName, password, siteName, contentName);
-        
         Map<String, Object> propertiesMap = new HashMap<String, Object>();
         propertiesMap.put("Name", getPropertyValue(basicProperties, PropertyIds.NAME));
         propertiesMap.put("Title", getPropertyValue(basicProperties, "cm:title"));

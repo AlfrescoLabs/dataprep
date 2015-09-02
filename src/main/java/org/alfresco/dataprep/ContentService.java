@@ -57,7 +57,6 @@ import org.springframework.stereotype.Service;
  * @author Bocancea Bogdan
  * @author Cristina Axinte
  */
-
 public class ContentService extends CMISUtil
 {
     /**
@@ -251,7 +250,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param siteName site name
-     * @param fileType file type
+     * @param fileType DocumentType file type
      * @param docName String file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -273,7 +272,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param siteName site name
-     * @param fileType file type
+     * @param fileType DocumentType file type
      * @param docName file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -296,7 +295,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
-     * @param fileType file type
+     * @param fileType DocumentType file type
      * @param docName file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -319,7 +318,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
-     * @param fileType file type
+     * @param fileType DocumentType file type
      * @param docName File file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -341,7 +340,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param siteName site name
-     * @param fileType file type
+     * @param fileType DocumentType file type
      * @param isFile boolean true if type File
      * @param docName file name
      * @param docFile file doc
@@ -455,7 +454,7 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param folderName folder name
-     * @param fileType file type (e.g. text/plain, text/html)
+     * @param fileType DocumentType file type
      * @param docName file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -536,7 +535,7 @@ public class ContentService extends CMISUtil
                 || StringUtils.isEmpty(siteName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }        
+        }
         try
         {
             String docId; 
@@ -667,7 +666,7 @@ public class ContentService extends CMISUtil
                 || StringUtils.isEmpty(folderName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }        
+        }
         deleteTreeFolder(userName, password, false, siteName, null, folderName);
     }
 
@@ -689,7 +688,7 @@ public class ContentService extends CMISUtil
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }        
+        }
         deleteTreeFolder(userName, password, true, null, path, folderName);
     }
 

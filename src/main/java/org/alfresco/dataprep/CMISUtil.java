@@ -24,6 +24,7 @@ import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.Repository;
@@ -40,6 +41,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentExcep
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -144,7 +146,7 @@ public class CMISUtil
             throw new CmisRuntimeException("Invalid user name and password", unauthorized);
         }
     }
-    
+
     /**
      * Gets the object id for a document or folder.
      * 
@@ -185,7 +187,7 @@ public class CMISUtil
         }
         return nodeRef;
     }
-    
+
     private Map<String, String> getId(Tree<FileableCmisObject> tree,
                                       final String contentName)
     { 
@@ -196,7 +198,7 @@ public class CMISUtil
         }
         return contents;
     }
-    
+
     /**
      * Gets the object id for a document or folder in repository
      * 
@@ -256,7 +258,7 @@ public class CMISUtil
                           final String contentNodeRef,
                           List<DocumentAspect> documentAspects) throws Exception
     {
-        Session session = getCMISSession(userName, password);      
+        Session session = getCMISSession(userName, password);
         try
         {
             CmisObject contentObj = session.getObject(contentNodeRef);
@@ -284,7 +286,7 @@ public class CMISUtil
             throw new CmisRuntimeException("Invalid content " + contentNodeRef, ia);
         }
     }
-    
+
     /**
      * Method to add properties for aspects
      *
@@ -310,7 +312,7 @@ public class CMISUtil
             throw new CmisRuntimeException("Invalid content " + contentNodeRef, ia);
         }
     }
-    
+
     /**
      * Method to get all object properties
      *
@@ -415,7 +417,37 @@ public class CMISUtil
         }
         return categoryNodeRef;
     }
-    
+    /**
+     * Method to attach a document
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param docsToAttach String document to attach
+     * @param attachToObj ObjectId attach to object
+     * @throws Exception
+     */
+    public void attachDocuments(final String userName,
+                                final String password,
+                                final String siteName,
+                                final List<String> docsToAttach,
+                                final ObjectId attachToObj) throws Exception
+    {
+        Session session = getCMISSession(userName, password);
+        for(int i = 0; i<docsToAttach.size(); i++)
+        {
+            String docNodRef = getNodeRef(userName, password, siteName, docsToAttach.get(i));
+            if(StringUtils.isEmpty(docNodRef))
+            {
+                throw new CmisRuntimeException(docsToAttach.get(i) + " doesn't exist");
+            }
+            Map<String,Object> relProps = new HashMap<String, Object>();
+            relProps.put(PropertyIds.OBJECT_TYPE_ID, "R:cm:attachments");
+            relProps.put(PropertyIds.SOURCE_ID, attachToObj.getId());
+            relProps.put(PropertyIds.TARGET_ID, docNodRef);
+            session.createRelationship(relProps);
+        }
+    }
+
     /**
      * Method to wait for given seconds.
      * 

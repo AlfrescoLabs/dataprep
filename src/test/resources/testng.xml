@@ -11,6 +11,7 @@
       <class name="org.alfresco.test.util.SiteTest"/>
       <class name="org.alfresco.test.util.ContentActionsTests"/>
       <class name="org.alfresco.test.util.SitePagesActionTests"/>
+       <class name="org.alfresco.test.util.DataListsTests"/>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->

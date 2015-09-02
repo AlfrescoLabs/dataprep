@@ -450,7 +450,7 @@ public class SitePagesService
             wikiTitle = wikiTitle.replaceAll(" ", "_");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;       
+        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.executeRequest(client, userName, password, url, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
@@ -782,9 +782,9 @@ public class SitePagesService
             {
                 case HttpStatus.SC_OK:
                     String strResponse = EntityUtils.toString(response.getEntity());
-                    JSONParser parser = new JSONParser();  
+                    JSONParser parser = new JSONParser();
                     Object obj = parser.parse(strResponse);
-                    JSONObject jsonObject = (JSONObject) obj;  
+                    JSONObject jsonObject = (JSONObject) obj;
                     org.json.simple.JSONArray jArray = (org.json.simple.JSONArray) jsonObject.get("items");
                     Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
                     while (iterator.hasNext()) 
