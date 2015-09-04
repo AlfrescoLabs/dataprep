@@ -357,6 +357,7 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
         Assert.assertEquals(userService.countAuthoritiesFromGroup(admin, admin, groupName), 2);
+        Assert.assertTrue(userService.isUserAddedToGroup(ADMIN, ADMIN, groupName, userName2));
     }
     
     @Test
@@ -526,7 +527,7 @@ public class UserTest extends AbstractTest
         String userName = "userm-" + System.currentTimeMillis();
         site.create(admin, admin, "myDomain", siteId,  "my site description", Visibility.PUBLIC);
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer"));
+        userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer");
         Assert.assertTrue(userService.changeUserRole(admin, admin, siteId, userName, "SiteCollaborator"));
     }
     
@@ -664,7 +665,7 @@ public class UserTest extends AbstractTest
         site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
         userService.createSiteMember(userManager, password, userToAdd, siteId, "fakeRole");
     }
-    
+
     @Test
     public void addMemberToSiteTwice() throws Exception
     { 

@@ -48,9 +48,9 @@ public class SitePagesActionTests extends AbstractTest
         site.create(ADMIN, ADMIN, "myDomain", siteId, "my site description", Visibility.PUBLIC);   
         Date today = new Date();
         Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today, 
-                "6:00 PM", "8:00 PM", false, "tag1"));        
+                "6:00 PM", "8:00 PM", false, "tag1"));
         Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today, 
-                "12:00", "13:00", false, "tag1"));      
+                "12:00", "13:00", false, "tag1"));
         String name1 = pageService.getEventName(ADMIN, ADMIN, siteId, "what", "where", today, today, "6:00 PM", "8:00 PM", false);
         String name2 = pageService.getEventName(ADMIN, ADMIN, siteId, "what", "where", today, today, "12:00", "13:00", false);
         Assert.assertNotNull(name1);
@@ -347,7 +347,7 @@ public class SitePagesActionTests extends AbstractTest
         String link = "link" + + System.currentTimeMillis();       
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));      
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));
         pageService.deleteLink(userName, userName, siteId, "fakeLink");
     }
     
@@ -356,10 +356,10 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String link = "link" + + System.currentTimeMillis();       
+        String link = "link" + + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));              
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));
         pageService.deleteLink(userName, userName, "fakeSite", link);
     }
 }

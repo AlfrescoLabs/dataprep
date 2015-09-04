@@ -95,7 +95,7 @@ public class SiteService
      */
     public void create(final String username,
                        final String password,
-                       final String domain, 
+                       final String domain,
                        final String siteId,
                        final String description,
                        final Visibility visibility) throws IOException
@@ -123,8 +123,8 @@ public class SiteService
                       final Visibility visibility) throws IOException
    {
        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
-       publicApi.createSite(domain, 
-                            siteId, 
+       publicApi.createSite(domain,
+                            siteId,
                             "site-dashboard", 
                             title,
                             description, 
@@ -236,23 +236,23 @@ public class SiteService
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }            
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqUrl = client.getApiVersionUrl() + "sites/" + siteName;        
+        String reqUrl = client.getApiVersionUrl() + "sites/" + siteName;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);       
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             String result = client.readStream(response.getEntity()).toJSONString();
             if(!StringUtils.isEmpty(result))
             {
-                JSONParser parser = new JSONParser();  
+                JSONParser parser = new JSONParser();
                 Object obj = parser.parse(result);
-                JSONObject jsonObject = (JSONObject) obj;  
+                JSONObject jsonObject = (JSONObject) obj;
                 JSONObject sites = (JSONObject) jsonObject.get("entry");
                 return siteNodeRef = (String) sites.get("guid");
             }
-        }      
+        }
         return siteNodeRef;
     }
     
@@ -288,7 +288,7 @@ public class SiteService
             HttpResponse response = clientWithAuth.execute(post);
             switch (response.getStatusLine().getStatusCode())
             {
-                case HttpStatus.SC_CREATED:        
+                case HttpStatus.SC_CREATED:
                     return true;
                 case HttpStatus.SC_NOT_FOUND:
                     throw new RuntimeException("Site doesn't exists " + siteName);
@@ -325,8 +325,8 @@ public class SiteService
             throw new IllegalArgumentException("Parameter missing");
         }     
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getSiteNodeRef(userName, password, siteName);      
-        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + nodeRef;     
+        String nodeRef = getSiteNodeRef(userName, password, siteName);
+        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + nodeRef;
         HttpGet get = new HttpGet(reqUrl);
         HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
@@ -366,8 +366,8 @@ public class SiteService
         {
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
-        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + siteNodeRef; 
-        HttpDelete delete = new HttpDelete(reqUrl);          
+        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + siteNodeRef;
+        HttpDelete delete = new HttpDelete(reqUrl);
         HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
@@ -402,18 +402,18 @@ public class SiteService
                              final boolean multiplePages,
                              final Page page,
                              final List<Page> pages) throws Exception
-    {    
+    {
         if(!exists(siteName, userName, password))
         {
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + DashboardCustomization.SITE_PAGES_URL;        
+        String url = client.getAlfrescoUrl() + DashboardCustomization.SITE_PAGES_URL;
         JSONObject body = new JSONObject();
-        JSONArray array = new JSONArray();      
+        JSONArray array = new JSONArray();
         body.put("siteId", siteName);
         // set the default page (Document Library)
-        array.add(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));       
+        array.add(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));
         if(pages != null)
         {
             for(int i = 0; i < pages.size(); i++)
@@ -430,7 +430,7 @@ public class SiteService
             array.add(new org.json.JSONObject().put("pageId", page.pageId));
         }       
         body.put("pages", array);
-        body.put("themeId", "");   
+        body.put("themeId", "");
         HttpPost post  = new HttpPost(url);
         HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
@@ -446,8 +446,7 @@ public class SiteService
             logger.error("Unable to add page to site " + siteName);
             return false;
         }
-            
-    }            
+    }
     
     /**
      * Add a single page to site dashboard
@@ -467,7 +466,7 @@ public class SiteService
                                  final String siteName,
                                  final Page page,
                                  final List<Page> oldPages) throws Exception
-    {        
+    {
         return addPages(userName, password, siteName, false, page, oldPages);
     }
     
@@ -485,7 +484,7 @@ public class SiteService
                                  final String password,
                                  final String siteName,
                                  final List<Page> pages) throws Exception
-    {       
+    {
         return addPages(userName, password, siteName, true, null, pages);
     }
     
@@ -518,15 +517,15 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
         JSONObject body = new JSONObject();
-        JSONArray array = new JSONArray();     
+        JSONArray array = new JSONArray();
         body.put("dashboardPage", "site/" + siteName + "/dashboard");
-        body.put("templateId", layout.id);      
+        body.put("templateId", layout.id);
         Hashtable<String, String> defaultDashlets = new Hashtable<String, String>();
         defaultDashlets.put(SiteDashlet.SITE_MEMBERS.id, "component-1-1");
         defaultDashlets.put(SiteDashlet.SITE_CONNTENT.id, "component-2-1");
-        defaultDashlets.put(SiteDashlet.SITE_ACTIVITIES.id, "component-2-2");       
+        defaultDashlets.put(SiteDashlet.SITE_ACTIVITIES.id, "component-2-2");
         Iterator<Map.Entry<String, String>> entries = defaultDashlets.entrySet().iterator();
-        while (entries.hasNext()) 
+        while (entries.hasNext())
         {
           Map.Entry<String, String> entry = entries.next();
           JSONObject jDashlet = new JSONObject();
@@ -534,14 +533,13 @@ public class SiteService
           jDashlet.put("regionId", entry.getValue());
           jDashlet.put("originalRegionId", entry.getValue());
           array.add(jDashlet);
-        }    
-        
+        }
         JSONObject newDashlet = new JSONObject();
         newDashlet.put("url", dashlet.id);
         String region = "component-" + column + "-" + position;
         newDashlet.put("regionId", region);
         array.add(newDashlet);
-        body.put("dashlets", array);      
+        body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
         HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
@@ -605,8 +603,8 @@ public class SiteService
                     HttpPost secondPost  = new HttpPost(secondPostUrl);
                     secondPost.setHeader("Content-Type", "application/xml;charset=UTF-8");
                     StringEntity xmlEntity = new StringEntity(xmlBody, "UTF-8");
-                    xmlEntity.setContentType("application/xml");     
-                    secondPost.setEntity(xmlEntity);                   
+                    xmlEntity.setContentType("application/xml");
+                    secondPost.setEntity(xmlEntity);
                     response = clientWithAuth.execute(secondPost);
                     secondPost.releaseConnection();
                     String url = client.getAlfrescoUrl() + "alfresco/service/slingshot/doclib2/doclist/all/site/rm/documentLibrary/";

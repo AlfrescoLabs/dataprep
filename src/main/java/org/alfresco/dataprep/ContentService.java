@@ -81,7 +81,7 @@ public class ContentService extends CMISUtil
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }      
+        }
         Map<String, String> properties = new HashMap<String, String >();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folderName);
@@ -193,7 +193,7 @@ public class ContentService extends CMISUtil
         {
             Session session = getCMISSession(userName, password); 
             String folderId = getNodeRef(userName, password, siteName, folderName);
-            session.getObject(folderId).delete();         
+            session.getObject(folderId).delete();
         }
         catch(CmisInvalidArgumentException nf)
         {
@@ -226,9 +226,9 @@ public class ContentService extends CMISUtil
         }
         try
         {
-            Session session = getCMISSession(userName, password); 
+            Session session = getCMISSession(userName, password);
             String folderId = getNodeRefFromRepo(userName, password, folderName, path);
-            session.getObject(folderId).delete();         
+            session.getObject(folderId).delete();
         }
         catch(CmisInvalidArgumentException nf)
         {
@@ -238,7 +238,7 @@ public class ContentService extends CMISUtil
         {
             throw new CmisRuntimeException("Cannot delete folder with at least one child", ce);
         }
-        catch (CmisUnauthorizedException ue) 
+        catch (CmisUnauthorizedException ue)
         {
             throw new CmisRuntimeException("User " + userName + " is not authorized to create folder in repository");
         }
@@ -477,7 +477,7 @@ public class ContentService extends CMISUtil
         Document d = null;
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-        properties.put(PropertyIds.NAME, docName);     
+        properties.put(PropertyIds.NAME, docName);
         Session session = getCMISSession(userName, password);
         byte[] content = docContent.getBytes();
         InputStream stream = new ByteArrayInputStream(content);
@@ -538,7 +538,7 @@ public class ContentService extends CMISUtil
         }
         try
         {
-            String docId; 
+            String docId;
             Session session = getCMISSession(userName, password); 
             docId = getNodeRef(userName, password, siteName, docName);
             session.getObject(docId).delete();
@@ -901,7 +901,7 @@ public class ContentService extends CMISUtil
             throw new IllegalArgumentException("Parameter missing");
         }
         File dir = new File(filesPath);
-        if (!dir.exists() || !dir.isDirectory()) 
+        if (!dir.exists() || !dir.isDirectory())
         {
             throw new IllegalArgumentException("Invalid Path: " + dir.getPath());
         }
@@ -919,12 +919,12 @@ public class ContentService extends CMISUtil
             FileInputStream fileContent=new FileInputStream(file);
             Map<String, String> properties = new HashMap<String, String>();
             properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-            properties.put(PropertyIds.NAME, fileName);     
+            properties.put(PropertyIds.NAME, fileName);
             try
             {
                 contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileExtention, fileContent);
                 folderObj = session.getObject(folderId);
-                Folder f = (Folder)folderObj;           
+                Folder f = (Folder)folderObj;
                 Document d = f.createDocument(properties, contentStream, VersioningState.MAJOR);
                 uploadedFiles.add(d);
             }

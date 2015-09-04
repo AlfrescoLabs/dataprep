@@ -176,6 +176,4 @@ public class BasicAuthPublicApiFactory implements PublicApiFactory
     {
         this.ignoreServletName = ignoreServletName;
     }
-    
-    
 }

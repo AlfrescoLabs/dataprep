@@ -113,7 +113,7 @@ public class ContentActions extends CMISUtil
         }
         return false;
     }
-    
+
     /**
      * Create multiple tags or comments for document or folder
      * 
@@ -148,7 +148,7 @@ public class ContentActions extends CMISUtil
         {
             jsonInput = ( jsonInput + "},{" + "\"" + optType.bodyParam  + "\"" + ": \"" + values.get(i) + "\"" );
         }
-        jsonInput = ( jsonInput + "}]" );         
+        jsonInput = ( jsonInput + "}]" ); 
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
@@ -174,7 +174,7 @@ public class ContentActions extends CMISUtil
         } 
         return false;
     }
-    
+
     /**
      * Remove tag or comment from document or folder
      * 
@@ -201,7 +201,7 @@ public class ContentActions extends CMISUtil
             throw new IllegalArgumentException("Parameter missing");
         }       
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);      
+        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         switch (optType)
         {
             case TAGS:
@@ -219,7 +219,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + optType.name + "/" + optionNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);          
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -229,8 +229,8 @@ public class ContentActions extends CMISUtil
             return true;
         }
         return false;
-    } 
-    
+    }
+
     /**
      * Create tag for a document or folder
      * 
@@ -250,7 +250,7 @@ public class ContentActions extends CMISUtil
     {
         return addNewAction(userName, password, siteName, contentName, ActionType.TAGS, tag);
     }
-    
+
     /**
      * Create multiple tags for document or folder
      * 
@@ -270,7 +270,7 @@ public class ContentActions extends CMISUtil
     {
         return addMultipleActions(userName, password, siteName, contentName, ActionType.TAGS, tags);
     }
-    
+
     /**
      * Get the response from HttpGet for added tags, comments, ratings
      * 
@@ -308,7 +308,7 @@ public class ContentActions extends CMISUtil
         }
         return "";
     }
-    
+
     /**
      * Return a list of tags or comments
      * 
@@ -319,7 +319,7 @@ public class ContentActions extends CMISUtil
     private List<String> getOptionValues(final String response,
                                          final ActionType optType) throws ParseException
     {
-        List<String> values = new ArrayList<String>();     
+        List<String> values = new ArrayList<String>();
         if(!StringUtils.isEmpty(response))
         {
             JSONParser parser = new JSONParser();  
@@ -333,7 +333,7 @@ public class ContentActions extends CMISUtil
                 JSONObject factObj = (JSONObject) iterator.next();
                 JSONObject entry = (JSONObject) factObj.get("entry");
                 values.add((String) entry.get(optType.bodyParam));
-            }           
+            }
             return values;
         }
         else
@@ -341,7 +341,7 @@ public class ContentActions extends CMISUtil
             return values;
         }
     }
-    
+
     /**
      * Return the node ref for a tag or comment
      * 
@@ -357,9 +357,9 @@ public class ContentActions extends CMISUtil
         String nodeRef = "";
         if(!StringUtils.isEmpty(response))
         {
-            JSONParser parser = new JSONParser();  
+            JSONParser parser = new JSONParser();
             Object obj = parser.parse(response);
-            JSONObject jsonObject = (JSONObject) obj;  
+            JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("list");
             JSONArray jArray = (JSONArray) list.get("entries");
             Iterator<JSONObject> iterator = jArray.iterator();
@@ -370,9 +370,9 @@ public class ContentActions extends CMISUtil
                 String name = (String) entry.get(optType.bodyParam);
                 if(name.equalsIgnoreCase(value))
                 {
-                    nodeRef = (String) entry.get("id");               
+                    nodeRef = (String) entry.get("id");
                 }
-            }                   
+            }
             return nodeRef;
         }
         else
@@ -380,7 +380,7 @@ public class ContentActions extends CMISUtil
             return nodeRef;
         }
     }
-    
+
     /**
      * Get list of tag names that are set for a document or folder
      * 
@@ -396,10 +396,10 @@ public class ContentActions extends CMISUtil
                                                final String siteName,
                                                final String contentName) throws Exception
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);   
+        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
         return getOptionValues(result, ActionType.TAGS);
-    }  
-    
+    }
+
     /**
      * Get the node ref from a tag
      * 
@@ -417,10 +417,10 @@ public class ContentActions extends CMISUtil
                                 final String contentName,
                                 final String tagName) throws Exception
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);     
+        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
         return getOptionNodeRef(result, tagName, ActionType.TAGS);
     }
-       
+
     /**
      * Remove tag from content
      * 
@@ -440,7 +440,7 @@ public class ContentActions extends CMISUtil
     {
         return removeAction(userName, password, siteName, contentName, ActionType.TAGS, tagName);
     }
-    
+
     /**
      * Create a comment for a document or folder
      * 
@@ -460,7 +460,7 @@ public class ContentActions extends CMISUtil
     {
         return addNewAction(userName, password, siteName, contentName, ActionType.COMMENTS, comment);
     }
-    
+
     /**
      * Create multiple comments for a document or folder
      * 
@@ -480,7 +480,7 @@ public class ContentActions extends CMISUtil
     {
         return addMultipleActions(userName, password, siteName, contentName, ActionType.COMMENTS, comments);
     }
-    
+
     /**
      * Get list of comments that are set for a document or folder
      * 
@@ -496,11 +496,11 @@ public class ContentActions extends CMISUtil
                                     final String siteName,
                                     final String contentName) throws Exception
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);   
+        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
         List<String> comments = getOptionValues(result, ActionType.COMMENTS);
         return comments;
     }
-    
+
     /**
      * Get the node ref for comment
      * 
@@ -518,10 +518,10 @@ public class ContentActions extends CMISUtil
                                     final String contentName,
                                     final String comment) throws Exception
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);     
+        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
         return getOptionNodeRef(result, comment, ActionType.COMMENTS);
     }
-    
+
     /**
      * Remove comment from content
      * 
@@ -541,7 +541,7 @@ public class ContentActions extends CMISUtil
     {
         return removeAction(userName, password, siteName, contentName, ActionType.COMMENTS, comment);
     }
-                   
+
     /**
      * Like a document or folder
      * 
@@ -559,7 +559,7 @@ public class ContentActions extends CMISUtil
     {
         return addNewAction(userName, password, siteName, contentName, ActionType.LIKES, "likes");
     }
-    
+
     /**
      * Get the number of likes for a document or folder
      * 
@@ -578,9 +578,9 @@ public class ContentActions extends CMISUtil
         String result = getOptionResponse(userName, password, siteName, contentName, ActionType.LIKES);
         if(!StringUtils.isEmpty(result))
         {
-            JSONParser parser = new JSONParser();  
+            JSONParser parser = new JSONParser();
             Object obj = parser.parse(result);
-            JSONObject jsonObject = (JSONObject) obj;  
+            JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("entry");
             JSONObject aggregate = (JSONObject) list.get("aggregate");
             String strLikes =  (String) aggregate.get("numberOfRatings").toString();
@@ -589,7 +589,7 @@ public class ContentActions extends CMISUtil
         }
         return 0;
     }
-    
+
     /**
      * Remove like from content
      * @param userName login username
@@ -610,14 +610,14 @@ public class ContentActions extends CMISUtil
             throw new IllegalArgumentException("Parameter missing");
         }       
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);      
+        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         if(StringUtils.isEmpty(contentNodeRef))
         {
             throw new RuntimeException("Content doesn't exists");
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + "/ratings/likes";
         HttpDelete delete = new HttpDelete(reqUrl);  
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);      
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -628,7 +628,7 @@ public class ContentActions extends CMISUtil
         }
         return false;
     }
-    
+
     /**
      * Set document or folder as favorite
      * 
@@ -650,7 +650,7 @@ public class ContentActions extends CMISUtil
                 || StringUtils.isEmpty(contentName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }        
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String nodeRef = getNodeRef(userName, password, siteName, contentName);
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites";
@@ -666,7 +666,7 @@ public class ContentActions extends CMISUtil
             HttpResponse response = clientWithAuth.execute(post);
             switch (response.getStatusLine().getStatusCode())
             {
-                case HttpStatus.SC_CREATED:        
+                case HttpStatus.SC_CREATED:
                     return true;
                 case HttpStatus.SC_NOT_FOUND:
                     throw new RuntimeException("Content doesn't exists " + contentName);
@@ -681,10 +681,10 @@ public class ContentActions extends CMISUtil
         {
             post.releaseConnection();
             client.close();
-        } 
+        }
         return false;
     }
-    
+
     /**
      * Set a document as favorite
      * 
@@ -720,7 +720,7 @@ public class ContentActions extends CMISUtil
     {
         return setFavorite(userName, password, siteName, "folder", folderName);
     }
-    
+
     /**
      * Remove favorite from document or folder
      * 
@@ -740,16 +740,16 @@ public class ContentActions extends CMISUtil
                 || StringUtils.isEmpty(contentName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }       
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);      
+        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         if(StringUtils.isEmpty(contentNodeRef))
         {
             throw new RuntimeException("Content doesn't exists");
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);         
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -760,7 +760,7 @@ public class ContentActions extends CMISUtil
         }   
         return false;
     }
-    
+
     /**
      * Verify if a document or folder is marked as favorite
      * 
@@ -782,14 +782,14 @@ public class ContentActions extends CMISUtil
             throw new IllegalArgumentException("Parameter missing");
         }     
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);      
+        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         if(StringUtils.isEmpty(contentNodeRef))
         {
             throw new RuntimeException("Content doesn't exists");
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);        
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())

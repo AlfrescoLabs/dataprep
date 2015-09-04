@@ -37,7 +37,7 @@ import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +138,7 @@ public class SitePagesService
         {
             // set the current date
             fulldatefrom = fulldate.format(currentDate);
-            startAt = fullFormat.format(currentDate);       
+            startAt = fullFormat.format(currentDate);
             DateTime dateTime = dtf.parseDateTime(startAt);
             startAt = dateTime.toString().replaceFirst("00:00", timeStart24);
         }
@@ -174,7 +174,7 @@ public class SitePagesService
         {
             tag = "";
         }
-        body.put("tags", tag);    
+        body.put("tags", tag);
         body.put("site", siteName);
         body.put("page", "calendar");
         body.put("docfolder", "");
@@ -229,11 +229,11 @@ public class SitePagesService
         String name = "";
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
-        Calendar calendar = Calendar.getInstance();     
+        Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 1);
         to = calendar.getTime();   
         String strFrom = dateFormat.format(from);
-        String strTo = dateFormat.format(to);        
+        String strTo = dateFormat.format(to);
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/events/" + siteName + 
                 "/user?from=" + strFrom + "&to" + strTo + "&repeating=all";
         HttpGet get = new HttpGet(reqURL);
@@ -362,6 +362,7 @@ public class SitePagesService
         return x;
     }
     
+    @SuppressWarnings("unchecked")
     private JSONArray createTagsArray(List<String>tags)
     {
         JSONArray array = new JSONArray();
@@ -369,7 +370,7 @@ public class SitePagesService
         {
             for(int i = 0; i < tags.size(); i++)
             {
-                array.put(tags.get(i));
+                array.add(tags.get(i));
             }
         }
         return array;
@@ -480,7 +481,7 @@ public class SitePagesService
             wikiTitle = wikiTitle.replaceAll(" ", "_");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;       
+        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpDelete delete = new HttpDelete(url);
         HttpResponse response = client.executeRequest(client, userName, password, url, delete);
         switch (response.getStatusLine().getStatusCode())
@@ -615,7 +616,7 @@ public class SitePagesService
     {
         String blogName = getBlogName(userName, password, siteName, blogTitle, isDraft);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";      
+        String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";
         HttpDelete delete = new HttpDelete(url);
         HttpResponse response = client.executeRequest(client, userName, password, url, delete);
         switch (response.getStatusLine().getStatusCode())
@@ -785,9 +786,9 @@ public class SitePagesService
                     JSONParser parser = new JSONParser();
                     Object obj = parser.parse(strResponse);
                     JSONObject jsonObject = (JSONObject) obj;
-                    org.json.simple.JSONArray jArray = (org.json.simple.JSONArray) jsonObject.get("items");
+                    JSONArray jArray = (JSONArray) jsonObject.get("items");
                     Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
-                    while (iterator.hasNext()) 
+                    while (iterator.hasNext())
                     {
                         JSONObject factObj = (JSONObject) iterator.next();
                         String theTitle = (String) factObj.get("title");
@@ -795,7 +796,7 @@ public class SitePagesService
                         {
                             return (String) factObj.get("name");
                         }
-                    }         
+                    }
                     return "";
                 case HttpStatus.SC_NOT_FOUND:
                     throw new RuntimeException("Invalid site " + siteName);
@@ -832,11 +833,11 @@ public class SitePagesService
     {
         String linkName = getLinkName(userName, password, siteName, linkTitle);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "links/delete/site/" + siteName + "/links";      
+        String url = client.getApiUrl() + "links/delete/site/" + siteName + "/links";
         HttpPost post = new HttpPost(url);
         JSONObject body = new JSONObject();
         JSONArray array = new JSONArray();
-        array.put(linkName);
+        array.add(linkName);
         body.put("items", array);
         HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
         switch (response.getStatusLine().getStatusCode())

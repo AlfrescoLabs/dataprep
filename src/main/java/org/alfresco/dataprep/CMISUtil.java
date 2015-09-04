@@ -110,6 +110,7 @@ public class CMISUtil
     }
     
     @Autowired protected  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    @Autowired private UserService userService;
     Map<String, String> contents = new HashMap<String,String>();
 
     /**
@@ -125,14 +126,13 @@ public class CMISUtil
     {
         SessionFactory factory = SessionFactoryImpl.newInstance();
         Map<String, String> parameter = new HashMap<String, String>();
-
         // user credentials
         parameter.put(SessionParameter.USER, userName);
         parameter.put(SessionParameter.PASSWORD, password);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/browser";
         parameter.put(SessionParameter.BROWSER_URL, serviceUrl);
-        parameter.put(SessionParameter.BINDING_TYPE, BindingType.BROWSER.value());                                                         
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.BROWSER.value());
         try
         {
             // create session
@@ -227,7 +227,7 @@ public class CMISUtil
             ItemIterable<CmisObject> children = folder.getChildren();
             ItemIterable<CmisObject> page = children.getPage();
             Iterator<CmisObject> pageItems = page.iterator();
-            while(pageItems.hasNext()) 
+            while(pageItems.hasNext())
             {
                 CmisObject item = pageItems.next();
                 if(item.getName().equalsIgnoreCase(contentName))
@@ -397,7 +397,6 @@ public class CMISUtil
         List<CmisObject> objList = new ArrayList<CmisObject>();
         String categoryNodeRef = "";
         Session session = getCMISSession(userName, password);
-       
         // execute query
         ItemIterable<QueryResult> results = session.query("select cmis:objectId from cm:category where cmis:name = '" + categoryName + "'", false);
         for (QueryResult qResult : results) 
@@ -417,6 +416,29 @@ public class CMISUtil
         }
         return categoryNodeRef;
     }
+    
+    /**
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @return String nodeRef of userName
+     * @throws Exception
+     */
+    public String getUserNodeRef(final String userManager,
+                                 final String password,
+                                 final String searchedUser) throws Exception
+    {
+        Session session = getCMISSession(userManager, password);
+        String objectId = "";
+        ItemIterable<QueryResult> results = session.query("select cmis:objectId from cm:person where cm:userName = '" + searchedUser + "'", false);
+        for (QueryResult qResult : results) 
+        {
+            PropertyData<?> propData = qResult.getPropertyById("cmis:objectId");
+            objectId = "workspace://SpacesStore/" + (String) propData.getFirstValue();
+        }
+        return objectId;
+    }
+    
     /**
      * Method to attach a document
      * @param userName String user name
@@ -447,7 +469,7 @@ public class CMISUtil
             session.createRelationship(relProps);
         }
     }
-
+    
     /**
      * Method to wait for given seconds.
      * 

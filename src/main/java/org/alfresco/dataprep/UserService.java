@@ -16,6 +16,7 @@ package org.alfresco.dataprep;
 
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
@@ -252,9 +253,6 @@ public class UserService
                     {
                         logger.trace("User successfully invited: " + userToInvite);
                     }
-                    String result = client.readStream(response.getEntity()).toJSONString();
-                    String inviteId = client.getParameterFromJSON(result, "inviteId");
-                    String inviteTicket = client.getParameterFromJSON(result, "inviteTicket");
                     String alfVersion = client.getAlfrescoVersion();
                     if(alfVersion.contains("5.1"))
                     {
@@ -262,6 +260,9 @@ public class UserService
                     }
                     else
                     {
+                        String result = client.readStream(response.getEntity()).toJSONString();
+                        String inviteId = client.getParameterFromJSON(result, "inviteId");
+                        String inviteTicket = client.getParameterFromJSON(result, "inviteTicket");
                         return acceptSiteInvitation(inviteId, inviteTicket);
                     }
                 default:
@@ -285,7 +286,7 @@ public class UserService
      * @return true if invite is successful
      * @throws Exception if error
      */
-    private boolean acceptSiteInvitation(final String inviteId, 
+    private boolean acceptSiteInvitation(final String inviteId,
                                          final String inviteTicket)
     {
         if (StringUtils.isEmpty(inviteId) ||  StringUtils.isEmpty(inviteTicket))
@@ -315,7 +316,7 @@ public class UserService
         {
             put.releaseConnection();
             client.close();
-        } 
+        }
         return false;
     }
       
@@ -476,9 +477,9 @@ public class UserService
      * @throws Exception if error
      */
     public boolean removePendingSiteRequest(final String siteManager,
-                                            final String passwordManager, 
+                                            final String passwordManager,
                                             final String userName,
-                                            final String siteId) throws Exception 
+                                            final String siteId) throws Exception
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
                 || StringUtils.isEmpty(userName))
@@ -513,15 +514,15 @@ public class UserService
      * @throws Exception if error
      */
     public boolean removeSiteMembership(final String siteManager,
-                                        final String passwordManager, 
+                                        final String passwordManager,
                                         final String userName,
-                                        final String siteId) throws Exception 
+                                        final String siteId) throws Exception
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
                 || StringUtils.isEmpty(userName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }        
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships/" + userName;
         HttpDelete delete  = new HttpDelete(url);
@@ -770,7 +771,7 @@ public class UserService
         }
         return false;
     }
-    
+
     /**
      * Add sub group. If sub group doesn't exists it will be created.
      * 
@@ -822,7 +823,7 @@ public class UserService
         }
         return false;
     }
-    
+
     /**
      * Remove user from group
      * 
@@ -856,7 +857,7 @@ public class UserService
         }
         return false;
     }
-    
+
     /**
      * Remove subgroup from group
      * 
@@ -890,7 +891,7 @@ public class UserService
         }
         return false;
     }
-    
+
     /**
      * Remove a root group
      * 
@@ -924,6 +925,29 @@ public class UserService
     }
     
     /**
+     * Get group details
+     * 
+     * @param adminUser String admin user
+     * @param adminPass String admin password
+     * @param groupName String group
+     * @return HttpReponse 200 if ok
+     * @throws Exception
+     */
+    private HttpResponse getGroupDetails(final String adminUser,
+                                        final String adminPass,
+                                        final String groupName) throws Exception
+    {
+        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        HttpGet request = new HttpGet(reqURL);
+        return client.executeRequest(request);
+    }
+    
+    /**
      * Count users and groups added in root group
      * 
      * @param adminUser admin username
@@ -936,36 +960,60 @@ public class UserService
                                          final String adminPass,
                                          final String groupName) throws Exception
     {
-        if (StringUtils .isEmpty(adminUser) || StringUtils .isEmpty(adminPass) || StringUtils.isEmpty(groupName))
+        HttpResponse response = getGroupDetails(adminUser, adminPass, groupName);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            throw new IllegalArgumentException("Parameter missing");
-        }
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
-        HttpGet request = new HttpGet(reqURL);
-        try
-        {
-            HttpResponse response = client.executeRequest(request);
-            if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-            {
-                HttpEntity entity = response. getEntity();
-                String responseString = EntityUtils.toString(entity , "UTF-8");
-                JSONParser parser = new JSONParser();
-                JSONObject obj = (JSONObject) parser.parse(responseString);
-                JSONObject data = (JSONObject) obj.get("paging");
-                long count = (Long) data.get("totalItems");
-                Integer i = (int) (long) count;
-                return i;
-            }
-        }
-        finally
-        {
-            request.releaseConnection();
-            client.close();
+            HttpEntity entity = response. getEntity();
+            String responseString = EntityUtils.toString(entity , "UTF-8");
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject) parser.parse(responseString);
+            JSONObject data = (JSONObject) obj.get("paging");
+            long count = (Long) data.get("totalItems");
+            Integer i = (int) (long) count;
+            return i;
         }
         return 0;
     }
     
+    /**
+     * Verify if a user is member of a group.
+     * 
+     * @param adminUser String admin user
+     * @param adminPass String admin password
+     * @param groupName String group
+     * @param userName String user to be searched
+     * @return boolean true if user is found
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    public boolean isUserAddedToGroup(final String adminUser,
+                                      final String adminPass,
+                                      final String groupName,
+                                      final String userName) throws Exception
+    {
+        HttpResponse response = getGroupDetails(adminUser, adminPass, groupName);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            HttpEntity entity = response. getEntity();
+            String responseString = EntityUtils.toString(entity , "UTF-8");
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject) parser.parse(responseString);
+            JSONObject jsonObject = (JSONObject) obj;
+            JSONArray jArray = (JSONArray) jsonObject.get("data");
+            Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
+            while (iterator.hasNext()) 
+            {
+                JSONObject factObj = (JSONObject) iterator.next();
+                String foundUser = (String) factObj.get("shortName");
+                if(userName.toString().equalsIgnoreCase(foundUser))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Count members of a site
      * 
@@ -1055,7 +1103,6 @@ public class UserService
             {
                 return false;
             }
-            
         }
         else
         {
@@ -1122,7 +1169,7 @@ public class UserService
             HttpResponse response = client.executeRequest(post);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
-                if (logger.isTraceEnabled())
+                if(logger.isTraceEnabled())
                 {
                     logger.trace("Dashlet " + dashlet.name + " was added on user: " + userName + " dashboard");
                 }

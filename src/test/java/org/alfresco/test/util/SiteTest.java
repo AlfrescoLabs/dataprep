@@ -54,7 +54,7 @@ public class SiteTest extends AbstractTest
                     ADMIN,
                     MY_DOMAIN,
                     siteId, 
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
     }
     
@@ -63,7 +63,7 @@ public class SiteTest extends AbstractTest
     {
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
-    } 
+    }
     /**
      * Test to create a site with shortname and title 
      * @throws Exception
@@ -77,7 +77,7 @@ public class SiteTest extends AbstractTest
                     MY_DOMAIN,
                     siteId, 
                     siteId + "_test",
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
     }
     
@@ -86,7 +86,7 @@ public class SiteTest extends AbstractTest
     {
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
-    } 
+    }
     
     @Test
     public void fakeSiteDoesNotExists() throws Exception
@@ -165,7 +165,7 @@ public class SiteTest extends AbstractTest
     
     @Test(expectedExceptions = RuntimeException.class)
     public void addPageToInvalidSite() throws Exception
-    {   
+    {
         site.addPageToSite(ADMIN, ADMIN, "fakeSite", Page.BLOG, null);
     }
     
@@ -192,7 +192,7 @@ public class SiteTest extends AbstractTest
     
     @Test(expectedExceptions = RuntimeException.class)
     public void addDashletToInvalidSite() throws Exception
-    {   
+    {
         site.addDashlet(ADMIN, ADMIN, "fakeSite", SiteDashlet.ADDONS_RSS_FEED, DashletLayout.FOUR_COLUMNS, 2, 1);
     }
     

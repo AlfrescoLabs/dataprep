@@ -217,8 +217,8 @@ public class AlfrescoHttpClient
             response = clientWithAuth.execute(request);
             if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
             {
-                throw new RuntimeException("Invalid user name or password");   
-            }      
+                throw new RuntimeException("Invalid user name or password");
+            }
         } 
         catch(Exception e)
         {
@@ -267,8 +267,8 @@ public class AlfrescoHttpClient
             response = clientWithAuth.execute(request);
             if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
             {
-                throw new RuntimeException("Invalid user name or password");   
-            }      
+                throw new RuntimeException("Invalid user name or password");
+            }
         } 
         catch(Exception e)
         {

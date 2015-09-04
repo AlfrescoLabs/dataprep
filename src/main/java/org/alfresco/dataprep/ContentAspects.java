@@ -152,7 +152,7 @@ public class ContentAspects extends CMISUtil
                               final String coverage,
                               final String rights,
                               final String subject) throws Exception
-    {       
+    {
         addAspect(userName, password, siteName, contentName, DocumentAspect.DUBLIN_CORE);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:contributor", contributor);
@@ -229,7 +229,6 @@ public class ContentAspects extends CMISUtil
      * @param contentName file or folder name
      * @param summary value for summary property
      * @throws Exception if error
-     * 
      */
     public void addSummarizable(final String userName,
                                 final String password,
