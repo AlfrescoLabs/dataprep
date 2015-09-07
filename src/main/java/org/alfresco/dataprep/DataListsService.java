@@ -28,7 +28,6 @@ import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
-import org.apache.chemistry.opencmis.commons.data.RepositoryInfo;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.commons.httpclient.HttpStatus;
@@ -249,7 +248,7 @@ public class DataListsService extends CMISUtil
     public ObjectId addContactListItem(final String userName,
                                        final String password,
                                        final String siteName,
-                                       final String contactListName,
+                                       final String contactListTitle,
                                        final String firstName,
                                        final String lastName,
                                        final String email,
@@ -272,7 +271,7 @@ public class DataListsService extends CMISUtil
         propertyMap.put("dl:contactPhoneMobile", phoneMobile);
         propertyMap.put("dl:contactNotes", notes);
         Session session = getCMISSession(userName, password);
-        CmisObject listNodeRef = session.getObject(getDataListNodeRef(userName, password, siteName, contactListName));
+        CmisObject listNodeRef = session.getObject(getDataListNodeRef(userName, password, siteName, contactListTitle));
         return addItem(userName, password, listNodeRef, propertyMap);
     }
 
@@ -384,15 +383,34 @@ public class DataListsService extends CMISUtil
         return itemId;
     }
     
+    /**
+     * Create Issue List item
+     *
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param dataListTitle String issue list title
+     * @param issueId String issue item id
+     * @param issueTitle String issue item title
+     * @param assignedTo List<String> assign to users
+     * @param status Status issue status
+     * @param priority Priority issue priority
+     * @param description String description
+     * @param dueDate Date due date
+     * @param comments String issue comments
+     * @param docsToAttach List<String> documents to attach to issue
+     * @return ObjectId new issue list item
+     * @throws Exception
+     */
     public ObjectId addIssueListItem(final String userName,
                                      final String password,
                                      final String siteName,
-                                     final String dataListTitle,
+                                     final String issueListTitle,
                                      final String issueId,
                                      final String issueTitle,
                                      final List<String> assignedTo,
-                                     final String status,
-                                     final String priority,
+                                     final Status status,
+                                     final Priority priority,
                                      final String description,
                                      Date dueDate,
                                      final String comments,
@@ -404,15 +422,15 @@ public class DataListsService extends CMISUtil
         propertyMap.put(PropertyIds.NAME, uuid.toString());
         propertyMap.put(PropertyIds.DESCRIPTION, description);
         propertyMap.put("dl:issueID", issueId);
-        propertyMap.put("dl:issueStatus", status);
-        propertyMap.put("dl:issuePriority", priority);
+        propertyMap.put("dl:issueStatus", status.getValue());
+        propertyMap.put("dl:issuePriority", priority.name());
         propertyMap.put("dl:issueDueDate", dueDate);
         propertyMap.put("dl:issueComments", comments);
         Session session = getCMISSession(userName, password);
-        CmisObject listNodeRef = session.getObject(getDataListNodeRef(userName, password, siteName, dataListTitle));
+        CmisObject listNodeRef = session.getObject(getDataListNodeRef(userName, password, siteName, issueListTitle));
         // create the item
         ObjectId itemId = addItem(userName, password, listNodeRef, propertyMap);
-        String eventListName = getDataListName(userName, password, siteName, dataListTitle);
+        String eventListName = getDataListName(userName, password, siteName, issueListTitle);
         Document newItem = (Document) session.getObjectByPath("/sites/" + siteName + "/datalists/" + eventListName + "/" + uuid.toString());
         Map<String, Object> newProp = new HashMap<String, Object>();
         newProp.put("cm:title", issueTitle);
@@ -424,6 +442,299 @@ public class DataListsService extends CMISUtil
         if(!assignedTo.isEmpty())
         {
             assignUser(userName, password, assignedTo, itemId, "R:dl:issueAssignedTo");
+        }
+        return itemId;
+    }
+    
+    /**
+     * Create location list item.
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param locationListTitle String location list title
+     * @param itemTitle String location item title
+     * @param addressLine1 String address line 1
+     * @param addressLine2 String address line 2
+     * @param addressLine3 String address line 3
+     * @param zipCode String zip code
+     * @param state String state
+     * @param country String country
+     * @param description String description
+     * @param docsToAttach List<String> documents to attach to item
+     * @return ObjectId new location list item
+     * @throws Exception
+     */
+    public ObjectId addLocationItem(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final String locationListTitle,
+                                    final String itemTitle,
+                                    final String addressLine1,
+                                    final String addressLine2,
+                                    final String addressLine3,
+                                    final String zipCode,
+                                    final String state,
+                                    final String country,
+                                    final String description,
+                                    final List<String> docsToAttach) throws Exception
+    {
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        UUID uuid = UUID.randomUUID();
+        propertyMap.put(PropertyIds.OBJECT_TYPE_ID, "D:dl:location");
+        propertyMap.put(PropertyIds.NAME, uuid.toString());
+        propertyMap.put(PropertyIds.DESCRIPTION, description);
+        propertyMap.put("dl:locationAddress1", addressLine1);
+        propertyMap.put("dl:locationAddress2", addressLine2);
+        propertyMap.put("dl:locationAddress3", addressLine3);
+        propertyMap.put("dl:locationAddress3", addressLine3);
+        propertyMap.put("dl:locationZip", zipCode);
+        propertyMap.put("dl:locationState", state);
+        propertyMap.put("dl:locationCountry", country);
+        Session session = getCMISSession(userName, password);
+        List<String> ids = getDataListIds(userName, password, siteName, locationListTitle);
+        CmisObject listNodeRef = session.getObject(ids.get(0));
+        ObjectId itemId = addItem(userName, password, listNodeRef, propertyMap);
+        Document newItem = (Document) session.getObjectByPath("/sites/" + siteName + "/datalists/" + ids.get(1) + "/" + uuid.toString());
+        Map<String, Object> newProp = new HashMap<String, Object>();
+        newProp.put("cm:title", itemTitle);
+        newItem.updateProperties(newProp);
+        if(!docsToAttach.isEmpty())
+        {
+            attachDocuments(userName, password, siteName, docsToAttach, itemId);
+        }
+        return itemId;
+    }
+    
+    /**
+     * Create event meeting item
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param meetingListTitle String meeting list title
+     * @param itemReference String item reference
+     * @param itemTitle String item title
+     * @param description String item description
+     * @param time String time
+     * @param owner String owner
+     * @param docsToAttach List<String> documents to attach to item
+     * @return ObjectId new meeting agenda item
+     * @throws Exception
+     */
+    public ObjectId addMeetingItem(final String userName,
+                                   final String password,
+                                   final String siteName,
+                                   final String meetingListTitle,
+                                   final String itemReference,
+                                   final String itemTitle,
+                                   final String description,
+                                   final String time,
+                                   final String owner,
+                                   final List<String> docsToAttach) throws Exception
+    {
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        UUID uuid = UUID.randomUUID();
+        propertyMap.put(PropertyIds.OBJECT_TYPE_ID, "D:dl:meetingAgenda");
+        propertyMap.put(PropertyIds.NAME, uuid.toString());
+        propertyMap.put(PropertyIds.DESCRIPTION, description);
+        propertyMap.put("dl:meetingAgendaRef", itemReference);
+        propertyMap.put("dl:meetingAgendaTime", time);
+        propertyMap.put("dl:meetingAgendaOwner", owner);
+        Session session = getCMISSession(userName, password);
+        List<String> ids = getDataListIds(userName, password, siteName, meetingListTitle);
+        CmisObject listNodeRef = session.getObject(ids.get(0));
+        ObjectId itemId = addItem(userName, password, listNodeRef, propertyMap);
+        Document newItem = (Document) session.getObjectByPath("/sites/" + siteName + "/datalists/" + ids.get(1) + "/" + uuid.toString());
+        Map<String, Object> newProp = new HashMap<String, Object>();
+        newProp.put("cm:title", itemTitle);
+        newItem.updateProperties(newProp);
+        if(!docsToAttach.isEmpty())
+        {
+            attachDocuments(userName, password, siteName, docsToAttach, itemId);
+        }
+        return itemId;
+    }
+    
+    /**
+     * Create new task list advanced item
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param taskAdvListTitle String advance list title
+     * @param itemTitle String new item title
+     * @param description String description
+     * @param startDate Date start date
+     * @param endDate Date end date
+     * @param assignedTo List<String> assign to users
+     * @param priority Priority item priority
+     * @param status Status item stats
+     * @param complete int complete (0-100)
+     * @param comments String item comments
+     * @param docsToAttach List<String> documents to attach to item
+     * @return ObjectId new task list advanced item
+     * @throws Exception
+     */
+    public ObjectId addTaskAdvancedItem(final String userName,
+                                        final String password,
+                                        final String siteName,
+                                        final String taskAdvListTitle,
+                                        final String itemTitle,
+                                        final String description,
+                                        final Date startDate,
+                                        final Date endDate,
+                                        final List<String> assignedTo,
+                                        final Priority priority,
+                                        final Status status,
+                                        final int complete,
+                                        final String comments,
+                                        final List<String> docsToAttach) throws Exception
+    {
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        UUID uuid = UUID.randomUUID();
+        propertyMap.put(PropertyIds.OBJECT_TYPE_ID, "D:dl:task");
+        propertyMap.put(PropertyIds.NAME, uuid.toString());
+        propertyMap.put(PropertyIds.DESCRIPTION, description);
+        propertyMap.put("dl:taskPriority", priority.name());
+        propertyMap.put("dl:taskStatus", status.getValue());
+        propertyMap.put("dl:taskComments", comments);
+        Session session = getCMISSession(userName, password);
+        List<String> ids = getDataListIds(userName, password, siteName, taskAdvListTitle);
+        CmisObject listNodeRef = session.getObject(ids.get(0));
+        ObjectId itemId = addItem(userName, password, listNodeRef, propertyMap);
+        Document newItem = (Document) session.getObjectByPath("/sites/" + siteName + "/datalists/" + ids.get(1) + "/" + uuid.toString());
+        Map<String, Object> newProp = new HashMap<String, Object>();
+        newProp.put("cm:title", itemTitle);
+        newProp.put("dl:ganttStartDate", startDate);
+        newProp.put("dl:ganttEndDate", endDate);
+        if(complete < 0 || complete > 100)
+        {
+            throw new RuntimeException("'Complete' must be between 0 and 100");
+        }
+        newProp.put("dl:ganttPercentComplete", complete);
+        newItem.updateProperties(newProp);
+        if(!docsToAttach.isEmpty())
+        {
+            attachDocuments(userName, password, siteName, docsToAttach, itemId);
+        }
+        if(!assignedTo.isEmpty())
+        {
+            assignUser(userName, password, assignedTo, itemId, "R:dl:taskAssignee");
+        }
+        return itemId;
+    }
+    
+    /**
+     * Create new task simple item
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param taskSimpleListTitle String task list simple title
+     * @param itemTitle String new item title
+     * @param description String description
+     * @param dueDate Date due date
+     * @param priority Priority item priority
+     * @param status Status item status
+     * @param comments String comments
+     * @return ObjectId new task simple item
+     * @throws Exception
+     */
+    public ObjectId addTaskSimpleItem(final String userName,
+                                      final String password,
+                                      final String siteName,
+                                      final String taskSimpleListTitle,
+                                      final String itemTitle,
+                                      final String description,
+                                      final Date dueDate,
+                                      final Priority priority,
+                                      final Status status,
+                                      final String comments) throws Exception
+    {
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        UUID uuid = UUID.randomUUID();
+        propertyMap.put(PropertyIds.OBJECT_TYPE_ID, "D:dl:simpletask");
+        propertyMap.put(PropertyIds.NAME, uuid.toString());
+        propertyMap.put(PropertyIds.DESCRIPTION, description);
+        propertyMap.put("dl:simpletaskPriority", priority.name());
+        propertyMap.put("dl:simpletaskStatus", status.getValue());
+        propertyMap.put("dl:simpletaskDueDate", dueDate);
+        propertyMap.put("dl:simpletaskComments", comments);
+        Session session = getCMISSession(userName, password);
+        List<String> ids = getDataListIds(userName, password, siteName, taskSimpleListTitle);
+        CmisObject listNodeRef = session.getObject(ids.get(0));
+        ObjectId itemId = addItem(userName, password, listNodeRef, propertyMap);
+        Document newItem = (Document) session.getObjectByPath("/sites/" + siteName + "/datalists/" + ids.get(1) + "/" + uuid.toString());
+        Map<String, Object> newProp = new HashMap<String, Object>();
+        newProp.put("cm:title", itemTitle);
+        newItem.updateProperties(newProp);
+        return itemId;
+    }
+    
+    /**
+     * Create to do item
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param toDoListTitle String to do list title
+     * @param itemTitle String item title
+     * @param dueDate Date due date
+     * @param priority int priority
+     * @param status Status item status
+     * @param notes String notes
+     * @param assignedToUser String assigned user
+     * @param docsToAttach List<String> documents to attach to item
+     * @return ObjectId new to do item
+     * @throws Exception
+     */
+    public ObjectId addToDoItem(final String userName,
+                                final String password,
+                                final String siteName,
+                                final String toDoListTitle,
+                                final String itemTitle,
+                                final Date dueDate,
+                                final int priority,
+                                final Status status,
+                                final String notes,
+                                final String assignedToUser,
+                                final List<String> docsToAttach) throws Exception
+    {
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        UUID uuid = UUID.randomUUID();
+        propertyMap.put(PropertyIds.OBJECT_TYPE_ID, "D:dl:todoList");
+        propertyMap.put(PropertyIds.NAME, uuid.toString());
+        propertyMap.put("dl:todoTitle", itemTitle);
+        propertyMap.put("dl:todoDueDate", dueDate);
+        propertyMap.put("dl:todoPriority", priority);
+        propertyMap.put("dl:todoStatus", status.getValue());
+        propertyMap.put("dl:todoNotes", notes);
+        Session session = getCMISSession(userName, password);
+        List<String> ids = getDataListIds(userName, password, siteName, toDoListTitle);
+        CmisObject listNodeRef = session.getObject(ids.get(0));
+        ObjectId itemId = addItem(userName, password, listNodeRef, propertyMap);
+        if(!StringUtils.isEmpty(assignedToUser))
+        {
+            List<String> user = new ArrayList<String>();
+            user.add(assignedToUser);
+            assignUser(userName, password, user, itemId, "R:dl:assignee");
+        }
+        if(!docsToAttach.isEmpty())
+        {
+            for(int i = 0; i<docsToAttach.size(); i++)
+            {
+                String docNodRef = getNodeRef(userName, password, siteName, docsToAttach.get(i));
+                if(StringUtils.isEmpty(docNodRef))
+                {
+                    throw new CmisRuntimeException(docsToAttach.get(i) + " doesn't exist");
+                }
+                Map<String,Object> relProps = new HashMap<String, Object>();
+                relProps.put(PropertyIds.OBJECT_TYPE_ID, "R:dl:attachments");
+                relProps.put(PropertyIds.SOURCE_ID, itemId.getId());
+                relProps.put(PropertyIds.TARGET_ID, docNodRef);
+                session.createRelationship(relProps);
+            }
         }
         return itemId;
     }

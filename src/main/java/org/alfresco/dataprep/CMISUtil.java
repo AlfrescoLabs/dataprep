@@ -109,6 +109,31 @@ public class CMISUtil
         }
     }
     
+    public enum Status
+    {
+        NOT_STARTED("Not Started"),
+        IN_PROGRESS("In Progress"),
+        COMPLETE("Complete"),
+        ON_HOLD("On Hold");
+        private String value;
+        private Status(String value)
+        {
+            this.value = value;
+        }
+        
+        public String getValue()
+        {
+            return this.value;
+        }
+    }
+    
+    public enum Priority
+    {
+        High,
+        Normal,
+        Low
+    }
+    
     @Autowired protected  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     @Autowired private UserService userService;
     Map<String, String> contents = new HashMap<String,String>();
