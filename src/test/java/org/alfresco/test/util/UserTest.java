@@ -668,7 +668,7 @@ public class UserTest extends AbstractTest
 
     @Test
     public void addMemberToSiteTwice() throws Exception
-    { 
+    {
         String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
         String siteId = "site" + System.currentTimeMillis();

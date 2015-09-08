@@ -1063,22 +1063,22 @@ public class UserService
      * @return true for successful user login
      * @throws Exception if error
      */
-    public boolean login(final String userName,
-                         final String userPass) throws Exception
+    public HttpState login(final String userName,
+                           final String userPass) throws Exception
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(userPass))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        HttpState state;
+        HttpState state = null;
         org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
         String reqURL = client.getAlfrescoUrl() + "share/page/dologin";
         org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
         NameValuePair[] formParams;
         CookieStore cookieStore = new BasicCookieStore();
         HttpClientContext localContext = HttpClientContext.create();
-        localContext.setCookieStore(cookieStore);      
+        localContext.setCookieStore(cookieStore);
         formParams = (new NameValuePair[]{
                       new NameValuePair("username", userName),
                       new NameValuePair("password", userPass),
@@ -1089,26 +1089,14 @@ public class UserService
         if(302 == postStatus)
         {
             state = theClient.getState();
-            post.releaseConnection();     
+            post.releaseConnection();
             org.apache.commons.httpclient.methods.GetMethod get = new org.apache.commons.httpclient.methods.GetMethod(
                     client.getAlfrescoUrl() + "share/page/user/" + userName + "/dashboard");
             theClient.setState(state);
-            int getStatus = theClient.executeMethod(get);
+            theClient.executeMethod(get);
             get.releaseConnection();
-            if(200 == getStatus)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
-        else
-        {
-            return false;
-        }
-        
+        return state;
     }
     
     /**
@@ -1130,7 +1118,7 @@ public class UserService
                               final DashletLayout layout,
                               final int column,
                               final int position) throws Exception
-    {     
+    {
         login(userName, password);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
@@ -1155,13 +1143,13 @@ public class UserService
             jDashlet.put("regionId", entry.getValue());
             jDashlet.put("originalRegionId", entry.getValue());
             array.add(jDashlet);
-        }    
+        }
         JSONObject newDashlet = new JSONObject();
         newDashlet.put("url", dashlet.id);
         String region = "component-" + column + "-" + position;
         newDashlet.put("regionId", region);
         array.add(newDashlet);
-        body.put("dashlets", array);       
+        body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
         post.setEntity(client.setMessageBody(body));
         try
@@ -1186,5 +1174,23 @@ public class UserService
                 client.close();
             }
         return false;
+    }
+    
+    /**
+     * Logout the current user from share.
+     * 
+     * @return HttpState 
+     * @throws Exception if error
+     */
+    public HttpState logout() throws Exception
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        HttpState state = null;
+        org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
+        String reqURL = client.getAlfrescoUrl() + "share/page/dologout";
+        org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
+        theClient.executeMethod(post);
+        state = theClient.getState();
+        return state;
     }
 }
