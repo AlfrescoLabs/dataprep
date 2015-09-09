@@ -148,7 +148,7 @@ public class SitePagesService
             startAt = fullFormat.format(startDate);
             DateTime dateTime = dtf.parseDateTime(startAt);
             startAt = dateTime.toString().replaceFirst("00:00", timeStart24);
-        }      
+        }
         if(endDate == null)
         {
             // set the current date
@@ -163,7 +163,7 @@ public class SitePagesService
             endAt = fullFormat.format(endDate);
             DateTime dateTime = dtf.parseDateTime(endAt);
             endAt = dateTime.toString().replaceFirst("00:00", timeEnd24);
-        }      
+        }
         HttpPost post = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("fromdate", fulldatefrom);
@@ -186,7 +186,7 @@ public class SitePagesService
         if(allDay)
         {
             body.put("allday", "on");
-        }     
+        }
         HttpResponse response = client.executeRequest(client, userName, password, reqURL, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
@@ -195,7 +195,7 @@ public class SitePagesService
                 logger.trace("Event created successfully");
             }
             return true;
-        }          
+        }
         return false;
     }
     
@@ -268,12 +268,12 @@ public class SitePagesService
                             if(timeEnd.contains("AM") || timeEnd.contains("PM"))
                             {
                                 timeEnd = convertTo24Hour(timeEnd);
-                            }                         
+                            }
                             if(itemWhat.equals(what) && sTime.equals(timeStart) && eTime.equals(timeEnd))
                             {
                                 name = items.getJSONArray("events").getJSONObject(i).getString("name");
-                            }              
-                        }                    
+                            }
+                        }
                     }
                     return name;
                 case HttpStatus.SC_UNAUTHORIZED:
@@ -282,7 +282,7 @@ public class SitePagesService
                     logger.error("Unable to find event " + response.toString());
                     break;
             }
-        } 
+        }
         finally
         {
             get.releaseConnection();
@@ -458,7 +458,7 @@ public class SitePagesService
         {
             return true;
         }  
-        return false;  
+        return false;
     }
     
     /**
@@ -526,7 +526,7 @@ public class SitePagesService
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts";
-        HttpPost post = new HttpPost(url);    
+        HttpPost post = new HttpPost(url);
         JSONObject body = new JSONObject();
         body.put("title", blogTitle);
         body.put("content", content);
@@ -663,7 +663,7 @@ public class SitePagesService
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiUrl() + "links/site/" + siteName + "/links/posts";
-        HttpPost post = new HttpPost(reqUrl);    
+        HttpPost post = new HttpPost(reqUrl);
         JSONObject body = new JSONObject();
         body.put("title", linkTitle);
         body.put("url", url);
@@ -771,6 +771,9 @@ public class SitePagesService
                     url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mypublished";
                 }
                 break;
+            case DISCUSSIONS:
+                url = client.getApiUrl() + "forum/site/" + siteName + "/discussions/posts";
+                break;
             default:
                 break;
         }
@@ -848,6 +851,132 @@ public class SitePagesService
                 throw new RuntimeException("Link doesn't exists " + linkTitle);
             default:
                 logger.error("Unable to delete link: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Create discussion topic
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String topic title
+     * @param text String topic content
+     * @param tags List<String> tags
+     * @return true if topic is created
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createDiscussion(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final String discussionTitle,
+                                    final String text,
+                                    final List<String>tags) throws Exception
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
+                || StringUtils.isEmpty(discussionTitle))
+        {
+            throw new IllegalArgumentException("Null Parameters: Please correct");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "forum/site/" + siteName + "/discussions/posts";
+        HttpPost post = new HttpPost(reqUrl);
+        JSONObject body = new JSONObject();
+        body.put("title", discussionTitle);
+        body.put("content", text);
+        body.put("tags", createTagsArray(tags));
+        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Discussion " + discussionTitle + " is created successfuly");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            default:
+                logger.error("Unable to create link: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Get the name(id) of a created topic
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String discussion title
+     * @return String name (id) of the topic
+     * @throws Exception if error
+     */
+    public String getDiscussionName(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final String discussionTitle) throws Exception
+    {
+        return getName(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
+    }
+    
+    /**
+     * Verify if a discussion topic exists
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String discussion title
+     * @return true if topic exists
+     * @throws Exception if error
+     */
+    public boolean discussionExists(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final String discussionTitle) throws Exception
+    {
+        if(getDiscussionName(userName, password, siteName, discussionTitle).isEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
+    /**
+     * Delete a discussion topic
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String discussion title
+     * @return true if deleted
+     * @throws Exception if error
+     */
+    public boolean deleteDiscussion(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final String discussionTitle) throws Exception
+    {
+        String discussionName = getDiscussionName(userName, password, siteName, discussionTitle);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "?page=discussions-topicview";
+        HttpDelete delete = new HttpDelete(url);
+        HttpResponse response = client.executeRequest(client, userName, password, url, delete);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Topic doesn't exists " + discussionTitle);
+            default:
+                logger.error("Unable to delete topic post: " + response.toString());
                 break;
         }
         return false;

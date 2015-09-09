@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
  * 
  * @author Bogdan Bocancea
  */
-
 public class SitePagesActionTests extends AbstractTest
 {
     @Autowired private SiteService site;
@@ -45,11 +44,11 @@ public class SitePagesActionTests extends AbstractTest
     public void addCalendarEvent() throws Exception
     {
         String siteId = "calendar-site" + System.currentTimeMillis();
-        site.create(ADMIN, ADMIN, "myDomain", siteId, "my site description", Visibility.PUBLIC);   
+        site.create(ADMIN, ADMIN, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today, 
+        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today,
                 "6:00 PM", "8:00 PM", false, "tag1"));
-        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today, 
+        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today,
                 "12:00", "13:00", false, "tag1"));
         String name1 = pageService.getEventName(ADMIN, ADMIN, siteId, "what", "where", today, today, "6:00 PM", "8:00 PM", false);
         String name2 = pageService.getEventName(ADMIN, ADMIN, siteId, "what", "where", today, today, "12:00", "13:00", false);
@@ -64,10 +63,10 @@ public class SitePagesActionTests extends AbstractTest
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);     
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
         Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today, 
-                "12:00", "13:00", false, "tag1"));  
+                "12:00", "13:00", false, "tag1"));
         String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
         Assert.assertNotNull(nameEvent);
     }
@@ -79,8 +78,8 @@ public class SitePagesActionTests extends AbstractTest
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null, 
-                null, null, false, "tag1"));  
+        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null,
+                null, null, false, "tag1"));
     }
     
     @Test
@@ -90,7 +89,7 @@ public class SitePagesActionTests extends AbstractTest
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null, 
+        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null,
                 null, null, true, null));
         Date today = new Date();
         String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, null, null, true);
@@ -102,8 +101,8 @@ public class SitePagesActionTests extends AbstractTest
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, "fakeSite", "what", "where", "description", null, null, 
-                null, null, true, null));  
+        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, "fakeSite", "what", "where", "description", null, null,
+                null, null, true, null));
     }
     
     @Test
@@ -112,12 +111,12 @@ public class SitePagesActionTests extends AbstractTest
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);     
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
         Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today, 
-                "12:00", "13:00", false, "tag1"));  
+                "12:00", "13:00", false, "tag1"));
         String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
-        Assert.assertNotNull(nameEvent);       
+        Assert.assertNotNull(nameEvent);
         Assert.assertTrue(pageService.removeEvent(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false));
         nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
         Assert.assertTrue(nameEvent.isEmpty());;
@@ -129,12 +128,12 @@ public class SitePagesActionTests extends AbstractTest
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);     
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today, 
-                "12:00", "13:00", false, "tag1"));  
+        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today,
+                "12:00", "13:00", false, "tag1"));
         String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
-        Assert.assertNotNull(nameEvent);       
+        Assert.assertNotNull(nameEvent);
         pageService.removeEvent(userName, "fakePassword", siteId, "what", "where", today, today, "12:00", "13:00", false);
     }
     
@@ -144,12 +143,12 @@ public class SitePagesActionTests extends AbstractTest
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);     
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today, 
-                "12:00", "13:00", false, "tag1"));  
+        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today,
+                "12:00", "13:00", false, "tag1"));
         String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
-        Assert.assertNotNull(nameEvent);       
+        Assert.assertNotNull(nameEvent);
         pageService.removeEvent(userName, userName, "fakeSite", "what", "where", today, today, "12:00", "13:00", false);
     }
     
@@ -158,7 +157,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String wikiTitle1 = "wiki_1" + + System.currentTimeMillis();
+        String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
         String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
@@ -168,8 +167,8 @@ public class SitePagesActionTests extends AbstractTest
         tags.add("tag2");
         Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, tags));
         Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle2, wikiTitle2, tags));
-        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle1));       
-        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle2));       
+        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle1));
+        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle2));
         Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, "fakeWiki"));
     }
     
@@ -178,14 +177,14 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String wikiTitle1 = "wiki_1" + + System.currentTimeMillis();
+        String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
         String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, null));
         Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle2, wikiTitle2, null));
         Assert.assertTrue(pageService.deleteWikiPage(userName, userName, siteId, wikiTitle1));
-        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle1));        
+        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle1));
         Assert.assertTrue(pageService.deleteWikiPage(userName, userName, siteId, wikiTitle2));
         Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle2));
     }
@@ -197,7 +196,7 @@ public class SitePagesActionTests extends AbstractTest
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        pageService.deleteWikiPage(userName, userName, siteId, "fakeWiki");      
+        pageService.deleteWikiPage(userName, userName, siteId, "fakeWiki");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -205,11 +204,11 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String wikiTitle1 = "wiki_1" + + System.currentTimeMillis();
+        String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, null));
-        pageService.deleteWikiPage(userName, userName, "fakeSite", wikiTitle1);      
+        pageService.deleteWikiPage(userName, userName, "fakeSite", wikiTitle1);
     }
     
     @Test
@@ -217,8 +216,8 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis(); 
-        String publishBlog = "publish" + + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        String publishBlog = "publish" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
@@ -226,7 +225,7 @@ public class SitePagesActionTests extends AbstractTest
         tags.add("tag1");
         tags.add("tag2");
         Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, publishBlog, publishBlog, false, tags));
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, tags));     
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, tags));
         Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
         Assert.assertTrue(pageService.blogExists(userName, userName, siteId, publishBlog, false));
     }
@@ -235,7 +234,7 @@ public class SitePagesActionTests extends AbstractTest
     public void createBlogInvalidSite() throws Exception
     {
         String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis(); 
+        String draftBlog = "draft" + System.currentTimeMillis(); 
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         pageService.createBlogPost(userName, userName, "fakeSite", draftBlog, draftBlog, false, null);
     }
@@ -245,7 +244,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis(); 
+        String draftBlog = "draft" + System.currentTimeMillis(); 
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         pageService.createBlogPost("fakeUser", "fakePass", siteId, draftBlog, draftBlog, false, null);
     }
@@ -255,11 +254,11 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis();       
+        String draftBlog = "draft" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));     
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
         Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
         Assert.assertTrue(pageService.deleteBlogPost(userName, userName, siteId, draftBlog, true));
         Assert.assertFalse(pageService.blogExists(userName, userName, siteId, draftBlog, true));
@@ -270,10 +269,10 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis();       
+        String draftBlog = "draft" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));      
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
         pageService.deleteBlogPost(userName, userName, siteId, "invalidblog", true);
     }
     
@@ -282,10 +281,10 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis();       
+        String draftBlog = "draft" + + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));             
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
         pageService.deleteBlogPost(userName, userName, "invalidBlog", draftBlog, true);
     }
     
@@ -294,7 +293,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link-" + + System.currentTimeMillis(); 
+        String linkTitle = "link-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
@@ -309,7 +308,7 @@ public class SitePagesActionTests extends AbstractTest
     public void createLinkInvalidSite() throws Exception
     {
         String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link" + + System.currentTimeMillis(); 
+        String linkTitle = "link" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         pageService.createLink(userName, userName, "fakeSite", linkTitle, linkTitle, linkTitle, true, null);
     }
@@ -319,7 +318,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link" + + System.currentTimeMillis(); 
+        String linkTitle = "link" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         pageService.createLink("fakeUser", "fakePass", siteId, linkTitle, linkTitle, linkTitle, true, null);
     }
@@ -329,7 +328,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link-" + + System.currentTimeMillis(); 
+        String linkTitle = "link-" + System.currentTimeMillis(); 
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
@@ -344,7 +343,7 @@ public class SitePagesActionTests extends AbstractTest
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        String link = "link" + + System.currentTimeMillis();       
+        String link = "link" + + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));
@@ -361,5 +360,39 @@ public class SitePagesActionTests extends AbstractTest
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));
         pageService.deleteLink(userName, userName, "fakeSite", link);
+    }
+    
+    @Test
+    public void createDiscussionTopic() throws Exception
+    {
+        String siteId = "topic-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String topicTitle = "topic-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
+        List<String>tags = new ArrayList<String>();
+        tags.add("tag1");
+        tags.add("tag2");
+        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, tags));
+        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
+    }
+    
+    @Test
+    public void deleteDiscussionTopic() throws Exception
+    {
+        String siteId = "topic-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String topicTitle = "topic-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
+        List<String>tags = new ArrayList<String>();
+        tags.add("tag1");
+        tags.add("tag2");
+        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, tags));
+        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
+        Assert.assertTrue(pageService.deleteDiscussion(userName, userName, siteId, topicTitle));
+        Assert.assertFalse(pageService.discussionExists(userName, userName, siteId, topicTitle));
     }
 }

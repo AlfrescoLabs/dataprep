@@ -43,7 +43,6 @@ import org.testng.annotations.Test;
  * 
  * @author Bogdan Bocancea
  */
-
 public class ContentAspectsTests extends AbstractTest
 {
     @Autowired private UserService userService;
@@ -104,7 +103,7 @@ public class ContentAspectsTests extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());        
+        Assert.assertFalse(doc1.getId().isEmpty());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 3);
         Date removeAfter = calendar.getTime();
