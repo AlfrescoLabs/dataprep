@@ -23,6 +23,7 @@ import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -158,7 +159,7 @@ public class UserService
                               final String username) throws Exception 
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "people/" + username;
+        String url = client.getApiUrl() + "people/" + URIUtil.encodeWithinPath(username);
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.executeRequest(client, adminUser, adminPass, url, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
@@ -185,7 +186,7 @@ public class UserService
             throw new IllegalArgumentException("Null Parameters: Please correct");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "people/" + userName;
+        String url = client.getApiUrl() + "people/" + URIUtil.encodeWithinPath(userName);
         HttpDelete httpDelete = new HttpDelete(url);
         HttpResponse response = client.executeRequest(client, adminUser, adminPass, url, httpDelete);
         switch (response.getStatusLine().getStatusCode())

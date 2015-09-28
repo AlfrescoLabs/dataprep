@@ -97,7 +97,16 @@ public class UserTest extends AbstractTest
         String userName = "booo";
         userService.delete(admin, admin, userName);
     }
-    
+
+    @Test
+    public void deleteUserContainingSpecialCharacters() throws Exception
+    {
+        String userNameWithSpecialCharacters = "delete \"#user;<=>with?[]^special`{|}characters";
+        userService.create(admin, admin, userNameWithSpecialCharacters, password, email, firstName, lastName);
+        Assert.assertTrue(userService.delete(admin, admin, userNameWithSpecialCharacters));
+        Assert.assertFalse(userService.userExists(admin, admin, userNameWithSpecialCharacters));
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void inviteUserInvalidinvitingUser() throws Exception
     {
