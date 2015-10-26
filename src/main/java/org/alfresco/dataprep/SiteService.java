@@ -187,18 +187,17 @@ public class SiteService
      * @return list of sites
      * @throws Exception if error
      */
-    public List<String> getSites(final String username,
+    public List<String> getSites(final String userName,
                                  final String password) throws Exception
     {
-        List<String> mySitesList=new ArrayList<String>() ;
+        List<String> mySitesList = new ArrayList<String>() ;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         try
         {
-            String ticket = client.getAlfTicket(username, password);
-            String apiUrl = client.getApiUrl();
-            String url = String.format("%ssites?alf_ticket=%s",apiUrl, ticket);
-            HttpGet get = new HttpGet(url);
-            HttpResponse response = client.executeRequest(get);
+            String apiUrl = client.getApiUrl() + "people/" + userName + "/sites";
+            HttpGet get = new HttpGet(apiUrl);
+            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+            HttpResponse response = clientWithAuth.execute(get);
             if(200 == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();

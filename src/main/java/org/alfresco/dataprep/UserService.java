@@ -97,7 +97,7 @@ public class UserService
             logger.trace("Create user using Url - " + reqURL);
         }
         HttpPost post = new HttpPost(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, post);         
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:

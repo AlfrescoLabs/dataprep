@@ -112,6 +112,7 @@ public class SiteTest extends AbstractTest
     {
         List<String> sites= site.getSites(ADMIN, ADMIN);
         Assert.assertNotEquals(sites.size(),0);
+        Assert.assertTrue(sites.contains(siteId));
     }
     
     @Test(dependsOnMethods="getAllSites")
