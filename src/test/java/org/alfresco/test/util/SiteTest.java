@@ -40,11 +40,13 @@ public class SiteTest extends AbstractTest
     @Autowired
     private SiteService site;
     private String siteId;
+    private String secondSite;
     
     @BeforeClass
     public void setup()
     {
         siteId = "michael" + System.currentTimeMillis();
+        secondSite = "second" + System.currentTimeMillis();
     }
     
     @Test
@@ -71,12 +73,11 @@ public class SiteTest extends AbstractTest
     @Test
     public void createWithSiteURLName() throws Exception
     {
-        siteId = "michael" + System.currentTimeMillis();
         site.create(ADMIN,
                     ADMIN,
                     MY_DOMAIN,
-                    siteId, 
-                    siteId + "_test",
+                    secondSite, 
+                    secondSite,
                     "my site description",
                     Visibility.PUBLIC);
     }
@@ -84,7 +85,7 @@ public class SiteTest extends AbstractTest
     @Test(dependsOnMethods="createWithSiteURLName")
     public void createWithSiteURLNameExists() throws Exception
     {
-        boolean exists = site.exists(siteId, ADMIN, ADMIN);
+        boolean exists = site.exists(secondSite, ADMIN, ADMIN);
         Assert.assertTrue(exists);
     }
     
@@ -111,7 +112,7 @@ public class SiteTest extends AbstractTest
     public void getAllSites() throws Exception
     {
         List<String> sites= site.getSites(ADMIN, ADMIN);
-        Assert.assertNotEquals(sites.size(),0);
+        Assert.assertNotEquals(sites.size(), 0);
         Assert.assertTrue(sites.contains(siteId));
     }
     
@@ -200,8 +201,12 @@ public class SiteTest extends AbstractTest
     @Test(dependsOnMethods="addDashlets")
     public void delete() throws Exception
     {
+        List<String> sites= site.getSites(ADMIN, ADMIN);
+        Assert.assertTrue(sites.contains(siteId));
         site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertFalse(exists);
+        sites= site.getSites(ADMIN, ADMIN);
+        Assert.assertFalse(sites.contains(siteId));
     }
 }
