@@ -237,20 +237,33 @@ public class SiteService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         String reqUrl = client.getApiVersionUrl() + "sites/" + siteName;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
-        if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
+        try
         {
-            String result = client.readStream(response.getEntity()).toJSONString();
-            if(!StringUtils.isEmpty(result))
+            HttpResponse response = clientWithAuth.execute(get);
+            if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
             {
-                JSONParser parser = new JSONParser();
-                Object obj = parser.parse(result);
-                JSONObject jsonObject = (JSONObject) obj;
-                JSONObject sites = (JSONObject) jsonObject.get("entry");
-                return siteNodeRef = (String) sites.get("guid");
+                String result = client.readStream(response.getEntity()).toJSONString();
+                if(!StringUtils.isEmpty(result))
+                {
+                    JSONParser parser = new JSONParser();
+                    Object obj = parser.parse(result);
+                    JSONObject jsonObject = (JSONObject) obj;
+                    JSONObject sites = (JSONObject) jsonObject.get("entry");
+                    return siteNodeRef = (String) sites.get("guid");
+                }
             }
+            else
+            {
+                throw new RuntimeException("Unable to get node ref of " + siteName + " " + response.getStatusLine());
+            }
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
         }
         return siteNodeRef;
     }
@@ -272,8 +285,8 @@ public class SiteService
         {
             throw new IllegalArgumentException("Parameter missing");
         }        
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String nodeRef = getSiteNodeRef(userName, password, siteName);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites";
         HttpPost post  = new HttpPost(reqUrl);
         String jsonInput;
@@ -323,11 +336,12 @@ public class SiteService
         {
             throw new IllegalArgumentException("Parameter missing");
         }     
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String nodeRef = getSiteNodeRef(userName, password, siteName);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + nodeRef;
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
+        HttpResponse response = clientWithAuth.execute(get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -359,12 +373,12 @@ public class SiteService
         {
             throw new IllegalArgumentException("Parameter missing");
         }       
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String siteNodeRef = getSiteNodeRef(userName, password, siteName); 
         if(StringUtils.isEmpty(siteNodeRef))
         {
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + siteNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
         HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
