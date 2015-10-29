@@ -207,7 +207,6 @@ public class AlfrescoHttpClient
     public HttpResponse executeRequest(AlfrescoHttpClient client,
                                       final String userName,
                                       final String password,
-                                      final String url,
                                       HttpRequestBase request) throws Exception
     {
         HttpResponse response = null;
@@ -248,7 +247,6 @@ public class AlfrescoHttpClient
     public HttpResponse executeRequest(AlfrescoHttpClient client,
                                       final String userName,
                                       final String password,
-                                      final String url,
                                       final JSONObject body,
                                       HttpEntityEnclosingRequestBase request) throws Exception
     {
@@ -427,7 +425,7 @@ public class AlfrescoHttpClient
              "   </component>"+
              " </document>"+
              " <document path=\"/alfresco/site-data/components/page.component-1-1.site~" + "<shortName>" + "~dashboard.xml\">"+
-"                   <component>"+
+             " <component>"+
     "             <guid>page.component-1-1.site~" + "<shortName>" + "~dashboard</guid>"+
     "             <scope>page</scope>"+
     "             <region-id>component-1-1</region-id>"+

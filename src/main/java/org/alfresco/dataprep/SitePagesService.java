@@ -187,7 +187,7 @@ public class SitePagesService
         {
             body.put("allday", "on");
         }
-        HttpResponse response = client.executeRequest(client, userName, password, reqURL, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -198,7 +198,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Get the name (ID) of the event
      * 
@@ -290,7 +290,7 @@ public class SitePagesService
         }  
         return name;
     }
-    
+
     /**
      * Remove an event
      * 
@@ -331,7 +331,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/event/" + siteName + "/" + eventName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(client, userName, password, reqURL, request);
+        HttpResponse response = client.executeRequest(client, userName, password, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -344,7 +344,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Convert time to 24 hour format
      * 
@@ -361,7 +361,7 @@ public class SitePagesService
         String x = f2.format(d);
         return x;
     }
-    
+
     @SuppressWarnings("unchecked")
     private JSONArray createTagsArray(List<String>tags)
     {
@@ -375,7 +375,7 @@ public class SitePagesService
         }
         return array;
     }
-    
+
     /**
      * Create a new wiki page
      * 
@@ -413,7 +413,7 @@ public class SitePagesService
         body.put("pageTitle", wikiTitle);
         body.put("pagecontent", content);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, url, body, put);
+        HttpResponse response = client.executeRequest(client, userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -430,7 +430,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Verify if wiki exists
      * 
@@ -453,14 +453,14 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(client, userName, password, url, get);
+        HttpResponse response = client.executeRequest(client, userName, password, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
         }  
         return false;
     }
-    
+
     /**
      * Delete wiki page
      * 
@@ -483,7 +483,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, userName, password, url, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -496,7 +496,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Create a new blog post
      * 
@@ -532,7 +532,7 @@ public class SitePagesService
         body.put("content", content);
         body.put("draft", draft);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -569,7 +569,7 @@ public class SitePagesService
     {
         return getName(userName, password, siteName, blogTitle, draft, Page.BLOG);
     }
-    
+
     /**
      * Verify if blog post exists
      * 
@@ -596,7 +596,7 @@ public class SitePagesService
             return true;
         }
     }
-    
+
     /**
      * Delete blog post
      * 
@@ -618,7 +618,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, userName, password, url, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -631,7 +631,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Create a new blog post
      * 
@@ -673,7 +673,7 @@ public class SitePagesService
             body.put("internal", internal);
         }
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -733,7 +733,7 @@ public class SitePagesService
             return true;
         }
     }
-    
+
     /**
      * Get the name (id) for blog post, link, discussion
      * 
@@ -817,7 +817,7 @@ public class SitePagesService
         }
         return name;
     }
-    
+
     /**
      * Delete link
      * 
@@ -842,7 +842,7 @@ public class SitePagesService
         JSONArray array = new JSONArray();
         array.add(linkName);
         body.put("items", array);
-        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -855,7 +855,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Create discussion topic
      * 
@@ -888,7 +888,7 @@ public class SitePagesService
         body.put("title", discussionTitle);
         body.put("content", text);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -905,7 +905,7 @@ public class SitePagesService
         }
         return false;
     }
-    
+
     /**
      * Get the name(id) of a created topic
      * 
@@ -923,7 +923,7 @@ public class SitePagesService
     {
         return getName(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
     }
-    
+
     /**
      * Verify if a discussion topic exists
      * 
@@ -948,7 +948,7 @@ public class SitePagesService
             return true;
         }
     }
-    
+
     /**
      * Delete a discussion topic
      * 
@@ -968,7 +968,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "?page=discussions-topicview";
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, userName, password, url, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:

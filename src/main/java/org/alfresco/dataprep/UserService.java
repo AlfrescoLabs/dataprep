@@ -97,7 +97,7 @@ public class UserService
             logger.trace("Create user using Url - " + reqURL);
         }
         HttpPost post = new HttpPost(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, post);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -161,7 +161,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "people/" + URIUtil.encodeWithinPath(username);
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, url, get);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -188,7 +188,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "people/" + URIUtil.encodeWithinPath(userName);
         HttpDelete httpDelete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, url, httpDelete);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, httpDelete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -352,7 +352,7 @@ public class UserService
         group.put("fullName", "GROUP_" + groupName);
         body.put("role", role);
         body.put("group", group);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, body, post);
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -394,7 +394,7 @@ public class UserService
         HttpPost post  = new HttpPost(reqUrl);
         JSONObject body = new JSONObject();
         body.put("id", siteId);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -444,7 +444,7 @@ public class UserService
         JSONObject body = new JSONObject();
         body.put("id", userName);
         body.put("role", role);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, body, post);
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -490,7 +490,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/site-membership-requests/" + siteId;
         HttpDelete delete  = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, reqUrl, delete);
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -527,7 +527,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships/" + userName;
         HttpDelete delete  = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, url, delete);
+        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -584,12 +584,12 @@ public class UserService
         if(!isGroup)
         {
             put.setEntity(client.setMessageBody(userBody));
-            response = client.executeRequest(client, siteManager, passwordManager, reqUrl, userBody, put);
+            response = client.executeRequest(client, siteManager, passwordManager, userBody, put);
         }
         else
         {
             put.setEntity(client.setMessageBody(grpBody));
-            response = client.executeRequest(client, siteManager, passwordManager, reqUrl, grpBody, put);
+            response = client.executeRequest(client, siteManager, passwordManager, grpBody, put);
         }
         switch (response.getStatusLine().getStatusCode())
         {
@@ -680,7 +680,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName;
         HttpGet request = new HttpGet(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -715,7 +715,7 @@ public class UserService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("displayName", groupName);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, request);
         if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -752,7 +752,7 @@ public class UserService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -798,7 +798,7 @@ public class UserService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, body, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -847,7 +847,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/" + userName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -881,7 +881,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/GROUP_" + subGroup;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -913,7 +913,7 @@ public class UserService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "rootgroups/" + groupName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, reqURL, request);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())

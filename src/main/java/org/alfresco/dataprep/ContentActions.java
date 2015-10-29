@@ -94,7 +94,7 @@ public class ContentActions extends CMISUtil
         {
             body.put("myRating", true);
         }
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -219,7 +219,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + optType.name + "/" + optionNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -301,7 +301,7 @@ public class ContentActions extends CMISUtil
             reqUrl = reqUrl + "/likes";
         }
         HttpGet get = new HttpGet(reqUrl);    
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
+        HttpResponse response = client.executeRequest(client, userName, password, get);
         if(HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             return client.readStream(response.getEntity()).toJSONString(); 
@@ -617,7 +617,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + "/ratings/likes";
         HttpDelete delete = new HttpDelete(reqUrl);  
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -749,7 +749,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -789,7 +789,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, get);
+        HttpResponse response = client.executeRequest(client, userName, password, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
