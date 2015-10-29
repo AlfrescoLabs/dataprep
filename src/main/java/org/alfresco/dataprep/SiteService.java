@@ -381,7 +381,7 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + siteNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, reqUrl, delete);
+        HttpResponse response = client.executeRequest(client, userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -445,7 +445,7 @@ public class SiteService
         body.put("pages", array);
         body.put("themeId", "");
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -554,7 +554,7 @@ public class SiteService
         array.add(newDashlet);
         body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeRequest(client, userName, password, url, body, post);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
