@@ -48,16 +48,38 @@ public class ContentAspects extends CMISUtil
      * @param aspect aspect to add
      * @throws Exception if error 
      */
+    public void addAspect(final Session session,
+                          final String siteName,
+                          final String contentName,
+                          DocumentAspect aspect) throws Exception
+    {
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        List<DocumentAspect> aspectsToAdd = new ArrayList<DocumentAspect>();
+        aspectsToAdd.add(aspect);
+        addAspect(session, contentNodeRef, aspectsToAdd);
+    }
+    
+    /**
+     * Add aspect for document or folder
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param aspect aspect to add
+     * @throws Exception if error 
+     */
     public void addAspect(final String userName,
                           final String password,
                           final String siteName,
                           final String contentName,
                           DocumentAspect aspect) throws Exception
     {
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
+        Session session = getCMISSession(userName, password);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
         List<DocumentAspect> aspectsToAdd = new ArrayList<DocumentAspect>();
         aspectsToAdd.add(aspect);
-        addAspect(userName, password, contentNodeRef, aspectsToAdd);
+        addAspect(session, contentNodeRef, aspectsToAdd);
     }
 
     /**
@@ -78,8 +100,8 @@ public class ContentAspects extends CMISUtil
     {
         try
         {
-            String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
             Session session = getCMISSession(userName, password);
+            String contentNodeRef = getNodeRef(session, siteName, contentName);
             CmisObject contentObj = session.getObject(contentNodeRef);
             List<SecondaryType> secondaryTypesList = contentObj.getSecondaryTypes();
             List<String> secondaryTypes = new ArrayList<String>();
@@ -92,7 +114,7 @@ public class ContentAspects extends CMISUtil
             {
                 properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondaryTypes);
             }
-            contentObj.updateProperties(properties);  
+            contentObj.updateProperties(properties);
         }
         catch(CmisInvalidArgumentException ia)
         {
@@ -116,11 +138,12 @@ public class ContentAspects extends CMISUtil
                                   final String contentName,
                                   final Date removeAfter) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.COMPLIANCEABLE);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.COMPLIANCEABLE);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:removeAfter", removeAfter);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
 
     /**
@@ -153,7 +176,8 @@ public class ContentAspects extends CMISUtil
                               final String rights,
                               final String subject) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.DUBLIN_CORE);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.DUBLIN_CORE);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:contributor", contributor);
         propertyMap.put("cm:publisher", publisher);
@@ -163,8 +187,8 @@ public class ContentAspects extends CMISUtil
         propertyMap.put("cm:rights", rights);
         propertyMap.put("cm:coverage", coverage);
         propertyMap.put("cm:dcsource", source);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -186,12 +210,13 @@ public class ContentAspects extends CMISUtil
                                final Date fromDate,
                                final Date toDate) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.EFFECTIVITY);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.EFFECTIVITY);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:from", fromDate);
         propertyMap.put("cm:to", toDate);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -212,12 +237,13 @@ public class ContentAspects extends CMISUtil
                                     final double longitude,
                                     final double latitude) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.GEOGRAPHIC);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.GEOGRAPHIC);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:longitude", longitude);
         propertyMap.put("cm:latitude", latitude);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -236,11 +262,12 @@ public class ContentAspects extends CMISUtil
                                 final String contentName,
                                 final String summary) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.SUMMARIZABLE);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.SUMMARIZABLE);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:summary", summary);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -260,15 +287,16 @@ public class ContentAspects extends CMISUtil
                                final String contentName,
                                final String templateContent) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.TEMPLATABLE);
-        String templateNodeRef = getNodeRef(userName, password, siteName, templateContent);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.TEMPLATABLE);
+        String templateNodeRef = getNodeRef(session, siteName, templateContent);
         if(!StringUtils.isEmpty(templateNodeRef))
         {
             templateNodeRef = "workspace://SpacesStore/" + templateNodeRef;
             Map<String, Object> propertyMap = new HashMap<String, Object>();
             propertyMap.put("cm:template", templateNodeRef);
-            String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-            addProperties(userName, password, contentNodeRef, propertyMap);
+            String contentNodeRef = getNodeRef(session, siteName, contentName);
+            addProperties(session, contentNodeRef, propertyMap);
         }
         else
         {
@@ -300,15 +328,16 @@ public class ContentAspects extends CMISUtil
                            final String originator,
                            final Date sentDate) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.EMAILED);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.EMAILED);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:addressee", addressee);
         propertyMap.put("cm:addressees", addressees);
         propertyMap.put("cm:subjectline", subject);
         propertyMap.put("cm:originator", originator);
         propertyMap.put("cm:sentdate", sentDate);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -330,12 +359,13 @@ public class ContentAspects extends CMISUtil
                                 final boolean isIndexed,
                                 final boolean contentIndexed) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.INDEX_CONTROL);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.INDEX_CONTROL);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:isIndexed", isIndexed);
         propertyMap.put("cm:isContentIndexed", contentIndexed);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -354,16 +384,17 @@ public class ContentAspects extends CMISUtil
                                 final String contentName,
                                 final int hours) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.RESTRICTABLE);
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.RESTRICTABLE);
         long milliseconds = TimeUnit.HOURS.toMillis(hours);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("dp:offlineExpiresAfter", milliseconds);
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
-     * Method to add Clasifiable Aspect  
+     * Method to add Clasifiable Aspect
      * 
      * @param userName login username
      * @param password login password
@@ -378,7 +409,8 @@ public class ContentAspects extends CMISUtil
                                final String contentName,
                                final List<String> categoryName) throws Exception
     {
-        addAspect(userName, password, siteName, contentName, DocumentAspect.CLASSIFIABLE); 
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.CLASSIFIABLE); 
         List<String> nodeRefs = new ArrayList<String>();
         for(int i = 0; i < categoryName.size(); i++)
         {       
@@ -386,8 +418,8 @@ public class ContentAspects extends CMISUtil
         }     
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put("cm:categories", nodeRefs);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
     
     /**
@@ -441,13 +473,14 @@ public class ContentAspects extends CMISUtil
                                    final String docTitle,
                                    final String docDescription,
                                    final String author) throws Exception
-    {       
+    {
+        Session session = getCMISSession(userName, password);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put(PropertyIds.NAME, docName);
         propertyMap.put("cm:title", docTitle);
         propertyMap.put(PropertyIds.DESCRIPTION, docDescription);
         propertyMap.put("cm:author", author);
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        addProperties(userName, password, contentNodeRef, propertyMap);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
     }
 }

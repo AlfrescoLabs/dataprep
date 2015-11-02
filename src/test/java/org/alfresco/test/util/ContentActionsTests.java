@@ -24,6 +24,7 @@ import org.alfresco.dataprep.UserService;
 import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
@@ -94,7 +95,7 @@ public class ContentActionsTests extends AbstractTest
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
         String tag2 = "tag2";
-        String tag3 = "tag3";     
+        String tag3 = "tag3";
         userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
@@ -682,5 +683,93 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertTrue(contentAction.setFolderAsFavorite(userName, password, siteName, folder));
         Assert.assertTrue(contentAction.removeFavorite(userName, password, siteName, folder));
         Assert.assertFalse(contentAction.isFavorite(userName, password, siteName, folder));
+    }
+    
+    @Test
+    public void editOffline() throws Exception
+    {
+        String siteName = "editSite" + System.currentTimeMillis();
+        String userName = "editUser" + System.currentTimeMillis();
+        String docName = "editDoc";
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docName);
+        ObjectId idWpc = contentAction.checkOut(userName, password, siteName, docName);
+        Assert.assertTrue(!idWpc.getId().isEmpty());
+        contentAction.cancelCheckOut(userName, password, siteName, docName);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void cancelNotEditedFile() throws Exception
+    {
+        String siteName = "editSite" + System.currentTimeMillis();
+        String docName = "editDoc";
+        site.create(ADMIN,
+                    ADMIN,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(ADMIN, ADMIN, siteName, DocumentType.TEXT_PLAIN, docName, docName);
+        contentAction.cancelCheckOut(ADMIN, ADMIN, siteName, docName);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void editOfflineFolder() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String folder = "folderTest";
+        site.create(ADMIN,
+                    ADMIN,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createFolder(ADMIN, ADMIN, folder, siteName);
+        contentAction.checkOut(ADMIN, ADMIN, siteName, folder);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void editOfflineTwice() throws Exception
+    {
+        String siteName = "editSite" + System.currentTimeMillis();
+        String userName = "editUser" + System.currentTimeMillis();
+        String docName = "editDoc";
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docName);
+        contentAction.checkOut(userName, password, siteName, docName);
+        contentAction.checkOut(userName, password, siteName, docName);
+    }
+    
+    @Test
+    public void checkIn() throws Exception
+    {
+        String siteName = "checkInSite" + System.currentTimeMillis();
+        String userName = "checkInUser" + System.currentTimeMillis();
+        String docName = "checkInDoc" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docName);
+        ObjectId id = contentAction.checkIn(userName, password, siteName, docName, DocumentType.TEXT_PLAIN, "new content", true, "comment");
+        Assert.assertFalse(id.getId().isEmpty());
+        contentAction.checkIn(userName, password, siteName, docName, DocumentType.TEXT_PLAIN, "third edit", false, "third comment");
+        String version = contentAction.getVersion(userName, password, siteName, docName);
+        Assert.assertEquals(version, "2.1");
     }
 }

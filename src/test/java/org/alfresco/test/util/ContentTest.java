@@ -438,18 +438,23 @@ public class ContentTest extends AbstractTest
         String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain" + System.currentTimeMillis();
         String xml = "xml" + System.currentTimeMillis();
+        String docx  = "doc" + System.currentTimeMillis();
         String newContentPlain = "new plain content";
         String newContentXml = "new xml content";
+        String newDocContent = "new doc content";
         userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.createDocument(userName, password, siteName, DocumentType.XML, xml, xml);
+        content.createDocument(userName, password, siteName, DocumentType.MSWORD, docx, docx);
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(plainDoc));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(xml));
         Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, newContentPlain));
         Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.XML, xml, newContentXml));
+        Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.MSWORD, docx, newDocContent));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(newContentPlain));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(newContentXml));
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, docx).equals(newDocContent));
     }
 
     @Test

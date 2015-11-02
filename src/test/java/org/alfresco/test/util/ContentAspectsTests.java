@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.alfresco.dataprep.CMISUtil.DocumentAspect;
+import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.alfresco.dataprep.ContentActions;
 import org.alfresco.dataprep.ContentAspects;
 import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
-import org.alfresco.dataprep.CMISUtil.DocumentAspect;
-import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
@@ -54,7 +54,7 @@ public class ContentAspectsTests extends AbstractTest
     String password = "password";
     private final String DATE_FORMAT = "EEE MMM dd HH:mm";
     String plainDoc = "testDoc.txt";
-    String folder = "cmisFolder"; 
+    String folder = "cmisFolder";
     
     @Test
     public void addDocAspect() throws Exception
@@ -71,7 +71,7 @@ public class ContentAspectsTests extends AbstractTest
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
         contentAspect.addAspect(userName, password, siteName, plainDoc, DocumentAspect.DUBLIN_CORE);
-        List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);       
+        List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         Assert.assertTrue(properties.toString().contains(DocumentAspect.DUBLIN_CORE.getProperty()));
     }
     

@@ -231,7 +231,7 @@ public class SitePagesService
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 1);
-        to = calendar.getTime();   
+        to = calendar.getTime();
         String strFrom = dateFormat.format(from);
         String strTo = dateFormat.format(to);
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/events/" + siteName + 
@@ -245,9 +245,9 @@ public class SitePagesService
             {
                 case HttpStatus.SC_OK:
                     org.json.JSONObject items = new org.json.JSONObject(EntityUtils.toString(response.getEntity()));
-                    org.json.JSONArray events = items.getJSONArray("events");  
+                    org.json.JSONArray events = items.getJSONArray("events");
                     for (int i = 0; i < events.length(); i++) 
-                    {               
+                    {
                         String itemWhat = items.getJSONArray("events").getJSONObject(i).getString("title");
                         String itemWhere = items.getJSONArray("events").getJSONObject(i).getString("where");
                         if(allDay)
@@ -272,6 +272,7 @@ public class SitePagesService
                             if(itemWhat.equals(what) && sTime.equals(timeStart) && eTime.equals(timeEnd))
                             {
                                 name = items.getJSONArray("events").getJSONObject(i).getString("name");
+                                break;
                             }
                         }
                     }

@@ -14,10 +14,18 @@
  */
 package org.alfresco.dataprep;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
+import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisVersioningException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -142,7 +150,7 @@ public class ContentActions extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String nodeRef = getNodeRef(userName, password, siteName, contentName);
         String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + optType.name;
-        HttpPost post  = new HttpPost(reqUrl);        
+        HttpPost post  = new HttpPost(reqUrl);
         jsonInput =  ( "[{" + "\"" + optType.bodyParam + "\"" + ": \"" + values.get(0) + "\"" );
         for( int i = 1; i < values.size(); i++ )
         {
@@ -780,7 +788,7 @@ public class ContentActions extends CMISUtil
                 || StringUtils.isEmpty(contentName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }     
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
         if(StringUtils.isEmpty(contentNodeRef))
@@ -799,5 +807,120 @@ public class ContentActions extends CMISUtil
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Checks out the document and returns the object id of the PWC (private
+     * working copy).
+     * @param userName login username
+     * @param password login password
+     * @param siteId site name
+     * @param fileName file
+     * @return ObjectId object id of PWC
+     * @throws Exception if error
+     */
+    public ObjectId checkOut(final String userName,
+                             final String password,
+                             final String siteId,
+                             final String fileName) throws Exception
+    {
+        ObjectId id;
+        try
+        {
+            Session session = getCMISSession(userName, password);
+            id = getDocumentObject(session, siteId, fileName).checkOut();
+        }
+        catch(CmisVersioningException cv)
+        {
+            throw new CmisRuntimeException("File " + fileName + " is already checked out", cv);
+        }
+        return id;
+    }
+    
+    /**
+     * If this is a PWC (private working copy) the check out will be reversed.
+     * If this is not a PWC it an exception will be thrown.
+     * @param userName login username
+     * @param password login password
+     * @param siteId site name
+     * @param fileName file
+     * @return ObjectId object id of PWC
+     * @throws Exception if error
+     */
+    public void cancelCheckOut(final String userName,
+                               final String password,
+                               final String siteId,
+                               final String fileName) throws Exception
+    {
+        try
+        {
+            Session session = getCMISSession(userName, password);
+            getDocumentObject(session, siteId, fileName).cancelCheckOut();
+        }
+        catch(CmisRuntimeException re)
+        {
+            throw new CmisRuntimeException("File " + fileName + " is not selected for editing", re);
+        }
+    }
+    
+    /**
+     * Check in document.If this is not a PWC(private working copy) it an exception will be thrown.
+     * @param userName login username
+     * @param password login password
+     * @param siteId site name
+     * @param docName document name
+     * @param fileType DocumentType type of document
+     * @param newContent String new content to be set
+     * @param majorVersion boolean true to set major version
+     * @param checkinComment String check in comment
+     * @return ObjectId object id of PWC
+     * @throws Exception if error
+     */
+    public ObjectId checkIn(final String userName,
+                            final String password,
+                            final String siteId,
+                            final String docName,
+                            final DocumentType fileType,
+                            final String newContent,
+                            final boolean majorVersion,
+                            final String checkinComment) throws Exception
+    {
+        Document pwc = null;
+        Session session = getCMISSession(userName, password);
+        Document docToModify = getDocumentObject(session, siteId, docName);
+        String id = docToModify.getVersionSeriesCheckedOutId();
+        if(!StringUtils.isEmpty(id))
+        {
+            pwc = (Document) session.getObject(id);
+        }
+        else
+        {
+            // checkout doc
+            ObjectId idPwc = docToModify.checkOut();
+            pwc = (Document) session.getObject(idPwc);
+        }
+        byte[] content = newContent.getBytes();
+        InputStream stream = new ByteArrayInputStream(content);
+        ContentStream contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+        return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
+    }
+    
+    /**
+     * Get the version for a file
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteId site name
+     * @param fileName file
+     * @return String file version
+     * @throws Exception if error
+     */
+    public String getVersion(final String userName,
+                             final String password,
+                             final String siteId,
+                             final String fileName) throws Exception
+    {
+        Session session = getCMISSession(userName, password);
+        return getDocumentObject(session, siteId, fileName).getVersionLabel();
     }
 }

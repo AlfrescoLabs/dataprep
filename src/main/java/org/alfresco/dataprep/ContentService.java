@@ -540,7 +540,7 @@ public class ContentService extends CMISUtil
         {
             String docId;
             Session session = getCMISSession(userName, password); 
-            docId = getNodeRef(userName, password, siteName, docName);
+            docId = getNodeRef(session, siteName, docName);
             session.getObject(docId).delete();
         }
         catch(CmisObjectNotFoundException nf)
@@ -621,7 +621,7 @@ public class ContentService extends CMISUtil
             Session session = getCMISSession(userName, password);
             if(!inRepository)
             {
-                folderId = getNodeRef(userName, password, siteName, folderName);
+                folderId = getNodeRef(session, siteName, folderName);
             }
             else
             {
@@ -635,7 +635,7 @@ public class ContentService extends CMISUtil
             if(o instanceof Folder)
             {
                 Folder f = (Folder)o;
-                f.deleteTree(true, UnfileObject.DELETE, true);    
+                f.deleteTree(true, UnfileObject.DELETE, true);
             }
             else
             {

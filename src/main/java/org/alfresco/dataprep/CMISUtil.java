@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
@@ -89,7 +90,6 @@ public class CMISUtil
         GEOGRAPHIC("Geographic", "P:cm:geographic"),
         EXIF("EXIF", "P:exif:exif"),
         RESTRICTABLE("Restrictable", "P:dp:restrictable");
-
         private String value;
         private String property;
         private DocumentAspect(String value, String property)
@@ -196,7 +196,7 @@ public class CMISUtil
             for (Tree<FileableCmisObject> t : documentLibrary.getDescendants(-1)) 
             {
                 contents = getId(t, contentName);
-            }      
+            }
             for (Map.Entry<String, String> entry : contents.entrySet()) 
             {
                 if(entry.getKey().equalsIgnoreCase(contentName))
@@ -204,7 +204,45 @@ public class CMISUtil
                     nodeRef = entry.getValue().split(";")[0];
                     return nodeRef;
                 }
-            }    
+            }
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Site doesn't exists: " + siteName, nf);
+        }
+        return nodeRef;
+    }
+    
+    /**
+     * Gets the object id for a document or folder.
+     * 
+     * @param session Session Cmis session
+     * @param siteName String site identifier
+     * @param contentName String content identifier
+     * @return String node identifier
+     * @throws Exception if error
+     */
+    public String getNodeRef(final Session session,
+                             final String siteName,
+                             final String contentName) throws Exception
+    {
+        String nodeRef = "";
+        contents.clear();
+        try
+        {
+            Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+            for (Tree<FileableCmisObject> t : documentLibrary.getDescendants(-1)) 
+            {
+                contents = getId(t, contentName);
+            }
+            for (Map.Entry<String, String> entry : contents.entrySet()) 
+            {
+                if(entry.getKey().equalsIgnoreCase(contentName))
+                {
+                    nodeRef = entry.getValue().split(";")[0];
+                    return nodeRef;
+                }
+            }
         }
         catch(CmisObjectNotFoundException nf)
         {
@@ -278,12 +316,10 @@ public class CMISUtil
      * @param documentAspects aspect to apply on node
      * @throws Exception if error
      */
-    public void addAspect(final String userName,
-                          final String password,
+    public void addAspect(final Session session,
                           final String contentNodeRef,
                           List<DocumentAspect> documentAspects) throws Exception
     {
-        Session session = getCMISSession(userName, password);
         try
         {
             CmisObject contentObj = session.getObject(contentNodeRef);
@@ -321,14 +357,12 @@ public class CMISUtil
      * @param propertiesMap Map of properties
      * @throws Exception if error
      */
-    public void addProperties(final String userName,
-                              final String password,
+    public void addProperties(final Session session,
                               final String contentNodeRef,
                               Map<String, Object> propertiesMap) throws Exception
     {
         try
         {
-            Session session = getCMISSession(userName, password);
             CmisObject contentObj = session.getObject(contentNodeRef);
             contentObj.updateProperties(propertiesMap);
         }
@@ -354,7 +388,7 @@ public class CMISUtil
                                            final String contentName) throws Exception
     {
         Session session = getCMISSession(userName, password);
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        String nodeRef = getNodeRef(session, siteName, contentName);
         CmisObject obj = session.getObject(nodeRef);
         return obj.getProperties();
     }
@@ -482,7 +516,7 @@ public class CMISUtil
         Session session = getCMISSession(userName, password);
         for(int i = 0; i<docsToAttach.size(); i++)
         {
-            String docNodRef = getNodeRef(userName, password, siteName, docsToAttach.get(i));
+            String docNodRef = getNodeRef(session, siteName, docsToAttach.get(i));
             if(StringUtils.isEmpty(docNodRef))
             {
                 throw new CmisRuntimeException(docsToAttach.get(i) + " doesn't exist");
@@ -510,6 +544,38 @@ public class CMISUtil
             time1 = System.currentTimeMillis();
         }
         while (time1 - time0 < seconds * 1000);
+    }
+    
+    /**
+     * Get Document object for a file
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteId site name
+     * @param fileName file
+     * @return Document object
+     * @throws Exception if error
+     */
+    public Document getDocumentObject(final Session session,
+                                      final String siteId,
+                                      final String fileName) throws Exception
+    {
+        if (StringUtils.isEmpty(siteId) || StringUtils.isEmpty(fileName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        Document doc = null;
+        String nodeRef = getNodeRef(session, siteId, fileName);
+        
+        try
+        {
+           doc = (Document) session.getObject(nodeRef);
+        }
+        catch(ClassCastException ce)
+        {
+            throw new CmisRuntimeException("Cannot checkout a folder");
+        }
+        return doc;
     }
 }
 

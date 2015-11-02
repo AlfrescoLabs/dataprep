@@ -724,7 +724,7 @@ public class DataListsService extends CMISUtil
         {
             for(int i = 0; i<docsToAttach.size(); i++)
             {
-                String docNodRef = getNodeRef(userName, password, siteName, docsToAttach.get(i));
+                String docNodRef = getNodeRef(session, siteName, docsToAttach.get(i));
                 if(StringUtils.isEmpty(docNodRef))
                 {
                     throw new CmisRuntimeException(docsToAttach.get(i) + " doesn't exist");

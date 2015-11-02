@@ -46,17 +46,17 @@ public class SitePagesActionTests extends AbstractTest
         String siteId = "calendar-site" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today,
+        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what1", "where1", "description2", today, today,
                 "6:00 PM", "8:00 PM", false, "tag1"));
-        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what", "where", "description", today, today,
+        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what2", "where2", "description2", today, today,
                 "12:00", "13:00", false, "tag1"));
-        String name1 = pageService.getEventName(ADMIN, ADMIN, siteId, "what", "where", today, today, "6:00 PM", "8:00 PM", false);
-        String name2 = pageService.getEventName(ADMIN, ADMIN, siteId, "what", "where", today, today, "12:00", "13:00", false);
+        String name1 = pageService.getEventName(ADMIN, ADMIN, siteId, "what1", "where1", today, today, "6:00 PM", "8:00 PM", false);
+        String name2 = pageService.getEventName(ADMIN, ADMIN, siteId, "what2", "where2", today, today, "12:00", "13:00", false);
         Assert.assertNotNull(name1);
         Assert.assertNotNull(name2);
         Assert.assertFalse(name1.equals(name2));
     }
-    
+
     @Test
     public void addCalendarEvent24h() throws Exception
     {
