@@ -268,7 +268,7 @@ public class CMISUtil
      * @param userName String identifier
      * @param password String password
      * @param contentName String content identifier
-     * @param path String path to the object(e.g. 'Shared'). If empty or null 'Company home' is set.   
+     * @param path String path to the object(e.g. 'Shared'). If empty or null 'Company home' is set.
      * @return String node identifier
      * @throws Exception if error
      */
@@ -547,35 +547,73 @@ public class CMISUtil
     }
     
     /**
-     * Get Document object for a file
+     * Get Cmis Object for a file or folder
      * 
-     * @param userName login username
-     * @param password login password
-     * @param siteId site name
-     * @param fileName file
-     * @return Document object
+     * @param session the session
+     * @param siteId site id
+     * @param contentName file or folder name
+     * @return CmisObject cmis object
+     * @throws Exception if error
+     */
+    public CmisObject getCmisObject(final Session session,
+                                    final String siteId,
+                                    final String contentName) throws Exception
+    {
+        if (StringUtils.isEmpty(siteId) || StringUtils.isEmpty(contentName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        String nodeRef = getNodeRef(session, siteId, contentName);
+        if(StringUtils.isEmpty(nodeRef))
+        {
+            throw new CmisRuntimeException("Content " + contentName + " doesn't exist");
+        }
+        CmisObject object = session.getObject(nodeRef);
+        return object;
+    }
+    
+    /**
+     * Get Document object for a file
+     *
+     * @param session the session
+     * @param siteId site id
+     * @param contentName file or folder name
+     * @return CmisObject cmis object
      * @throws Exception if error
      */
     public Document getDocumentObject(final Session session,
                                       final String siteId,
                                       final String fileName) throws Exception
     {
-        if (StringUtils.isEmpty(siteId) || StringUtils.isEmpty(fileName))
+        Document d = null;
+        CmisObject docObj = getCmisObject(session, siteId, fileName);
+        if(docObj instanceof Document)
         {
-            throw new IllegalArgumentException("Parameter missing");
+            d = (Document)docObj;
         }
-        Document doc = null;
-        String nodeRef = getNodeRef(session, siteId, fileName);
-        
-        try
+        return d;
+    }
+    
+    /**
+     * Get Folder object for a folder
+     *
+     * @param session the session
+     * @param siteId site id
+     * @param contentName file or folder name
+     * @return CmisObject cmis object
+     * @throws Exception if error
+     */
+    public Folder getFolderObject(final Session session,
+                                  final String siteId,
+                                  final String folderName) throws Exception
+    {
+        Folder f = null;
+        CmisObject folderObj = getCmisObject(session, siteId, folderName);
+        if(folderObj instanceof Folder)
         {
-           doc = (Document) session.getObject(nodeRef);
+            f = (Folder)folderObj;
         }
-        catch(ClassCastException ce)
-        {
-            throw new CmisRuntimeException("Cannot checkout a folder");
-        }
-        return doc;
+        return f;
     }
 }
 

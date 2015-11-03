@@ -146,11 +146,11 @@ public class ContentAspectsTests extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());        
+        Assert.assertFalse(doc1.getId().isEmpty());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 3);
         Date removeAfter = calendar.getTime();
-        contentAspect.addComplianceable(userName, password, siteName, plainDoc, removeAfter);    
+        contentAspect.addComplianceable(userName, password, siteName, plainDoc, removeAfter);
         contentAspect.removeAspect(userName, password, siteName, plainDoc, DocumentAspect.COMPLIANCEABLE);
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         Assert.assertEquals(contentAspect.getPropertyValue(properties, "cm:removeAfter"), null);

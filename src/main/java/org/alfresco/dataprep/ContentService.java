@@ -484,7 +484,7 @@ public class ContentService extends CMISUtil
         try
         {
             contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
-            String folderId = getNodeRef(userName, password, siteName, folderName);
+            String folderId = getNodeRef(session, siteName, folderName);
             CmisObject folderObj = session.getObject(folderId);
             if(folderObj instanceof Folder)
             {

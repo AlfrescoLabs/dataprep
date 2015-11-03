@@ -259,8 +259,15 @@ public class SitePagesService
                         }
                         else
                         {
-                            String sTime = events.getJSONObject(i).getJSONObject("startAt").getString("legacyTime");
-                            String eTime = events.getJSONObject(i).getJSONObject("endAt").getString("legacyTime");
+                            String sTime = events.getJSONObject(i).getJSONObject("startAt").getString("iso8601");
+                            String eTime = events.getJSONObject(i).getJSONObject("endAt").getString("iso8601");
+                            DateTime st = new DateTime(sTime);
+                            DateTime et = new DateTime(eTime);
+                            DateTimeFormatter  sdf = DateTimeFormat.forPattern("HH:mm");
+                            sTime = st.toString(sdf);
+                            eTime = et.toString(sdf);
+                            
+                            
                             if(timeStart.contains("AM") || timeStart.contains("PM"))
                             {
                                 timeStart = convertTo24Hour(timeStart);

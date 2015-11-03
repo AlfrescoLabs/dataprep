@@ -15,16 +15,20 @@
 package org.alfresco.test.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.alfresco.dataprep.ContentActions;
+import org.alfresco.dataprep.ContentAspects;
 import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
-import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
@@ -43,6 +47,7 @@ public class ContentActionsTests extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private ContentService content;
     @Autowired private ContentActions contentAction;
+    @Autowired private ContentAspects contentAspect;
     String admin = "admin";
     String password = "password";
     String tagDoc = "tagDoc";
@@ -59,8 +64,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
@@ -79,8 +84,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(contentAction.addSingleTag(userName, password, siteName, tagDoc, tag1));
@@ -100,19 +105,19 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         List<String> tags = new ArrayList<String>();
         tags.add(tag1);
         tags.add(tag2);
         tags.add(tag3);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
-        Assert.assertTrue(contentAction.addMultipleTags(userName, password, siteName, tagDoc, tags));            
+        Assert.assertTrue(contentAction.addMultipleTags(userName, password, siteName, tagDoc, tags));
         List<String> returnTags = contentAction.getTagNamesFromContent(userName, password, siteName, tagDoc);
         Assert.assertEquals(returnTags.get(0), tag1);
         Assert.assertEquals(returnTags.get(1), tag2);
-        Assert.assertEquals(returnTags.get(2), tag3);     
+        Assert.assertEquals(returnTags.get(2), tag3);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -125,8 +130,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         contentAction.addSingleTag(userName, password, siteName, "fakeDoc", tag1);
     }
@@ -193,7 +198,7 @@ public class ContentActionsTests extends AbstractTest
         String userName = "tagUser" + System.currentTimeMillis();
         String tag1 = "tag1";
         String tag2 = "tag2";
-        String tag3 = "tag3";     
+        String tag3 = "tag3";
         userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
@@ -206,11 +211,11 @@ public class ContentActionsTests extends AbstractTest
         tags.add(tag2);
         tags.add(tag3);
         content.createFolder(userName, password, folder, siteName);
-        Assert.assertTrue(contentAction.addMultipleTags(userName, password, siteName, folder, tags));            
+        Assert.assertTrue(contentAction.addMultipleTags(userName, password, siteName, folder, tags));
         List<String> returnTags = contentAction.getTagNamesFromContent(userName, password, siteName, folder);
         Assert.assertEquals(returnTags.get(0), tag1);
         Assert.assertEquals(returnTags.get(1), tag2);
-        Assert.assertEquals(returnTags.get(2), tag3);     
+        Assert.assertEquals(returnTags.get(2), tag3);
     }
     
     @Test
@@ -224,7 +229,7 @@ public class ContentActionsTests extends AbstractTest
                     password,
                     "mydomain",
                     siteName, 
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
@@ -244,12 +249,12 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
-        Assert.assertTrue(contentAction.addSingleTag(userName, password, siteName, tagDoc, tag1));     
+        Assert.assertTrue(contentAction.addSingleTag(userName, password, siteName, tagDoc, tag1));
         contentAction.removeTag(userName, password, siteName, tagDoc, "faketag");
     }
     
@@ -263,8 +268,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
@@ -282,8 +287,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
@@ -320,8 +325,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createFolder(userName, password, folder, siteName);
         Assert.assertTrue(contentAction.addComment(userName, password, siteName, folder, commentFolder));
@@ -339,8 +344,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         contentAction.addComment(userName, password, siteName, "fakeDoc", comment);
     }
@@ -355,8 +360,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
         contentAction.addComment(userName, password, "fakeSite", commentDoc, comment);
@@ -367,7 +372,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
-        String folder = "commentFolder";     
+        String folder = "commentFolder";
        contentAction.addComment(userName, password, siteName, folder, "");
     }
     
@@ -382,7 +387,7 @@ public class ContentActionsTests extends AbstractTest
                     password,
                     "mydomain",
                     siteName, 
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
         Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, comment));
@@ -400,7 +405,7 @@ public class ContentActionsTests extends AbstractTest
         String userName = "commentUser" + System.currentTimeMillis();
         String comment1 = "comment1";
         String comment2 = "comment2";
-        String comment3 = "comment3";     
+        String comment3 = "comment3";
         userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,
@@ -413,7 +418,7 @@ public class ContentActionsTests extends AbstractTest
         comments.add(comment2);
         comments.add(comment3);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
-        Assert.assertTrue(contentAction.addMultipleComments(userName, password, siteName, commentDoc, comments));            
+        Assert.assertTrue(contentAction.addMultipleComments(userName, password, siteName, commentDoc, comments));
         List<String> returnComments = contentAction.getComments(userName, password, siteName, commentDoc);
         Assert.assertEquals(returnComments.get(0), comment3);
         Assert.assertEquals(returnComments.get(1), comment2);
@@ -432,8 +437,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, likeDoc, likeDoc);
         Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, userToInvite, siteName, "SiteConsumer"));
@@ -452,8 +457,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         contentAction.likeContent(userName, password, siteName, "fakeDoc");
     }
@@ -468,7 +473,7 @@ public class ContentActionsTests extends AbstractTest
                     password,
                     "mydomain",
                     siteName, 
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
         String likeDoc = "likeDoc";
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, likeDoc, likeDoc);
@@ -488,15 +493,15 @@ public class ContentActionsTests extends AbstractTest
                     password,
                     "mydomain",
                     siteName, 
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, likeDoc, likeDoc);
         Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, userToInvite, siteName, "SiteConsumer"));
         Assert.assertTrue(contentAction.likeContent(userName, password, siteName, likeDoc));
-        Assert.assertTrue(contentAction.likeContent(userToInvite, password, siteName, likeDoc));      
-        Assert.assertTrue(contentAction.removeLike(userName, password, siteName, likeDoc));      
+        Assert.assertTrue(contentAction.likeContent(userToInvite, password, siteName, likeDoc));
+        Assert.assertTrue(contentAction.removeLike(userName, password, siteName, likeDoc));
         Assert.assertEquals(contentAction.countLikes(userName, password, siteName, likeDoc), 1);
-        Assert.assertTrue(contentAction.removeLike(userToInvite, password, siteName, likeDoc));      
+        Assert.assertTrue(contentAction.removeLike(userToInvite, password, siteName, likeDoc));
         Assert.assertEquals(contentAction.countLikes(userName, password, siteName, likeDoc), 0);
     }
     
@@ -525,7 +530,7 @@ public class ContentActionsTests extends AbstractTest
                     password,
                     "mydomain",
                     siteName, 
-                    "my site description", 
+                    "my site description",
                     Visibility.PUBLIC);
         content.createFolder(userName, password, folder, siteName);
         Assert.assertTrue(contentAction.likeContent(userName, password, siteName, folder));
@@ -544,16 +549,16 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createFolder(userName, password, folder, siteName);
         Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, userToInvite, siteName, "SiteConsumer"));
         Assert.assertTrue(contentAction.likeContent(userName, password, siteName, folder));
-        Assert.assertTrue(contentAction.likeContent(userToInvite, password, siteName, folder));      
-        Assert.assertTrue(contentAction.removeLike(userName, password, siteName, folder));      
+        Assert.assertTrue(contentAction.likeContent(userToInvite, password, siteName, folder));
+        Assert.assertTrue(contentAction.removeLike(userName, password, siteName, folder));
         Assert.assertEquals(contentAction.countLikes(userName, password, siteName, folder), 1);
-        Assert.assertTrue(contentAction.removeLike(userToInvite, password, siteName, folder));      
+        Assert.assertTrue(contentAction.removeLike(userToInvite, password, siteName, folder));
         Assert.assertEquals(contentAction.countLikes(userName, password, siteName, folder), 0);
     }
     
@@ -567,8 +572,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, favDoc, favDoc);
         Assert.assertTrue(contentAction.setFileAsFavorite(userName, password, siteName, favDoc));
@@ -584,8 +589,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createFolder(userName, password, folder, siteName);
         Assert.assertTrue(contentAction.setFolderAsFavorite(userName, password, siteName, folder));
@@ -601,8 +606,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                    Visibility.PUBLIC);
         contentAction.setFileAsFavorite(userName, password, siteName, "fakeDoc");
     }
@@ -616,8 +621,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                    Visibility.PUBLIC);
         contentAction.setFolderAsFavorite(userName, password, siteName, "fakeFolder");
     }
@@ -640,8 +645,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, favDoc, favDoc);
         Assert.assertTrue(contentAction.setFileAsFavorite(userName, password, siteName, favDoc));
@@ -658,8 +663,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, favDoc, favDoc);
         Assert.assertTrue(contentAction.setFileAsFavorite(userName, password, siteName, favDoc));
@@ -744,8 +749,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docName);
         contentAction.checkOut(userName, password, siteName, docName);
@@ -762,8 +767,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(userName,
                     password,
                     "mydomain",
-                    siteName, 
-                    "my site description", 
+                    siteName,
+                    "my site description",
                     Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, docName, docName);
         ObjectId id = contentAction.checkIn(userName, password, siteName, docName, DocumentType.TEXT_PLAIN, "new content", true, "comment");
@@ -771,5 +776,66 @@ public class ContentActionsTests extends AbstractTest
         contentAction.checkIn(userName, password, siteName, docName, DocumentType.TEXT_PLAIN, "third edit", false, "third comment");
         String version = contentAction.getVersion(userName, password, siteName, docName);
         Assert.assertEquals(version, "2.1");
+        Assert.assertTrue(content.getDocumentContent(userName, password, siteName, docName).equals("third edit"));
+    }
+    
+    @Test
+    public void folderCopyTo() throws Exception
+    {
+        String siteName = "copyToSite" + System.currentTimeMillis();
+        String userName = "copytoUser" + System.currentTimeMillis();
+        String copyDoc = "copyFile" + System.currentTimeMillis();
+        String targetFolder = "targeFolder";
+        String sourceFolder = "sourceFolder";
+        String subFolder = "subFolder";
+        userService.create(admin, admin, userName, password, password,"firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description",
+                    Visibility.PUBLIC);
+        content.createFolder(userName, password, targetFolder, siteName);
+        Folder f1 = content.createFolder(userName, password, sourceFolder, siteName);
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+        properties.put(PropertyIds.NAME, subFolder);
+        f1.createFolder(properties);
+        content.createDocumentInFolder(userName, password, siteName, sourceFolder, DocumentType.TEXT_PLAIN, copyDoc, copyDoc);
+        content.createDocumentInFolder(userName, password, siteName, subFolder, DocumentType.TEXT_PLAIN, copyDoc + "R1", copyDoc + "R1");
+        Folder objectCopied = (Folder) contentAction.copyTo(userName, password, siteName, sourceFolder, siteName, targetFolder);
+        Assert.assertTrue(objectCopied.getFolderParent().getName().equals(targetFolder));
+    }
+    
+    @Test
+    public void copyFileAnotherSite() throws Exception
+    {
+        String siteName1 = "sourceSite" + System.currentTimeMillis();
+        String siteName2 = "targetSite" + System.currentTimeMillis();
+        String fileToCopy = "fileToCopy";
+        site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
+        site.create(ADMIN, ADMIN, "mydomain", siteName2,  "my site description", Visibility.PUBLIC);
+        content.createDocument(ADMIN, ADMIN, siteName1, DocumentType.MSWORD, fileToCopy, fileToCopy);
+        contentAction.copyTo(ADMIN, ADMIN, siteName1, fileToCopy, siteName2, null);
+        String nodeRef = content.getNodeRef(ADMIN, ADMIN, siteName2, fileToCopy);
+        Assert.assertNotNull(nodeRef);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void copyFileNonExistentTarget() throws Exception
+    {
+        String siteName1 = "sourceSite" + System.currentTimeMillis();
+        String fileToCopy = "fileToCopy";
+        site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
+        content.createDocument(ADMIN, ADMIN, siteName1, DocumentType.MSWORD, fileToCopy, fileToCopy);
+        contentAction.copyTo(ADMIN, ADMIN, siteName1, fileToCopy, "fakeSite", null);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void copyFileNonExistentSource() throws Exception
+    {
+        String siteName1 = "sourceSite" + System.currentTimeMillis();
+        site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
+        contentAction.copyTo(ADMIN, ADMIN, siteName1, "fakeFile", siteName1, null);
     }
 }

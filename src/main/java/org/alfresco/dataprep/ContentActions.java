@@ -17,13 +17,21 @@ package org.alfresco.dataprep;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
+import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.client.api.Tree;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisVersioningException;
 import org.apache.commons.lang3.StringUtils;
@@ -812,6 +820,7 @@ public class ContentActions extends CMISUtil
     /**
      * Checks out the document and returns the object id of the PWC (private
      * working copy).
+     * 
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -840,6 +849,7 @@ public class ContentActions extends CMISUtil
     /**
      * If this is a PWC (private working copy) the check out will be reversed.
      * If this is not a PWC it an exception will be thrown.
+     * 
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -864,7 +874,9 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Check in document.If this is not a PWC(private working copy) it an exception will be thrown.
+     * Check in document. If this is not a PWC(private working copy) check out for the 
+     * file will be made.
+     * 
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -906,7 +918,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Get the version for a file
+     * Get the version of a file
      * 
      * @param userName login username
      * @param password login password
@@ -922,5 +934,99 @@ public class ContentActions extends CMISUtil
     {
         Session session = getCMISSession(userName, password);
         return getDocumentObject(session, siteId, fileName).getVersionLabel();
+    }
+    /**
+     * Copy file or folder
+     * 
+     * @param userName user name
+     * @param password password
+     * @param siteName source site
+     * @param contentName content to be copied
+     * @param targetSite tartget site
+     * @param targetFolder target folder. If null document library is set
+     * @return CmisObject of new created object
+     * @throws Exception
+     */
+    public CmisObject copyTo(final String userName,
+                             final String password,
+                             final String sourceSite,
+                             final String contentName,
+                             final String targetSite,
+                             final String targetFolder) throws Exception
+    {
+        CmisObject objTarget = null;
+        CmisObject copiedContent = null;
+        Session session = getCMISSession(userName, password);
+        CmisObject objFrom = getCmisObject(session, sourceSite, contentName);
+        try
+        {
+            if(!StringUtils.isEmpty(targetFolder))
+            {
+                objTarget = getCmisObject(session, targetSite, targetFolder);
+            }
+            else
+            {
+                objTarget = session.getObjectByPath("/Sites/" + targetSite + "/documentLibrary");
+            }
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Target doesnt exists: " + targetSite + " or " + targetFolder, nf);
+        }
+        
+        if(objFrom instanceof Document)
+        {
+            Document d = (Document)objFrom;
+            copiedContent = d.copy(objTarget);
+        }
+        else if(objFrom instanceof Folder)
+        {
+            Folder fFrom = (Folder)objFrom;
+            Folder toFolder = (Folder)objTarget;
+            copiedContent = copyFolder(fFrom, toFolder);
+        }
+        return copiedContent;
+    }
+    
+    /**
+     * Copy folder with all childs 
+     * 
+     * @param toCopyFolder source folder
+     * @param targetFolder target folder
+     * @return CmisObject of new created folder
+     */
+    private CmisObject copyFolder(Folder sourceFolder,
+                                  Folder targetFolder)
+    {
+        Map<String, Object> folderProperties = new HashMap<String, Object>(2);
+        folderProperties.put(PropertyIds.NAME, sourceFolder.getName());
+        folderProperties.put(PropertyIds.OBJECT_TYPE_ID, sourceFolder.getBaseTypeId().value());
+        Folder newFolder = targetFolder.createFolder(folderProperties);
+        copyChildrenFromFolder(sourceFolder, newFolder);
+        return newFolder;
+    }
+    
+    /**
+     * Copy all the childs of the source folder to the target folder
+     * 
+     * @param sourceFolder
+     * @param targetFolder
+     */
+    private void copyChildrenFromFolder(Folder sourceFolder,
+                                        Folder targetFolder)
+    {
+        for (Tree<FileableCmisObject> t : sourceFolder.getDescendants(-1))
+        {
+            CmisObject obj = t.getItem();
+            if (obj instanceof Document)
+            {
+                Document d = (Document)obj;
+                d.copy(targetFolder);
+            } 
+            else if (obj instanceof Folder)
+            {
+               copyFolder( (Folder) obj, targetFolder);
+            }
+        }
     }
 }
