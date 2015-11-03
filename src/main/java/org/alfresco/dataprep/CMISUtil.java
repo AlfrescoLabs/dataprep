@@ -591,6 +591,10 @@ public class CMISUtil
         {
             d = (Document)docObj;
         }
+        else if(docObj instanceof Folder)
+        {
+            throw new CmisRuntimeException("Content " + fileName + " is not a document");
+        }
         return d;
     }
     
@@ -612,6 +616,10 @@ public class CMISUtil
         if(folderObj instanceof Folder)
         {
             f = (Folder)folderObj;
+        }
+        else if(folderObj instanceof Document)
+        {
+            throw new CmisRuntimeException("Content " + folderName + " is not a folder");
         }
         return f;
     }
