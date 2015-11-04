@@ -1290,14 +1290,14 @@ public class UserService
      * @return List<String> list of followers
      * @throws Exception
      */
-    private List<String> getFallowUsers(final String userName,
+    private List<String> getFollowUsers(final String userName,
                                         final String password,
-                                        final boolean fallowers) throws Exception
+                                        final boolean followers) throws Exception
     {
         String reqURL;
-        List<String> followers = new ArrayList<String>();
+        List<String> userFollowers = new ArrayList<String>();
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        if(fallowers)
+        if(followers)
         {
             reqURL = client.getApiUrl() + "subscriptions/" + userName + "/followers";
         }
@@ -1312,9 +1312,9 @@ public class UserService
             HttpResponse response = clientWithAuth.execute(get);
             if(200 == response.getStatusLine().getStatusCode())
             {
-                followers = client.getElementsFromJsonArray(response, "people", "userName");
+                userFollowers = client.getElementsFromJsonArray(response, "people", "userName");
             }
-            return followers;
+            return userFollowers;
         } 
         finally
         {
@@ -1334,7 +1334,7 @@ public class UserService
     public List<String> getFollowers(final String userName,
                                      final String password) throws Exception
     {
-        return getFallowUsers(userName, password, true);
+        return getFollowUsers(userName, password, true);
     }
     
     /**
@@ -1348,6 +1348,6 @@ public class UserService
     public List<String> getFollowingUsers(final String userName,
                                           final String password) throws Exception
     {
-        return getFallowUsers(userName, password, false);
+        return getFollowUsers(userName, password, false);
     }
 }
