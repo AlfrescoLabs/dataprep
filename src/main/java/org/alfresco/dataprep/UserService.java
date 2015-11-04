@@ -1312,7 +1312,7 @@ public class UserService
             HttpResponse response = clientWithAuth.execute(get);
             if(200 == response.getStatusLine().getStatusCode())
             {
-                followers = client.getElementsFromJsonArray(response, "people", userName);
+                followers = client.getElementsFromJsonArray(response, "people", "userName");
             }
             return followers;
         } 
