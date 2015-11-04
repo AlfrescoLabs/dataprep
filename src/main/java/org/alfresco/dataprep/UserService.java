@@ -1168,12 +1168,12 @@ public class UserService
             {
                 logger.error("Unable to add dashlet to user dashboard " + userName);
             }
-            }
-            finally
-            {
-                post.releaseConnection();
-                client.close();
-            }
+        }
+        finally
+        {
+            post.releaseConnection();
+            client.close();
+        }
         return false;
     }
     

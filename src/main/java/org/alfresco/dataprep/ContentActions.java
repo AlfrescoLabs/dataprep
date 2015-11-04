@@ -779,7 +779,7 @@ public class ContentActions extends CMISUtil
 
     /**
      * Verify if a document or folder is marked as favorite
-     * 
+     *
      * @param userName login username
      * @param password login password
      * @param siteName site name
@@ -820,7 +820,7 @@ public class ContentActions extends CMISUtil
     /**
      * Checks out the document and returns the object id of the PWC (private
      * working copy).
-     * 
+     *
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -849,7 +849,7 @@ public class ContentActions extends CMISUtil
     /**
      * If this is a PWC (private working copy) the check out will be reversed.
      * If this is not a PWC it an exception will be thrown.
-     * 
+     *
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -876,7 +876,7 @@ public class ContentActions extends CMISUtil
     /**
      * Check in document. If this is not a PWC(private working copy) check out for the 
      * file will be made.
-     * 
+     *
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -919,7 +919,7 @@ public class ContentActions extends CMISUtil
     
     /**
      * Get the version of a file
-     * 
+     *
      * @param userName login username
      * @param password login password
      * @param siteId site name
@@ -935,9 +935,10 @@ public class ContentActions extends CMISUtil
         Session session = getCMISSession(userName, password);
         return getDocumentObject(session, siteId, fileName).getVersionLabel();
     }
+    
     /**
      * Copy file or folder
-     * 
+     *
      * @param userName user name
      * @param password password
      * @param siteName source site
@@ -1028,5 +1029,60 @@ public class ContentActions extends CMISUtil
                copyFolder( (Folder) obj, targetFolder);
             }
         }
+    }
+    
+    /**
+     * Move file or folder
+     * 
+     * @param userName user name
+     * @param password password
+     * @param siteName source site
+     * @param contentName content to be copied
+     * @param targetSite tartget site
+     * @param targetFolder target folder. If null document library is set
+     * @return CmisObject of new created object
+     * @throws Exception
+     */
+    public CmisObject moveTo(final String userName,
+                             final String password,
+                             final String sourceSite,
+                             final String contentName,
+                             final String targetSite,
+                             final String targetFolder) throws Exception
+    {
+        CmisObject objTarget = null;
+        CmisObject movedContent = null;
+        Session session = getCMISSession(userName, password);
+        CmisObject objFrom = getCmisObject(session, sourceSite, contentName);
+        try
+        {
+            if(!StringUtils.isEmpty(targetFolder))
+            {
+                objTarget = getCmisObject(session, targetSite, targetFolder);
+            }
+            else
+            {
+                objTarget = session.getObjectByPath("/Sites/" + targetSite + "/documentLibrary");
+            }
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Target doesnt exists: " + targetSite + " or " + targetFolder, nf);
+        }
+        if(objFrom instanceof Document)
+        {
+            Document d = (Document)objFrom;
+            List<Folder> parents = d.getParents();
+            CmisObject parent = session.getObject(parents.get(0).getId());
+            movedContent = d.move(parent, objTarget);
+        }
+        else if(objFrom instanceof Folder)
+        {
+            Folder f = (Folder)objFrom;
+            List<Folder> parents = f.getParents();
+            CmisObject parent = session.getObject(parents.get(0).getId());
+            movedContent = f.move(parent, objTarget);
+        }
+        return movedContent;
     }
 }

@@ -275,17 +275,17 @@ public class CMISUtil
     public String getNodeRefFromRepo(final String userName,
                                      final String password,
                                      final String contentName,
-                                     String path) throws Exception
+                                     String pathToContent) throws Exception
     {
         String nodeRef = "";
         Session session = getCMISSession(userName, password);
-        if(path == null)
+        if(pathToContent == null)
         {
-            path = "";
+            pathToContent = "";
         }
         try
         {
-            CmisObject repo = session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
+            CmisObject repo = session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathToContent);
             Folder folder = (Folder) repo;
             ItemIterable<CmisObject> children = folder.getChildren();
             ItemIterable<CmisObject> page = children.getPage();
@@ -302,7 +302,7 @@ public class CMISUtil
         }
         catch(CmisObjectNotFoundException nf)
         {
-            throw new CmisRuntimeException("Invalid path -> " + path, nf);
+            return nodeRef;
         }  
         return nodeRef;
     }

@@ -817,8 +817,8 @@ public class ContentActionsTests extends AbstractTest
         site.create(ADMIN, ADMIN, "mydomain", siteName2,  "my site description", Visibility.PUBLIC);
         content.createDocument(ADMIN, ADMIN, siteName1, DocumentType.MSWORD, fileToCopy, fileToCopy);
         contentAction.copyTo(ADMIN, ADMIN, siteName1, fileToCopy, siteName2, null);
-        String nodeRef = content.getNodeRef(ADMIN, ADMIN, siteName2, fileToCopy);
-        Assert.assertNotNull(nodeRef);
+        Assert.assertNotNull(content.getNodeRef(ADMIN, ADMIN, siteName2, fileToCopy));
+        Assert.assertNotNull(content.getNodeRef(ADMIN, ADMIN, siteName1, fileToCopy));
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
@@ -837,5 +837,69 @@ public class ContentActionsTests extends AbstractTest
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
         contentAction.copyTo(ADMIN, ADMIN, siteName1, "fakeFile", siteName1, null);
+    }
+    
+    @Test
+    public void moveTo() throws Exception
+    {
+        String siteName = "moveToSite" + System.currentTimeMillis();
+        String userName = "moveUser" + System.currentTimeMillis();
+        String copyDoc = "moveFile" + System.currentTimeMillis();
+        String targetFolder = "targeFolder";
+        String sourceFolder = "sourceFolder";
+        String subFolder = "subFolder";
+        userService.create(admin, admin, userName, password, userName,"firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName,
+                    "my site description",
+                    Visibility.PUBLIC);
+        content.createFolder(userName, password, targetFolder, siteName);
+        Folder f1 = content.createFolder(userName, password, sourceFolder, siteName);
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+        properties.put(PropertyIds.NAME, subFolder);
+        f1.createFolder(properties);
+        content.createDocumentInFolder(userName, password, siteName, sourceFolder, DocumentType.TEXT_PLAIN, copyDoc, copyDoc);
+        content.createDocumentInFolder(userName, password, siteName, subFolder, DocumentType.TEXT_PLAIN, copyDoc + "R1", copyDoc + "R1");
+        Folder objectMoved = (Folder) contentAction.moveTo(userName, password, siteName, subFolder, siteName, targetFolder);
+        Assert.assertTrue(objectMoved.getFolderParent().getName().equals(targetFolder));
+        Assert.assertFalse(content.getNodeRefFromRepo(userName, password, copyDoc, 
+                "Sites/" + siteName + "/documentLibrary/" + sourceFolder).isEmpty());
+        Assert.assertTrue(content.getNodeRefFromRepo(userName, password, subFolder, 
+                "Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + subFolder).isEmpty());
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void moveFileNonExistentTarget() throws Exception
+    {
+        String siteName1 = "sourceSite" + System.currentTimeMillis();
+        String fileToMove = "fileToCopy";
+        site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
+        content.createDocument(ADMIN, ADMIN, siteName1, DocumentType.MSWORD, fileToMove, fileToMove);
+        contentAction.moveTo(ADMIN, ADMIN, siteName1, fileToMove, "fakeSite", null);
+    }
+    
+    @Test(expectedExceptions = CmisRuntimeException.class)
+    public void moveFileNonExistentSource() throws Exception
+    {
+        String siteName1 = "sourceSite" + System.currentTimeMillis();
+        site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
+        contentAction.copyTo(ADMIN, ADMIN, siteName1, "fakeFile", siteName1, null);
+    }
+    
+    @Test
+    public void moveFileAnotherSite() throws Exception
+    {
+        String siteName1 = "sourceSite" + System.currentTimeMillis();
+        String siteName2 = "targetSite" + System.currentTimeMillis();
+        String fileToCopy = "fileToMove";
+        site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
+        site.create(ADMIN, ADMIN, "mydomain", siteName2,  "my site description", Visibility.PUBLIC);
+        content.createDocument(ADMIN, ADMIN, siteName1, DocumentType.MSWORD, fileToCopy, fileToCopy);
+        contentAction.moveTo(ADMIN, ADMIN, siteName1, fileToCopy, siteName2, null);
+        Assert.assertNotNull(content.getNodeRef(ADMIN, ADMIN, siteName2, fileToCopy));
+        Assert.assertTrue(content.getNodeRef(ADMIN, ADMIN, siteName1, fileToCopy).isEmpty());
     }
 }
