@@ -190,12 +190,12 @@ public class SiteService
     public List<String> getSites(final String userName,
                                  final String password) throws Exception
     {
-        List<String> mySitesList = new ArrayList<String>() ;
+        List<String> mySitesList = new ArrayList<String>();
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String apiUrl = client.getApiUrl() + "people/" + userName + "/sites";
+        HttpGet get = new HttpGet(apiUrl);
         try
         {
-            String apiUrl = client.getApiUrl() + "people/" + userName + "/sites";
-            HttpGet get = new HttpGet(apiUrl);
             HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
             HttpResponse response = clientWithAuth.execute(get);
             if(200 == response.getStatusLine().getStatusCode())
@@ -214,6 +214,7 @@ public class SiteService
         } 
         finally
         {
+            get.releaseConnection();
             client.close();
         }
     }

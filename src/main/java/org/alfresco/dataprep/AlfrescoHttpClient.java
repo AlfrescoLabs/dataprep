@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
@@ -41,7 +43,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -337,11 +341,40 @@ public class AlfrescoHttpClient
      * @return String value of key
      * @throws ParseException if error parsing
      */
-    public String getParameterFromJSON(String result, String param) throws ParseException
+    public String getParameterFromJSON(String result, 
+                                       String param) throws ParseException
     {
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(result);
         return (String) obj.get(param);
+    }
+    
+    /**
+     * Get the elements from an JSONArray
+     * 
+     * @param response HttpResponse response
+     * @param array String the name of the array
+     * @param elementFromArray element from array
+     * @return List<String> elements found in the array
+     * @throws ParseException
+     * @throws IOException
+     */
+    public List<String> getElementsFromJsonArray(HttpResponse response,
+                                                 String array,
+                                                 String elementFromArray) throws ParseException, IOException
+    {
+        List<String>elements = new ArrayList<String>();
+        HttpEntity entity = response.getEntity();
+        String responseString = EntityUtils.toString(entity , "UTF-8"); 
+        Object obj = JSONValue.parse(responseString);
+        JSONObject jsonObject = (JSONObject) obj;
+        JSONArray jArray = (JSONArray) jsonObject.get(array);
+        for (Object item:jArray)
+        {
+            JSONObject jobject = (JSONObject) item;
+            elements.add(jobject.get(elementFromArray).toString());
+        }
+        return elements;
     }
     
     /**

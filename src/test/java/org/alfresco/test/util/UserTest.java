@@ -14,6 +14,8 @@
  */
 package org.alfresco.test.util;
 
+import java.util.List;
+
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.alfresco.dataprep.SiteService;
@@ -366,6 +368,7 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName));
         Assert.assertTrue(userService.addUserToGroup(admin, admin, groupName, userName2));
         Assert.assertEquals(userService.countAuthoritiesFromGroup(admin, admin, groupName), 2);
+        Assert.assertTrue(userService.isUserAddedToGroup(ADMIN, ADMIN, groupName, userName));
         Assert.assertTrue(userService.isUserAddedToGroup(ADMIN, ADMIN, groupName, userName2));
     }
     
@@ -686,5 +689,75 @@ public class UserTest extends AbstractTest
         site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
         Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
         Assert.assertFalse(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+    }
+    
+    @Test
+    public void followUser() throws Exception
+    {
+        String user = "user" + System.currentTimeMillis();
+        String userToFollow1 = "userFollow-1" + System.currentTimeMillis();
+        String userToFollow2 = "userFollow-2" + System.currentTimeMillis();
+        String userToFollow3 = "userFollow-3" + System.currentTimeMillis();
+        userService.create(admin, admin, user, password, user, firstName, lastName);
+        userService.create(admin, admin, userToFollow1, password, userToFollow1, firstName, lastName);
+        userService.create(admin, admin, userToFollow2, password, userToFollow2, firstName, lastName);
+        userService.create(admin, admin, userToFollow3, password, userToFollow3, firstName, lastName);
+        Assert.assertTrue(userService.followUser(user, password, userToFollow1));
+        Assert.assertTrue(userService.followUser(user, password, userToFollow2));
+        Assert.assertTrue(userService.followUser(user, password, userToFollow3));
+        List<String> following = userService.getFollowingUsers(user, password);
+        Assert.assertTrue(following.size()==3);
+        Assert.assertTrue(following.contains(userToFollow1));
+        Assert.assertTrue(following.contains(userToFollow2));
+        Assert.assertTrue(following.contains(userToFollow3));
+    }
+    
+    @Test
+    public void followInvalidUser() throws Exception
+    {
+        Assert.assertFalse(userService.followUser(ADMIN, ADMIN, "fakeUser"));
+    }
+    
+    @Test
+    public void getFollowers() throws Exception
+    {
+        String userToFollow = "user" + System.currentTimeMillis();
+        String user1 = "userFollow-1" + System.currentTimeMillis();
+        String user2 = "userFollow-2" + System.currentTimeMillis();
+        String user3 = "userFollow-3" + System.currentTimeMillis();
+        userService.create(admin, admin, userToFollow, password, userToFollow, firstName, lastName);
+        userService.create(admin, admin, user1, password, user1, firstName, lastName);
+        userService.create(admin, admin, user2, password, user2, firstName, lastName);
+        userService.create(admin, admin, user3, password, user3, firstName, lastName);
+        Assert.assertTrue(userService.followUser(user1, password, userToFollow));
+        Assert.assertTrue(userService.followUser(user2, password, userToFollow));
+        Assert.assertTrue(userService.followUser(user3, password, userToFollow));
+        List<String> followers = userService.getFollowers(userToFollow, password);
+        Assert.assertTrue(followers.size() == 3);
+        Assert.assertTrue(followers.contains(user1));
+        Assert.assertTrue(followers.contains(user2));
+        Assert.assertTrue(followers.contains(user3));
+    }
+    
+    @Test
+    public void unfollowUser() throws Exception
+    {
+        String user = "user" + System.currentTimeMillis();
+        String userToFollow1 = "userFollow-1" + System.currentTimeMillis();
+        String userToFollow2 = "userFollow-2" + System.currentTimeMillis();
+        String userToFollow3 = "userFollow-3" + System.currentTimeMillis();
+        userService.create(admin, admin, user, password, user, firstName, lastName);
+        userService.create(admin, admin, userToFollow1, password, userToFollow1, firstName, lastName);
+        userService.create(admin, admin, userToFollow2, password, userToFollow2, firstName, lastName);
+        userService.create(admin, admin, userToFollow3, password, userToFollow3, firstName, lastName);
+        Assert.assertTrue(userService.followUser(user, password, userToFollow1));
+        Assert.assertTrue(userService.followUser(user, password, userToFollow2));
+        Assert.assertTrue(userService.followUser(user, password, userToFollow3));
+        List<String> following = userService.getFollowingUsers(user, password);
+        Assert.assertTrue(following.size()== 3);
+        Assert.assertTrue(userService.unfollowUser(user, password, userToFollow1));
+        Assert.assertTrue(userService.unfollowUser(user, password, userToFollow2));
+        following = userService.getFollowingUsers(user, password);
+        Assert.assertTrue(following.size()== 1);
     }
 }

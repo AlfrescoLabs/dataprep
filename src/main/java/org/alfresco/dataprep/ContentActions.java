@@ -338,9 +338,9 @@ public class ContentActions extends CMISUtil
         List<String> values = new ArrayList<String>();
         if(!StringUtils.isEmpty(response))
         {
-            JSONParser parser = new JSONParser();  
+            JSONParser parser = new JSONParser();
             Object obj = parser.parse(response);
-            JSONObject jsonObject = (JSONObject) obj;  
+            JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("list");
             JSONArray jArray = (JSONArray) list.get("entries");
             Iterator<JSONObject> iterator = jArray.iterator();

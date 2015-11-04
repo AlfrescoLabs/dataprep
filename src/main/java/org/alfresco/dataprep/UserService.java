@@ -14,6 +14,7 @@
  */
 package org.alfresco.dataprep;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
@@ -986,7 +988,6 @@ public class UserService
      * @return boolean true if user is found
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     public boolean isUserAddedToGroup(final String adminUser,
                                       final String adminPass,
                                       final String groupName,
@@ -995,18 +996,11 @@ public class UserService
         HttpResponse response = getGroupDetails(adminUser, adminPass, groupName);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpEntity entity = response. getEntity();
-            String responseString = EntityUtils.toString(entity , "UTF-8");
-            JSONParser parser = new JSONParser();
-            JSONObject obj = (JSONObject) parser.parse(responseString);
-            JSONObject jsonObject = (JSONObject) obj;
-            JSONArray jArray = (JSONArray) jsonObject.get("data");
-            Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
-            while (iterator.hasNext()) 
+            AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+            List<String> users = client.getElementsFromJsonArray(response, "data", "shortName");
+            for(String user: users)
             {
-                JSONObject factObj = (JSONObject) iterator.next();
-                String foundUser = (String) factObj.get("shortName");
-                if(userName.toString().equalsIgnoreCase(foundUser))
+                if(userName.toString().equalsIgnoreCase(user))
                 {
                     return true;
                 }
@@ -1193,5 +1187,167 @@ public class UserService
         theClient.executeMethod(post);
         state = theClient.getState();
         return state;
+    }
+    
+    /**
+     * Follow or unfollow a user
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param userToFollow String user to be followed
+     * @return true if user is followed successfully
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    private boolean toFollowOrUnfollow(final String userName,
+                                       final String password,
+                                       final String userToFollowOrNot, 
+                                       final boolean follow) throws Exception
+    {
+        String url;
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(userToFollowOrNot))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        if(follow)
+        {
+            url = client.getApiUrl() + "subscriptions/" + userName + "/follow";
+        }
+        else
+        {
+            url = client.getApiUrl() + "subscriptions/" + userName + "/unfollow";
+        }
+        HttpPost request = new HttpPost(url);
+        JSONArray requestBody = new JSONArray();
+        requestBody.add(userToFollowOrNot);
+        request.setEntity(new StringEntity(requestBody.toString()));
+        HttpResponse response = client.executeRequest(client, userName, password, request);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_NO_CONTENT:
+                if (logger.isTraceEnabled())
+                {
+                    if(follow)
+                    {
+                        logger.trace("User " + userName + " is now following user " + userToFollowOrNot);
+                    }
+                    else
+                    {
+                        logger.trace("User " + userName + " is not following " + userToFollowOrNot);
+                    }
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("User " + userToFollowOrNot + " does not exist");
+                }
+            default:
+                logger.error("Unable to follow user: " + userToFollowOrNot + " - " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Follow a user
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param userToFollow String user to be followed
+     * @return true if user is followed successfully
+     * @throws Exception
+     */
+    public boolean followUser(final String userName,
+                              final String password,
+                              final String userToFollow) throws Exception
+    {
+        return toFollowOrUnfollow(userName, password, userToFollow, true);
+    }
+    
+    /**
+     * Unfollow a user
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param userToFollow String user to be followed
+     * @return true if user is followed successfully
+     * @throws Exception
+     */
+    public boolean unfollowUser(final String userName,
+                              final String password,
+                              final String userToFollow) throws Exception
+    {
+        return toFollowOrUnfollow(userName, password, userToFollow, false);
+    }
+    
+    /**
+     * Get a list of followers
+     * 
+     * @param userName
+     * @param password
+     * @return List<String> list of followers
+     * @throws Exception
+     */
+    private List<String> getFallowUsers(final String userName,
+                                        final String password,
+                                        final boolean fallowers) throws Exception
+    {
+        String reqURL;
+        List<String> followers = new ArrayList<String>();
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        if(fallowers)
+        {
+            reqURL = client.getApiUrl() + "subscriptions/" + userName + "/followers";
+        }
+        else
+        {
+            reqURL = client.getApiUrl() + "subscriptions/" + userName + "/following";
+        }
+        HttpGet get = new HttpGet(reqURL);
+        try
+        {
+            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+            HttpResponse response = clientWithAuth.execute(get);
+            if(200 == response.getStatusLine().getStatusCode())
+            {
+                followers = client.getElementsFromJsonArray(response, "people", userName);
+            }
+            return followers;
+        } 
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        }
+    }
+    
+    /**
+     * Get a list of followers
+     * 
+     * @param userName
+     * @param password
+     * @return List<String> list of followers
+     * @throws Exception
+     */
+    public List<String> getFollowers(final String userName,
+                                     final String password) throws Exception
+    {
+        return getFallowUsers(userName, password, true);
+    }
+    
+    /**
+     * Get a list of followers
+     * 
+     * @param userName
+     * @param password
+     * @return List<String> list of followers
+     * @throws Exception
+     */
+    public List<String> getFollowingUsers(final String userName,
+                                          final String password) throws Exception
+    {
+        return getFallowUsers(userName, password, false);
     }
 }
