@@ -865,7 +865,7 @@ public class ContentActionsTests extends AbstractTest
         content.createDocumentInFolder(userName, password, siteName, subFolder, DocumentType.TEXT_PLAIN, copyDoc + "R1", copyDoc + "R1");
         Folder objectMoved = (Folder) contentAction.moveTo(userName, password, siteName, subFolder, siteName, targetFolder);
         Assert.assertTrue(objectMoved.getFolderParent().getName().equals(targetFolder));
-        Assert.assertFalse(content.getNodeRefFromRepo(userName, password, copyDoc, 
+        Assert.assertFalse(content.getNodeRefFromRepo(userName, password, copyDoc,
                 "Sites/" + siteName + "/documentLibrary/" + sourceFolder).isEmpty());
         Assert.assertTrue(content.getNodeRefFromRepo(userName, password, subFolder, 
                 "Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + subFolder).isEmpty());
