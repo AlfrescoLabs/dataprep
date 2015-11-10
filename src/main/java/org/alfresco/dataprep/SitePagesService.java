@@ -17,10 +17,13 @@ package org.alfresco.dataprep;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.apache.commons.httpclient.HttpStatus;
@@ -415,7 +418,7 @@ public class SitePagesService
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
-        HttpPut put = new HttpPut(url);    
+        HttpPut put = new HttpPut(url);
         JSONObject body = new JSONObject();
         body.put("page", "wiki-page");
         body.put("pageTitle", wikiTitle);
@@ -575,7 +578,15 @@ public class SitePagesService
                               final String blogTitle,
                               final boolean draft) throws Exception
     {
-        return getName(userName, password, siteName, blogTitle, draft, Page.BLOG);
+        Map<String, String> ids = getIds(userName, password, siteName, blogTitle, draft, Page.BLOG);
+        if(!ids.isEmpty())
+        {
+            return ids.get("name");
+        }
+        else
+        {
+            return "";
+        }
     }
 
     /**
@@ -714,7 +725,15 @@ public class SitePagesService
                               final String siteName,
                               final String linkTitle) throws Exception
     {
-        return getName(userName, password, siteName, linkTitle, false, Page.LINKS);
+        Map<String, String> ids = getIds(userName, password, siteName, linkTitle, false, Page.LINKS);
+        if(!ids.isEmpty())
+        {
+            return ids.get("name");
+        }
+        else
+        {
+            return "";
+        }
     }
     
     /**
@@ -750,19 +769,19 @@ public class SitePagesService
      * @param siteName String site name
      * @param title String blog title
      * @param draftBlog boolean is blog draft
-     * @return String name (id)
+     * @return Map<String, String> name, nodeRef and replyUrl
      * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
-    private String getName(final String userName,
-                           final String password,
-                           final String siteName,
-                           final String title,
-                           boolean draftBlog,
-                           final Page page) throws Exception
+    private Map<String, String> getIds(final String userName,
+                                       final String password,
+                                       final String siteName,
+                                       final String title,
+                                       boolean draftBlog,
+                                       final Page page) throws Exception
     {
-        String name = "";
         String url = "";
+        Map<String, String> ids = new HashMap<String, String>();
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         switch(page)
         {
@@ -799,16 +818,22 @@ public class SitePagesService
                     JSONObject jsonObject = (JSONObject) obj;
                     JSONArray jArray = (JSONArray) jsonObject.get("items");
                     Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
-                    while (iterator.hasNext())
+                    while (iterator.hasNext() && jArray.size() > 0)
                     {
                         JSONObject factObj = (JSONObject) iterator.next();
                         String theTitle = (String) factObj.get("title");
                         if(title.toString().equalsIgnoreCase(theTitle))
                         {
-                            return (String) factObj.get("name");
+                            ids.put("name", (String) factObj.get("name"));
+                            ids.put("nodeRef", (String) factObj.get("nodeRef"));
+                            if(page.pageId.equals("discussions-topiclist"))
+                            {
+                                ids.put("repliesUrl", (String) factObj.get("repliesUrl"));
+                            }
+                            return ids;
                         }
                     }
-                    return "";
+                    return ids;
                 case HttpStatus.SC_NOT_FOUND:
                     throw new RuntimeException("Invalid site " + siteName);
                 case HttpStatus.SC_UNAUTHORIZED:
@@ -823,7 +848,7 @@ public class SitePagesService
             get.releaseConnection();
             client.close();
         }
-        return name;
+        return ids;
     }
 
     /**
@@ -929,7 +954,15 @@ public class SitePagesService
                                     final String siteName,
                                     final String discussionTitle) throws Exception
     {
-        return getName(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
+        Map<String, String> ids = getIds(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
+        if(!ids.isEmpty())
+        {
+            return ids.get("name");
+        }
+        else
+        {
+            return "";
+        }
     }
 
     /**
@@ -988,5 +1021,76 @@ public class SitePagesService
                 break;
         }
         return false;
+    }
+    /**
+     * Add reply to topic
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String topic title
+     * @param reply String reply to topic
+     * @return true if reply is added successfully
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    public boolean replyToDiscussion(final String userName,
+                                     final String password,
+                                     final String siteName,
+                                     final String discussionTitle,
+                                     final String reply) throws Exception
+    {
+        String replyUrl;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        Map<String, String> id =  getIds(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
+        if(!id.isEmpty())
+        {
+            replyUrl = id.get("repliesUrl").replaceFirst("/", "");
+        }
+        else
+        {
+            throw new RuntimeException("Topic doesn't exists " + discussionTitle);
+        }
+        String url = client.getApiUrl() + replyUrl;
+        HttpPost post = new HttpPost(url);
+        JSONObject body = new JSONObject();
+        body.put("site", siteName);
+        body.put("container", "discussions");
+        body.put("page", "discussions-topicview");
+        body.put("content", reply);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Discussion reply is created successfuly");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            default:
+                logger.error("Unable to create reply: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    public List<String> getDiscussionReplies(final String userName,
+                                             final String password,
+                                             final String siteName,
+                                             final String discussionTitle) throws Exception
+    {
+        List<String> replies = new ArrayList<String>();
+        String discussionName = getDiscussionName(userName, password, siteName, discussionTitle);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "/replies";
+        HttpGet get = new HttpGet(url);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        HttpResponse response = clientWithAuth.execute(get);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            replies = client.getElementsFromJsonArray(response, "items", "content");
+        }
+        return replies;
     }
 }

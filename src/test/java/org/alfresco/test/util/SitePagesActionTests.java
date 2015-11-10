@@ -384,15 +384,35 @@ public class SitePagesActionTests extends AbstractTest
         String siteId = "topic-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         String topicTitle = "topic-" + System.currentTimeMillis();
+        String topic2 = "second topic";
         userService.create(admin, admin, userName, userName, userName, userName, userName);
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
-        List<String>tags = new ArrayList<String>();
-        tags.add("tag1");
-        tags.add("tag2");
-        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, tags));
+        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
+        pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "firstReplay");
         Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
         Assert.assertTrue(pageService.deleteDiscussion(userName, userName, siteId, topicTitle));
         Assert.assertFalse(pageService.discussionExists(userName, userName, siteId, topicTitle));
+        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topic2, topic2, null));
+        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topic2));
+        Assert.assertTrue(pageService.deleteDiscussion(userName, userName, siteId, topic2));
+        Assert.assertFalse(pageService.discussionExists(userName, userName, siteId, topic2));
+    }
+    
+    @Test
+    public void replyToTopic() throws Exception
+    {
+        String siteId = "topic-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String topicTitle = "topic-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
+        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
+        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "firstReplay"));
+        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "secondReply"));
+        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "thirdReply"));
+        List<String> replies = pageService.getDiscussionReplies(userName, userName, siteId, topicTitle);
+        Assert.assertTrue(replies.contains("firstReplay") && replies.contains("secondReply") && replies.contains("thirdReply"));
     }
 }
