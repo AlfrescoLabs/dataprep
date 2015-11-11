@@ -409,10 +409,134 @@ public class SitePagesActionTests extends AbstractTest
         site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
         Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
-        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "firstReplay"));
+        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "firstReply"));
         Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "secondReply"));
         Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "thirdReply"));
         List<String> replies = pageService.getDiscussionReplies(userName, userName, siteId, topicTitle);
-        Assert.assertTrue(replies.contains("firstReplay") && replies.contains("secondReply") && replies.contains("thirdReply"));
+        Assert.assertTrue(replies.contains("firstReply") && replies.contains("secondReply") && replies.contains("thirdReply"));
+    }
+    
+    @Test
+    public void commentBlog() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment1"));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment2"));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment3"));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment4"));
+        List<String> comments = pageService.getBlogComments(userName, userName, siteId, draftBlog);
+        Assert.assertTrue(comments.contains("comment1") && comments.contains("comment2") 
+                && comments.contains("comment3") && comments.contains("comment4"));
+        Assert.assertNotNull(pageService.getCommentNodeRef(userName, userName, siteId, Page.BLOG, draftBlog, "comment1"));
+    }
+    
+    @Test
+    public void commentLink() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String linkTitle = "link-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, null));
+        Assert.assertTrue(pageService.linkExists(userName, userName, siteId, linkTitle));
+        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 1"));
+        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 2"));
+        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 3"));
+        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 4"));
+        List<String> comments = pageService.getLinkComments(userName, userName, siteId, linkTitle);
+        Assert.assertTrue(comments.contains("link comment 1") && comments.contains("link comment 2") 
+                && comments.contains("link comment 3") && comments.contains("link comment 4"));
+        Assert.assertTrue(pageService.deleteLinkComment(userName, userName, siteId, linkTitle, "link comment 1"));
+        Assert.assertTrue(pageService.getCommentNodeRef(userName, userName, siteId, Page.LINKS, linkTitle, "link comment 1").isEmpty());
+        comments = pageService.getLinkComments(userName, userName, siteId, linkTitle);
+        Assert.assertFalse(comments.contains("link comment 1"));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void commentNonExistentBlog() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        pageService.commentBlog(userName, userName, siteId, "fakeBlog", true, "comment1");
+        pageService.commentBlog(userName, userName, siteId, "fakeBlog", true, "comment1");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void commentLinkNonExistentSite() throws Exception
+    {
+        String siteId = "link-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String linkTitle = "link-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
+        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, null));
+        pageService.commentLink(userName, userName, "fakeSite", linkTitle, "link comment 1");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void getCommentsFakeBlog() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        pageService.getBlogComments(userName, userName, siteId, draftBlog);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void getCommentsBlogsFakeSite() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        pageService.getBlogComments(userName, userName, "fakeSite", draftBlog);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void getTopicDiscussionFakeSite() throws Exception
+    {
+        String siteId = "topic-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String topicTitle = "topic-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
+        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
+        pageService.getDiscussionReplies(userName, userName, "fakeSite", topicTitle);
+    }
+    
+    @Test
+    public void deleteCommentBlog() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName, userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment1"));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment2"));
+        Assert.assertNotNull(pageService.getCommentNodeRef(userName, userName, siteId, Page.BLOG, draftBlog, "comment1"));
+        Assert.assertTrue(pageService.deleteBlogComment(userName, userName, siteId, draftBlog, "comment1"));
+        List<String> comments = pageService.getBlogComments(userName, userName, siteId, draftBlog);
+        Assert.assertTrue(comments.contains("comment2"));
+        Assert.assertFalse(comments.contains("comment1"));
     }
 }

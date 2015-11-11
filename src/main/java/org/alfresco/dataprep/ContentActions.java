@@ -76,7 +76,7 @@ public class ContentActions extends CMISUtil
     private static Log logger = LogFactory.getLog(ContentActions.class);
 
     /**
-     * Create single tag and comment for document or folder
+     * Create single tag or comment for document or folder
      * 
      * @param userName login username
      * @param password login password

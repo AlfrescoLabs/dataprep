@@ -14,6 +14,7 @@
  */
 package org.alfresco.dataprep;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,7 +60,6 @@ public class SitePagesService
     
     /**
      * Add calendar event
-     * 
      * @param userName String user name
      * @param password String user password
      * @param siteName String site name
@@ -204,7 +204,6 @@ public class SitePagesService
 
     /**
      * Get the name (ID) of the event
-     * 
      * @param userName String user name
      * @param password String user password
      * @param siteName String site name
@@ -304,7 +303,6 @@ public class SitePagesService
 
     /**
      * Remove an event
-     * 
      * @param userName String user name
      * @param password String user password
      * @param siteName String site name
@@ -358,7 +356,6 @@ public class SitePagesService
 
     /**
      * Convert time to 24 hour format
-     * 
      * @param time String time
      * @throws ParseException if error
      * @return String converted hour
@@ -389,7 +386,6 @@ public class SitePagesService
 
     /**
      * Create a new wiki page
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -444,7 +440,6 @@ public class SitePagesService
 
     /**
      * Verify if wiki exists
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -474,7 +469,6 @@ public class SitePagesService
 
     /**
      * Delete wiki page
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -510,7 +504,6 @@ public class SitePagesService
 
     /**
      * Create a new blog post
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -563,7 +556,6 @@ public class SitePagesService
     
     /**
      * Get the name (id) of a blog post
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -578,7 +570,7 @@ public class SitePagesService
                               final String blogTitle,
                               final boolean draft) throws Exception
     {
-        Map<String, String> ids = getIds(userName, password, siteName, blogTitle, draft, Page.BLOG);
+        Map<String, String> ids = getIds(userName, password, siteName, blogTitle, Page.BLOG);
         if(!ids.isEmpty())
         {
             return ids.get("name");
@@ -591,7 +583,6 @@ public class SitePagesService
 
     /**
      * Verify if blog post exists
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -618,7 +609,6 @@ public class SitePagesService
 
     /**
      * Delete blog post
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -653,7 +643,6 @@ public class SitePagesService
 
     /**
      * Create a new blog post
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -712,7 +701,6 @@ public class SitePagesService
     
     /**
      * Get the name (id) of a link
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -725,7 +713,7 @@ public class SitePagesService
                               final String siteName,
                               final String linkTitle) throws Exception
     {
-        Map<String, String> ids = getIds(userName, password, siteName, linkTitle, false, Page.LINKS);
+        Map<String, String> ids = getIds(userName, password, siteName, linkTitle, Page.LINKS);
         if(!ids.isEmpty())
         {
             return ids.get("name");
@@ -738,7 +726,6 @@ public class SitePagesService
     
     /**
      * Verify if link exists
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -763,7 +750,6 @@ public class SitePagesService
 
     /**
      * Get the name (id) for blog post, link, discussion
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -777,7 +763,6 @@ public class SitePagesService
                                        final String password,
                                        final String siteName,
                                        final String title,
-                                       boolean draftBlog,
                                        final Page page) throws Exception
     {
         String url = "";
@@ -789,14 +774,7 @@ public class SitePagesService
                 url = client.getApiUrl() + "links/site/" + siteName + "/links?filter=all&contentLength=512&page=1&pageSize=10&startIndex=0";
                 break;
             case BLOG:
-                if(draftBlog)
-                {
-                    url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mydrafts";
-                }
-                else
-                {
-                    url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts/mypublished";
-                }
+                url = client.getApiUrl() + "blog/site/" + siteName + "/blog/posts";
                 break;
             case DISCUSSIONS:
                 url = client.getApiUrl() + "forum/site/" + siteName + "/discussions/posts";
@@ -830,6 +808,10 @@ public class SitePagesService
                             {
                                 ids.put("repliesUrl", (String) factObj.get("repliesUrl"));
                             }
+                            else if(page.pageId.equals("blog-postlist") || page.pageId.equals("links"))
+                            {
+                                ids.put("commentsUrl", (String) factObj.get("commentsUrl"));
+                            }
                             return ids;
                         }
                     }
@@ -853,7 +835,6 @@ public class SitePagesService
 
     /**
      * Delete link
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -891,7 +872,6 @@ public class SitePagesService
 
     /**
      * Create discussion topic
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -909,7 +889,7 @@ public class SitePagesService
                                     final String text,
                                     final List<String>tags) throws Exception
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
+        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(discussionTitle))
         {
             throw new IllegalArgumentException("Null Parameters: Please correct");
@@ -941,7 +921,6 @@ public class SitePagesService
 
     /**
      * Get the name(id) of a created topic
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -954,7 +933,7 @@ public class SitePagesService
                                     final String siteName,
                                     final String discussionTitle) throws Exception
     {
-        Map<String, String> ids = getIds(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
+        Map<String, String> ids = getIds(userName, password, siteName, discussionTitle, Page.DISCUSSIONS);
         if(!ids.isEmpty())
         {
             return ids.get("name");
@@ -967,7 +946,6 @@ public class SitePagesService
 
     /**
      * Verify if a discussion topic exists
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -992,7 +970,6 @@ public class SitePagesService
 
     /**
      * Delete a discussion topic
-     * 
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -1022,6 +999,143 @@ public class SitePagesService
         }
         return false;
     }
+    
+    /**
+     * Get a list of replies from a topic
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String discussion title
+     * @return List<String> of replies
+     * @throws Exception
+     */
+    public List<String> getDiscussionReplies(final String userName,
+                                             final String password,
+                                             final String siteName,
+                                             final String discussionTitle) throws Exception
+    {
+        return extractComments(getComments(userName, password, siteName, Page.DISCUSSIONS, discussionTitle));
+    }
+    
+    private HttpResponse getComments(final String userName,
+                                     final String password,
+                                     final String siteName,
+                                     final Page page,
+                                     final String itemTitle) throws Exception
+    {
+        String url;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        if(page.pageId.equals("discussions-topiclist"))
+        {
+            String discussionName = getDiscussionName(userName, password, siteName, itemTitle);
+            if(StringUtils.isEmpty(discussionName))
+            {
+                throw new RuntimeException("Discussion doesn't exists " + itemTitle);
+            }
+            url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "/replies";
+        }
+        else
+        {
+            Map<String, String> id = getIds(userName, password, siteName, itemTitle, page);
+            if(!id.isEmpty())
+            {
+                url = client.getApiUrl() + id.get("commentsUrl").replaceFirst("/", "");
+            }
+            else
+            {
+                throw new RuntimeException("Item doesn't exists " + itemTitle);
+            }
+        }
+        HttpGet get = new HttpGet(url);
+        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        return clientWithAuth.execute(get);
+    }
+    
+    /**
+     * Get a list of comments from HttpResponse
+     * 
+     * @param response HttpResponse the response
+     * @return List of comments
+     * @throws org.json.simple.parser.ParseException
+     * @throws IOException
+     */
+    private List<String> extractComments(HttpResponse response) throws IOException
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        List<String> replies = new ArrayList<String>();
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            replies = client.getElementsFromJsonArray(response, "items", "content");
+        }
+        return replies;
+    }
+    
+    /**
+     * Add a comment to blog, link or reply to a discussion
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param itemTitle Strin title
+     * @param page Page the page
+     * @param draftBlog boolean if blog is draft
+     * @param comment String comment to add
+     * @return true if comment is added successfully
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    private boolean addComment(final String userName,
+                               final String password, 
+                               final String siteName,
+                               final String itemTitle,
+                               final Page page,
+                               final String comment) throws Exception
+    {
+        String commentsUrl = null;
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
+                || StringUtils.isEmpty(itemTitle) || StringUtils.isEmpty(comment))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        Map<String, String> id = getIds(userName, password, siteName, itemTitle, page);
+        if(!id.isEmpty())
+        {
+            if(page.pageId.equals("discussions-topiclist"))
+            {
+                commentsUrl = id.get("repliesUrl");
+            }
+            else if(page.pageId.equals("blog-postlist") || page.pageId.equals("links"))
+            {
+                commentsUrl = id.get("commentsUrl");
+            }
+        }
+        else
+        {
+            throw new RuntimeException(itemTitle +  " doesn't exists ");
+        }
+        String reqUrl = client.getApiUrl() + commentsUrl.replaceFirst("/", "");
+        HttpPost post  = new HttpPost(reqUrl);
+        JSONObject body = new JSONObject();
+        body.put("site", siteName);
+        body.put("page", page.pageId);
+        body.put("itemTitle", itemTitle);
+        body.put("content", comment);
+        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("Comment added successfully");
+            }
+            return true;
+        }
+        else
+        {
+            logger.error("Unable to add comment: " + response.toString());
+        }
+        return false;
+    }
+    
     /**
      * Add reply to topic
      * @param userName String user name
@@ -1032,65 +1146,184 @@ public class SitePagesService
      * @return true if reply is added successfully
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     public boolean replyToDiscussion(final String userName,
                                      final String password,
                                      final String siteName,
                                      final String discussionTitle,
                                      final String reply) throws Exception
     {
-        String replyUrl;
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        Map<String, String> id =  getIds(userName, password, siteName, discussionTitle, false, Page.DISCUSSIONS);
-        if(!id.isEmpty())
-        {
-            replyUrl = id.get("repliesUrl").replaceFirst("/", "");
-        }
-        else
-        {
-            throw new RuntimeException("Topic doesn't exists " + discussionTitle);
-        }
-        String url = client.getApiUrl() + replyUrl;
-        HttpPost post = new HttpPost(url);
-        JSONObject body = new JSONObject();
-        body.put("site", siteName);
-        body.put("container", "discussions");
-        body.put("page", "discussions-topicview");
-        body.put("content", reply);
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
-        switch (response.getStatusLine().getStatusCode())
-        {
-            case HttpStatus.SC_OK:
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("Discussion reply is created successfuly");
-                }
-                return true;
-            case HttpStatus.SC_NOT_FOUND:
-                throw new RuntimeException("Invalid site " + siteName);
-            default:
-                logger.error("Unable to create reply: " + response.toString());
-                break;
-        }
-        return false;
+        return addComment(userName, password, siteName, discussionTitle, Page.DISCUSSIONS, reply);
     }
     
-    public List<String> getDiscussionReplies(final String userName,
-                                             final String password,
-                                             final String siteName,
-                                             final String discussionTitle) throws Exception
+    /**
+     * Add comment to blog
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param draft boolean true if draft
+     * @param comment String comment to add
+     * @return true if comment is added
+     * @throws Exception if error
+     */
+    public boolean commentBlog(final String userName,
+                               final String password, 
+                               final String siteName,
+                               final String blogTitle,
+                               final boolean draft,
+                               final String comment) throws Exception
     {
-        List<String> replies = new ArrayList<String>();
-        String discussionName = getDiscussionName(userName, password, siteName, discussionTitle);
+        return addComment(userName, password, siteName, blogTitle, Page.BLOG, comment);
+    }
+    
+    /**
+     * Add comment to link
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String link title
+     * @param comment String comment
+     * @return true if comment is added
+     * @throws Exception if error
+     */
+    public boolean commentLink(final String userName,
+                               final String password, 
+                               final String siteName,
+                               final String linkTitle,
+                               final String comment) throws Exception
+    {
+        return addComment(userName, password, siteName, linkTitle, Page.LINKS, comment);
+    }
+    
+    /**
+     * Get list of comments for a blog
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param draft boolean if blog is draft
+     * @return List<String> of comments
+     * @throws Exception if error
+     */
+    public List<String> getBlogComments(final String userName,
+                                        final String password,
+                                        final String siteName,
+                                        final String blogTitle) throws Exception
+    {
+        return extractComments(getComments(userName, password, siteName, Page.BLOG, blogTitle));
+    }
+    
+    /**
+     * Get list of comments for a link
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String link title
+     * @return List<String> of comments
+     * @throws Exception if error
+     */
+    public List<String> getLinkComments(final String userName,
+                                        final String password,
+                                        final String siteName,
+                                        final String linkTitle) throws Exception
+    {
+        return extractComments(getComments(userName, password, siteName, Page.LINKS, linkTitle));
+    }
+    
+    /**
+     * Get a node ref for a comment added in blog or link page
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param page Page page where the comment was created (Blog or Link)
+     * @param itemTitle String title
+     * @param comment String comment
+     * @return String nodeRef of the comment
+     * @throws Exception if error
+     */
+    public String getCommentNodeRef(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final Page page,
+                                    final String itemTitle,
+                                    final String comment) throws Exception
+    {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "/replies";
-        HttpGet get = new HttpGet(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        HttpResponse response = clientWithAuth.execute(get);
-        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
-        {
-            replies = client.getElementsFromJsonArray(response, "items", "content");
-        }
-        return replies;
+        HttpResponse response = getComments(userName, password, siteName, page, itemTitle);
+        return client.getSpecificElementFronJArray(response, "items", comment, "content", "nodeRef");
+    }
+    
+    /**
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param page Page page
+     * @param itemTitle String item title
+     * @param comment comment to delete
+     * @return true if deleted
+     * @throws Exception if error
+     */
+    private boolean deleteComment(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  final Page page,
+                                  final String itemTitle,
+                                  final String comment) throws Exception
+    {
+       String nodeRef = getCommentNodeRef(userName, password, siteName, page, itemTitle, comment);
+       AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+       String url = client.getApiUrl() + "comment/node/" + nodeRef.replaceFirst(":/", "");
+       HttpDelete delete = new HttpDelete(url);
+       HttpResponse response = client.executeRequest(client, userName, password, delete);
+       switch (response.getStatusLine().getStatusCode())
+       {
+           case HttpStatus.SC_OK:
+               return true;
+           case HttpStatus.SC_NOT_FOUND:
+               throw new RuntimeException("Comment doesn't exists " + comment);
+           default:
+               logger.error("Unable to delete comment: " + response.toString());
+               break;
+       }
+       return false;
+    }
+    
+    /**
+     * Delete a comment from a blog
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title
+     * @param comment String comment to delete
+     * @return true if deleted
+     * @throws Exception if error
+     */
+    public boolean deleteBlogComment(final String userName,
+                                     final String password,
+                                     final String siteName,
+                                     final String blogTitle,
+                                     final String comment) throws Exception
+    {
+        return deleteComment(userName, password, siteName, Page.BLOG, blogTitle, comment);
+    }
+    
+    /**
+     * Delete a comment from a link
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String link title
+     * @param comment String comment to delete
+     * @return true if deleted
+     * @throws Exception if error
+     */
+    public boolean deleteLinkComment(final String userName,
+                                     final String password,
+                                     final String siteName,
+                                     final String linkTitle,
+                                     final String comment) throws Exception
+    {
+        return deleteComment(userName, password, siteName, Page.LINKS, linkTitle, comment);
     }
 }

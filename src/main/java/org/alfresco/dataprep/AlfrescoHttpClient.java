@@ -341,7 +341,7 @@ public class AlfrescoHttpClient
      * @return String value of key
      * @throws ParseException if error parsing
      */
-    public String getParameterFromJSON(String result, 
+    public String getParameterFromJSON(String result,
                                        String param) throws ParseException
     {
         JSONParser parser = new JSONParser();
@@ -350,7 +350,7 @@ public class AlfrescoHttpClient
     }
     
     /**
-     * Get the elements from an JSONArray
+     * Get the elements from a JSONArray
      * 
      * @param response HttpResponse response
      * @param array String the name of the array
@@ -361,11 +361,11 @@ public class AlfrescoHttpClient
      */
     public List<String> getElementsFromJsonArray(HttpResponse response,
                                                  String array,
-                                                 String elementFromArray) throws ParseException, IOException
+                                                 String elementFromArray) throws IOException
     {
         List<String>elements = new ArrayList<String>();
         HttpEntity entity = response.getEntity();
-        String responseString = EntityUtils.toString(entity , "UTF-8"); 
+        String responseString = EntityUtils.toString(entity , "UTF-8");
         Object obj = JSONValue.parse(responseString);
         JSONObject jsonObject = (JSONObject) obj;
         JSONArray jArray = (JSONArray) jsonObject.get(array);
@@ -375,6 +375,28 @@ public class AlfrescoHttpClient
             elements.add(jobject.get(elementFromArray).toString());
         }
         return elements;
+    }
+    
+    public String getSpecificElementFronJArray(HttpResponse response,
+                                               String array,
+                                               String itemName,
+                                               String itemParameter,
+                                               String requiredElement) throws IOException
+    {
+        HttpEntity entity = response.getEntity();
+        String responseString = EntityUtils.toString(entity , "UTF-8");
+        Object obj = JSONValue.parse(responseString);
+        JSONObject jsonObject = (JSONObject) obj;
+        JSONArray jArray = (JSONArray) jsonObject.get(array);
+        for (Object item:jArray)
+        {
+            JSONObject jobject = (JSONObject) item;
+            if(jobject.get(itemParameter).toString().equals(itemName))
+            {
+                return (String) jobject.get(requiredElement);
+            }
+        }
+        return "";
     }
     
     /**
