@@ -902,4 +902,132 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertNotNull(content.getNodeRef(ADMIN, ADMIN, siteName2, fileToCopy));
         Assert.assertTrue(content.getNodeRef(ADMIN, ADMIN, siteName1, fileToCopy).isEmpty());
     }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addCommentConsumer() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String userName = "commentUser" + System.currentTimeMillis();
+        String inviteUser = "invite" + System.currentTimeMillis();
+        String commentConsumer = "comment consumer";
+        userService.create(admin, admin, userName, password, userName +  "@test.com","firstname","lastname");
+        userService.create(admin, admin, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteConsumer"));
+        contentAction.addComment(inviteUser, password, siteName, commentDoc, commentConsumer);
+    }
+    
+    //TODO: uncomment after ACE-4614 is fixed
+    //@Test
+    public void addCommentContributor() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String userName = "commentUser" + System.currentTimeMillis();
+        String inviteUser = "invite" + System.currentTimeMillis();
+        String commentContributor = "comment contributor";
+        userService.create(admin, admin, userName, password, userName +  "@test.com","firstname","lastname");
+        userService.create(admin, admin, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteContributor"));
+        Assert.assertTrue(contentAction.addComment(inviteUser, password, siteName, commentDoc, commentContributor));
+        List<String> comments = contentAction.getComments(inviteUser, password, siteName, commentDoc);
+        Assert.assertEquals(comments.get(0), commentContributor);
+    }
+    
+    @Test
+    public void addCommentCollaborator() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String userName = "commentUser" + System.currentTimeMillis();
+        String inviteUser = "invite" + System.currentTimeMillis();
+        String commentCollaborator = "comment collaborator";
+        userService.create(admin, admin, userName, password, userName +  "@test.com","firstname","lastname");
+        userService.create(admin, admin, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteCollaborator"));
+        Assert.assertTrue(contentAction.addComment(inviteUser, password, siteName, commentDoc, commentCollaborator));
+        List<String> comments = contentAction.getComments(inviteUser, password, siteName, commentDoc);
+        Assert.assertEquals(comments.get(0), commentCollaborator);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteCommentColaborator() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String userName = "commentUser" + System.currentTimeMillis();
+        String inviteUser = "invite" + System.currentTimeMillis();
+        String commentCollaborator = "comment collaborator";
+        userService.create(admin, admin, userName, password, userName +  "@test.com","firstname","lastname");
+        userService.create(admin, admin, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteCollaborator"));
+        Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentCollaborator));
+        contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentCollaborator);
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteCommentContributor() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String userName = "commentUser" + System.currentTimeMillis();
+        String inviteUser = "invite" + System.currentTimeMillis();
+        String commentContributor = "comment Contributor";
+        userService.create(admin, admin, userName, password, userName +  "@test.com","firstname","lastname");
+        userService.create(admin, admin, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteContributor"));
+        Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentContributor));
+        contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentContributor);
+    }
+    
+    @Test
+    public void deleteCommentManager() throws Exception
+    {
+        String siteName = "siteComment" + System.currentTimeMillis();
+        String userName = "commentUser" + System.currentTimeMillis();
+        String inviteUser = "invite" + System.currentTimeMillis();
+        String commentManager = "comment manager";
+        userService.create(admin, admin, userName, password, userName +  "@test.com","firstname","lastname");
+        userService.create(admin, admin, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
+        site.create(userName,
+                    password,
+                    "mydomain",
+                    siteName, 
+                    "my site description", 
+                    Visibility.PUBLIC);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteManager"));
+        Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentManager));
+        Assert.assertTrue(contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentManager));
+    }
 }

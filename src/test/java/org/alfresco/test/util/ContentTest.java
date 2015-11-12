@@ -686,4 +686,16 @@ public class ContentTest extends AbstractTest
         String pathToFile = DATA_FOLDER + SLASH + "fakeFile.txt";
         content.uploadFileInRepository(admin, admin, null, pathToFile);
     }
+    
+    @Test
+    public void createDocInUserHomes() throws Exception
+    {
+        String user = "user_" + System.currentTimeMillis();
+        String doc = "repoDoc-" + System.currentTimeMillis();
+        String folder = "shareFolder" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, user, user, user + "@test", "firstName", "lastName");
+        content.createFolderInRepository(user, user, folder, "User Homes/" + user);
+        Document theDoc = content.createDocumentInRepository(admin, admin, "User Homes/" + user + "/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        Assert.assertFalse(theDoc.getId().isEmpty());
+    }
 }

@@ -539,4 +539,73 @@ public class SitePagesActionTests extends AbstractTest
         Assert.assertTrue(comments.contains("comment2"));
         Assert.assertFalse(comments.contains("comment1"));
     }
+    
+    @Test
+    public void commentBlogConsumer() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userConsumer = "userCons-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
+        userService.create(admin, admin, userConsumer, userConsumer, userConsumer + "@test", userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userConsumer, siteId, "SiteConsumer"));
+        site.addPageToSite(userConsumer, userConsumer, siteId, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
+        Assert.assertFalse(pageService.commentBlog(userConsumer, userConsumer, siteId, draftBlog, true, "comment1"));
+    }
+    
+    @Test
+    public void commentBlogContributor() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userContributor = "userContrib-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
+        userService.create(admin, admin, userContributor, userContributor, userContributor + "@test", userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userContributor, siteId, "SiteContributor"));
+        site.addPageToSite(userContributor, userContributor, siteId, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
+        Assert.assertTrue(pageService.commentBlog(userContributor, userContributor, siteId, draftBlog, true, "comment1"));
+    }
+    
+    @Test
+    public void commentBlogCollaborator() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userCollaborator = "userCollab" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
+        userService.create(admin, admin, userCollaborator, userCollaborator, userCollaborator + "@test", userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userCollaborator, siteId, "SiteCollaborator"));
+        site.addPageToSite(userCollaborator, userCollaborator, siteId, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
+        Assert.assertTrue(pageService.commentBlog(userCollaborator, userCollaborator, siteId, draftBlog, true, "comment1"));
+    }
+    
+    @Test
+    public void deleteCommentContributor() throws Exception
+    {
+        String siteId = "blog-site" + System.currentTimeMillis();
+        String userName = "userm-" + System.currentTimeMillis();
+        String userContributor = "userContrib-" + System.currentTimeMillis();
+        String draftBlog = "draft" + System.currentTimeMillis(); 
+        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
+        userService.create(admin, admin, userContributor, userContributor, userContributor + "@test", userName, userName);
+        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userContributor, siteId, "SiteContributor"));
+        site.addPageToSite(userContributor, userContributor, siteId, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
+        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment1"));
+        Assert.assertFalse(pageService.deleteBlogComment(userContributor, userContributor, siteId, draftBlog, "comment1"));
+    }
 }

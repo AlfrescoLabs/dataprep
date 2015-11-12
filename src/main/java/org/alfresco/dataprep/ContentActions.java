@@ -121,8 +121,8 @@ public class ContentActions extends CMISUtil
                 return true;
             case HttpStatus.SC_NOT_FOUND:
                 throw new RuntimeException("Content doesn't exists " + contentName);
-            case HttpStatus.SC_UNAUTHORIZED:
-                throw new RuntimeException("Invalid user name or password");
+            case HttpStatus.SC_FORBIDDEN:
+                throw new RuntimeException("User " + userName + " doesn't have enough rights");
             default:
                 logger.error("Unable to add new action: " + response.toString());
                 break;
@@ -236,13 +236,19 @@ public class ContentActions extends CMISUtil
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + optType.name + "/" + optionNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
         HttpResponse response = client.executeRequest(client, userName, password, delete);
-        if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
+        switch (response.getStatusLine().getStatusCode())
         {
-            if(logger.isTraceEnabled())
-            {
-                logger.trace(actionValue + " is removed successfully");
-            }
-            return true;
+            case HttpStatus.SC_NO_CONTENT:
+                if(logger.isTraceEnabled())
+                {
+                    logger.trace(actionValue + " is removed successfully");
+                }
+                return true;
+            case HttpStatus.SC_FORBIDDEN:
+                throw new RuntimeException("User" + userName + " doesn't have enough rights");
+            default:
+                logger.error("Unable to add new action: " + response.toString());
+                break;
         }
         return false;
     }
