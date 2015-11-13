@@ -28,6 +28,7 @@ import java.util.Map;
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -612,11 +613,10 @@ public class SiteService
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
-                    String xmlBody = AlfrescoHttpClient.contentRmSite.replaceAll("<shortName>", "rm");
                     String secondPostUrl = client.getAlfrescoUrl() + "alfresco/service/remoteadm/createmulti?s=sitestore";
                     HttpPost secondPost  = new HttpPost(secondPostUrl);
                     secondPost.setHeader("Content-Type", "application/xml;charset=UTF-8");
-                    StringEntity xmlEntity = new StringEntity(xmlBody, "UTF-8");
+                    StringEntity xmlEntity = new StringEntity(readContentRmSite(), "UTF-8");
                     xmlEntity.setContentType("application/xml");
                     secondPost.setEntity(xmlEntity);
                     response = clientWithAuth.execute(secondPost);
@@ -655,5 +655,19 @@ public class SiteService
             client.close();
         } 
         return false;
+    }
+    
+    private String readContentRmSite()
+    {
+        ClassLoader classLoader = getClass().getClassLoader();
+        try 
+        {
+            return IOUtils.toString(classLoader.getResourceAsStream("contentRMSite.xml"));
+        } 
+        catch (IOException e) 
+        {
+            e.printStackTrace();
+        }
+        return "";
     }
 }
