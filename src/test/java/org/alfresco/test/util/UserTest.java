@@ -545,10 +545,70 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.followUser(user, password, userToFollow2));
         Assert.assertTrue(userService.followUser(user, password, userToFollow3));
         List<String> following = userService.getFollowingUsers(user, password);
-        Assert.assertTrue(following.size()== 3);
+        Assert.assertTrue(following.size() == 3);
         Assert.assertTrue(userService.unfollowUser(user, password, userToFollow1));
         Assert.assertTrue(userService.unfollowUser(user, password, userToFollow2));
         following = userService.getFollowingUsers(user, password);
-        Assert.assertTrue(following.size()== 1);
+        Assert.assertTrue(following.size() == 1);
+    }
+    
+    @Test
+    public void createRootCategory() throws Exception
+    {
+        String rootCateg = "firstCateg" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
+        Assert.assertTrue(userService.categoryExists(admin, admin, rootCateg));
+    }
+    
+    @Test
+    public void createRootCategoryTwice() throws Exception
+    {
+        String rootCateg = "firstCateg" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
+        Assert.assertFalse(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
+    }
+    
+    @Test
+    public void createSubCategory() throws Exception
+    {
+        String rootCateg = "rootCateg" + System.currentTimeMillis();
+        String subCateg1 = "sub1";
+        String subCateg2 = "sub2";
+        String subCateg3 = "sub3";
+        Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
+        Assert.assertTrue(userService.createSubCategory(admin, admin, rootCateg, subCateg1));
+        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg1, subCateg2));
+        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg2, subCateg3));
+    }
+    
+    @Test
+    public void deleteRootCategory() throws Exception
+    {
+        String rootCateg = "firstCateg" + System.currentTimeMillis();
+        Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
+        Assert.assertTrue(userService.deleteCategory(admin, admin, rootCateg));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void deleteInvalidCategory() throws Exception
+    {
+        userService.deleteCategory(admin, admin, "fakeCategory");
+    }
+    
+    @Test
+    public void deleteSubCategory() throws Exception
+    {
+        String rootCateg = "rootCateg" + System.currentTimeMillis();
+        String subCateg1 = "sub1";
+        String subCateg2 = "sub2";
+        String subCateg3 = "sub3";
+        Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
+        Assert.assertTrue(userService.createSubCategory(admin, admin, rootCateg, subCateg1));
+        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg1, subCateg2));
+        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg2, subCateg3));
+        Assert.assertTrue(userService.categoryExists(admin, admin, rootCateg));
+        Assert.assertTrue(userService.deleteCategory(admin, admin, subCateg3));
+        Assert.assertTrue(userService.deleteCategory(admin, admin, rootCateg));
+        Assert.assertFalse(userService.categoryExists(admin, admin, rootCateg));
     }
 }

@@ -44,7 +44,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 /**
@@ -53,10 +52,10 @@ import org.springframework.stereotype.Service;
  * @author Michael Suzuki
  * @author Bocancea Bogdan
  */
-public class UserService
+public class UserService extends CMISUtil
 {
     private static Log logger = LogFactory.getLog(UserService.class);
-    @Autowired private  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    //@Autowired private  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     public static String DEFAULT_LAST_NAME = "lastName";
     public static String PAGE_ACCEPT_URL = "page/accept-invite";
     public static String PAGE_REJECT_URL = "page/reject-invite";
@@ -735,11 +734,11 @@ public class UserService
                                        final boolean follow) throws Exception
     {
         String url;
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(userToFollowOrNot))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         if(follow)
         {
             url = client.getApiUrl() + "subscriptions/" + userName + "/follow";
@@ -879,5 +878,131 @@ public class UserService
                                           final String password) throws Exception
     {
         return getFollowUsers(userName, password, false);
+    }
+    
+    /**
+     * Create a new root category
+     * 
+     * @param adminUser String admin user
+     * @param adminPass String admin password
+     * @param categoryName String category name
+     * @return true if category is created
+     * @throws Exception if error
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createRootCategory(final String adminUser,
+                                      final String adminPass,
+                                      final String categoryName) throws Exception
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "category";
+        HttpPost post  = new HttpPost(url);
+        JSONObject body = new JSONObject();
+        body.put("name", categoryName);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, post);
+        if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("Successfuly created root category " + categoryName);
+            }
+            return true;
+        }
+        else
+        {
+            logger.error("Unable to create category " + categoryName + " " +  response.toString());
+        }
+        return false;
+    }
+    
+    /**
+     * Create a new subcategory
+     * 
+     * @param adminUser String admin user
+     * @param adminPass String admmin password
+     * @param parentCategory String parent category
+     * @param subCategory String subcategory
+     * @return true if category is created
+     * @throws Exception 
+     */
+    @SuppressWarnings("unchecked")
+    public boolean createSubCategory(final String adminUser,
+                                     final String adminPass,
+                                     final String parentCategory,
+                                     final String subCategory) throws Exception
+    {
+        String rootCategNodeRef = getCategoryNodeRef(adminPass, adminPass, parentCategory);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "category/workspace/SpacesStore/" + rootCategNodeRef;
+        HttpPost post  = new HttpPost(url);
+        JSONObject body = new JSONObject();
+        body.put("name", subCategory);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, post);
+        if( HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("Successfuly created root category " + subCategory);
+            }
+            return true;
+        }
+        else
+        {
+            logger.error("Unable to create category " + subCategory + " " +  response.toString());
+        }
+        return false;
+    }
+    
+    /**
+     * Delete a category
+     * 
+     * @param adminUser String admin user
+     * @param adminPass String admin password
+     * @param categoryName String category to delete
+     * @return true if category is deleted
+     * @throws Exception if error
+     */
+    public boolean deleteCategory(final String adminUser,
+                                  final String adminPass,
+                                  final String categoryName) throws Exception
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String categNodeRef = getCategoryNodeRef(adminPass, adminPass, categoryName);
+        String url = client.getApiUrl() + "category/workspace/SpacesStore/" + categNodeRef;
+        HttpDelete delete  = new HttpDelete(url);
+        HttpResponse response = client.executeRequest(client, adminUser, adminPass, delete);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Category doesn't exists " + categoryName);
+            default:
+                logger.error("Unable to delete category: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Check if a category exists
+     * 
+     * @param adminUser String admin user
+     * @param adminPass String admin password
+     * @param categoryName String category to check
+     * @throws Exception
+     */
+    public boolean categoryExists(final String adminUser,
+                                  final String adminPass,
+                                  final String categoryName) throws Exception
+    {
+        if(!getCategoryNodeRef(adminPass, adminPass, categoryName).isEmpty())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

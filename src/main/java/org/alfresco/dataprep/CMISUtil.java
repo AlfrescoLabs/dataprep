@@ -135,7 +135,6 @@ public class CMISUtil
     }
     
     @Autowired protected  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
-    @Autowired private UserService userService;
     Map<String, String> contents = new HashMap<String,String>();
 
     /**
