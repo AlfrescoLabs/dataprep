@@ -126,15 +126,15 @@ public class CMISUtil
     
     public enum Priority
     {
-        High("1"),
-        Normal("2"),
-        Low("3");
-        private String level;
-        private Priority(String level)
+        High(1),
+        Normal(2),
+        Low(3);
+        private int level;
+        private Priority(int level)
         {
             this.level = level;
         }
-        public String getLevel()
+        public int getLevel()
         {
             return this.level;
         }

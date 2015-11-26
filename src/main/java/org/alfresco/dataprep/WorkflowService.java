@@ -89,18 +89,21 @@ public class WorkflowService extends CMISUtil
         JSONObject body = new JSONObject();
         body.put("processDefinitionId", workflowType.getId());
         JSONArray items = new JSONArray();
-        if(!docsByPath)
+        if(!(docsToAttach == null) || !(pathsToDocs == null))
         {
-            for(int i = 0; i<docsToAttach.size(); i++)
+            if(!docsByPath)
             {
-                items.add(getNodeRef(userName, password, documentsSite, docsToAttach.get(i)));
+                for(int i = 0; i<docsToAttach.size(); i++)
+                {
+                    items.add(getNodeRef(userName, password, documentsSite, docsToAttach.get(i)));
+                }
             }
-        }
-        else
-        {
-            for(int i = 0; i<pathsToDocs.size(); i++)
+            else
             {
-                items.add(getNodeRefFromPath(userName, password, pathsToDocs.get(i)));
+                for(int i = 0; i<pathsToDocs.size(); i++)
+                {
+                    items.add(getNodeRefFromPath(userName, password, pathsToDocs.get(i)));
+                }
             }
         }
         JSONObject variables = new JSONObject();

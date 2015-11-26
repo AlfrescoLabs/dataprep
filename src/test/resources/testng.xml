@@ -13,7 +13,7 @@
       <class name="org.alfresco.test.util.SitePagesActionTests"/>
       <class name="org.alfresco.test.util.DataListsTests"/>
       <class name="org.alfresco.test.util.GroupTest"/>
-      <class name="org.alfresco.test.util.WorkflowTests"/>
+    <!--   <class name="org.alfresco.test.util.WorkflowTests"/>--> 
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->
