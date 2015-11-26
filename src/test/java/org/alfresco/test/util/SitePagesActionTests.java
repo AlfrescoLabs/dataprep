@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.SitePagesService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
@@ -38,6 +39,7 @@ public class SitePagesActionTests extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private UserService userService;
     @Autowired private SitePagesService pageService;
+    @Autowired private ContentService contentService;
     private String admin = "admin";
 
     @Test

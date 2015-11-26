@@ -268,8 +268,6 @@ public class SitePagesService
                             DateTimeFormatter  sdf = DateTimeFormat.forPattern("HH:mm");
                             sTime = st.toString(sdf);
                             eTime = et.toString(sdf);
-                            
-                            
                             if(timeStart.contains("AM") || timeStart.contains("PM"))
                             {
                                 timeStart = convertTo24Hour(timeStart);

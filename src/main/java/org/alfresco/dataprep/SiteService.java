@@ -19,6 +19,7 @@
 package org.alfresco.dataprep;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -542,12 +543,12 @@ public class SiteService
         Iterator<Map.Entry<String, String>> entries = defaultDashlets.entrySet().iterator();
         while (entries.hasNext())
         {
-          Map.Entry<String, String> entry = entries.next();
-          JSONObject jDashlet = new JSONObject();
-          jDashlet.put("url", entry.getKey());
-          jDashlet.put("regionId", entry.getValue());
-          jDashlet.put("originalRegionId", entry.getValue());
-          array.add(jDashlet);
+            Map.Entry<String, String> entry = entries.next();
+            JSONObject jDashlet = new JSONObject();
+            jDashlet.put("url", entry.getKey());
+            jDashlet.put("regionId", entry.getValue());
+            jDashlet.put("originalRegionId", entry.getValue());
+            array.add(jDashlet);
         }
         JSONObject newDashlet = new JSONObject();
         newDashlet.put("url", dashlet.id);
@@ -660,14 +661,18 @@ public class SiteService
     private String readContentRmSite()
     {
         ClassLoader classLoader = getClass().getClassLoader();
+        InputStream input = classLoader.getResourceAsStream("contentRMSite.xml");
         try 
         {
-            return IOUtils.toString(classLoader.getResourceAsStream("contentRMSite.xml"));
+            return IOUtils.toString(input);
         } 
         catch (IOException e) 
         {
-            e.printStackTrace();
+            throw new RuntimeException("Unable to read contentRMSite.xml ", e);
         }
-        return "";
+        finally
+        {
+            IOUtils.closeQuietly(input);
+        }
     }
 }

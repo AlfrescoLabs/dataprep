@@ -97,12 +97,10 @@ public class CMISUtil
             this.value = value;
             this.property = property;
         }
-
         public String getValue()
         {
             return this.value;
         }
-
         public String getProperty()
         {
             return this.property;
@@ -120,7 +118,6 @@ public class CMISUtil
         {
             this.value = value;
         }
-        
         public String getValue()
         {
             return this.value;
@@ -129,9 +126,18 @@ public class CMISUtil
     
     public enum Priority
     {
-        High,
-        Normal,
-        Low
+        High("1"),
+        Normal("2"),
+        Low("3");
+        private String level;
+        private Priority(String level)
+        {
+            this.level = level;
+        }
+        public String getLevel()
+        {
+            return this.level;
+        }
     }
     
     @Autowired protected  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
@@ -263,28 +269,29 @@ public class CMISUtil
 
     /**
      * Gets the object id for a document or folder in repository
+     * It looks for the item in the folder specified in the path.
      * 
      * @param userName String identifier
      * @param password String password
      * @param contentName String content identifier
-     * @param path String path to the object(e.g. 'Shared'). If empty or null 'Company home' is set.
+     * @param path String path to the object (e.g. 'Shared'). If empty or null 'Company home' is set.
      * @return String node identifier
      * @throws Exception if error
      */
     public String getNodeRefFromRepo(final String userName,
                                      final String password,
                                      final String contentName,
-                                     String pathToContent) throws Exception
+                                     String path) throws Exception
     {
         String nodeRef = "";
         Session session = getCMISSession(userName, password);
-        if(pathToContent == null)
+        if(path == null)
         {
-            pathToContent = "";
+            path = "";
         }
         try
         {
-            CmisObject repo = session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathToContent);
+            CmisObject repo = session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
             Folder folder = (Folder) repo;
             ItemIterable<CmisObject> children = folder.getChildren();
             ItemIterable<CmisObject> page = children.getPage();
@@ -304,6 +311,34 @@ public class CMISUtil
             return nodeRef;
         }  
         return nodeRef;
+    }
+    
+    /**
+     * Get the node ref for a item by path
+     * @param userName String user
+     * @param password String password
+     * @param pathToContent String path to item (e.g. Sites/siteId/documentLibrary/doc.txt)
+     * @return String node ref of the item
+     * @throws Exception if error
+     */
+    public String getNodeRefFromPath(final String userName,
+                                     final String password,
+                                     final String pathToContent) throws Exception
+    {
+        Session session = getCMISSession(userName, password);
+        if(StringUtils.isEmpty(pathToContent))
+        {
+            throw new CmisRuntimeException("Path to content is missing");
+        }
+        try
+        {
+            CmisObject content = session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathToContent);
+            return content.getId().split(";")[0];
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            return "";
+        }
     }
     
     /**
@@ -498,7 +533,7 @@ public class CMISUtil
     }
     
     /**
-     * Method to attach a document
+     * Method to attach a document to an existent object
      * @param userName String user name
      * @param password String password
      * @param siteName String site name

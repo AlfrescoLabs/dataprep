@@ -55,7 +55,6 @@ import org.springframework.stereotype.Service;
 public class UserService extends CMISUtil
 {
     private static Log logger = LogFactory.getLog(UserService.class);
-    //@Autowired private  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     public static String DEFAULT_LAST_NAME = "lastName";
     public static String PAGE_ACCEPT_URL = "page/accept-invite";
     public static String PAGE_REJECT_URL = "page/reject-invite";
@@ -73,10 +72,10 @@ public class UserService extends CMISUtil
      * @return true if successful
      * @throws Exception 
      */
-    public boolean create(final String adminUser, 
-                          final String adminPass, 
-                          final String userName, 
-                          final String password, 
+    public boolean create(final String adminUser,
+                          final String adminPass,
+                          final String userName,
+                          final String password,
                           final String email,
                           final String firstName,
                           final String lastName) throws Exception 
@@ -88,7 +87,6 @@ public class UserService extends CMISUtil
         {
             throw new IllegalArgumentException("User detail is required");
         }
-
         JSONObject body = encode(userName, password, firstName, lastName, email);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "people";

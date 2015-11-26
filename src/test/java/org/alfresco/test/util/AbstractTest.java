@@ -31,7 +31,8 @@ public class AbstractTest extends AbstractTestNGSpringContextTests
     public static final String SLASH = File.separator;
     private static final String SRC_ROOT = System.getProperty("user.dir") + SLASH;
     protected static final String DATA_FOLDER = SRC_ROOT + "src/test/resources/testdata" + SLASH;
-    protected static final String ADMIN = "admin"; 
+    protected static final String ADMIN = "admin";
+    protected static final String domain = "@test";
     @Autowired
     protected static ApplicationContext ctx;
 }

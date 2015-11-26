@@ -15,12 +15,9 @@ import org.testng.annotations.Test;
  */
 public class GroupTest extends AbstractTest
 {
-    @Autowired
-    private SiteService site;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private GroupService groupService;
+    @Autowired private SiteService site;
+    @Autowired private UserService userService;
+    @Autowired private GroupService groupService;
     String userName = "userm-" + System.currentTimeMillis();
     String firstName = "fname-" + System.currentTimeMillis();
     String lastName = "lname-" + System.currentTimeMillis();
