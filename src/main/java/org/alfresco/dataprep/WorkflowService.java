@@ -80,7 +80,9 @@ public class WorkflowService extends CMISUtil
                                   final boolean sendEmail) throws Exception
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String api = client.getApiVersionUrl().replaceFirst("(alfresco.*?)alfresco", "$1workflow") + "processes";
+        String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes";
+        logger.info("Create process using url: " + api);
         DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'Z");
         SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd'T'Z");
         String dueDate = fullFormat.format(due);
@@ -132,7 +134,7 @@ public class WorkflowService extends CMISUtil
         try
         {
             HttpResponse response = client.executeRequest(client, userName, password, body, post);
-            logger.info("Resonse code: " + response.getStatusLine().getStatusCode());
+            logger.info("Response code: " + response.getStatusLine().getStatusCode());
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_CREATED:
