@@ -132,6 +132,7 @@ public class WorkflowService extends CMISUtil
         try
         {
             HttpResponse response = client.executeRequest(client, userName, password, body, post);
+            logger.info("Resonse code: " + response.getStatusLine().getStatusCode());
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_CREATED:
@@ -142,7 +143,6 @@ public class WorkflowService extends CMISUtil
                     return true;
                 default:
                     logger.error("Unable to start workflow " + response.toString());
-                    break;
             }
         }
         finally
