@@ -33,6 +33,5 @@ public class AbstractTest extends AbstractTestNGSpringContextTests
     protected static final String DATA_FOLDER = SRC_ROOT + "src/test/resources/testdata" + SLASH;
     protected static final String ADMIN = "admin";
     protected static final String domain = "@test";
-    @Autowired
-    protected static ApplicationContext ctx;
+    @Autowired protected static ApplicationContext ctx;
 }

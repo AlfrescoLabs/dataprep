@@ -73,7 +73,6 @@ public class SitePagesService
      * @param allDay boolean all day event
      * @param tag String tag the event
      * @return true if event is created
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean addCalendarEvent(final String userName,
@@ -87,7 +86,7 @@ public class SitePagesService
                                     String timeStart,
                                     String timeEnd,
                                     final boolean allDay,
-                                    String tag) throws Exception
+                                    String tag)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
             || StringUtils.isEmpty(what))
@@ -190,7 +189,7 @@ public class SitePagesService
         {
             body.put("allday", "on");
         }
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -215,7 +214,6 @@ public class SitePagesService
      * @param timeEnd String event time finish
      * @param allDay boolean all day event
      * @return String name (id) of event
-     * @throws Exception if error
      */
     public String getEventName(final String userName,
                                final String password,
@@ -226,7 +224,7 @@ public class SitePagesService
                                Date to,
                                String timeStart,
                                String timeEnd,
-                               final boolean allDay) throws Exception
+                               final boolean allDay)
     {
         String name = "";
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -291,6 +289,10 @@ public class SitePagesService
                     break;
             }
         }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to execute request:" + get, e);
+        }
         finally
         {
             get.releaseConnection();
@@ -312,7 +314,7 @@ public class SitePagesService
      * @param timeEnd String event time finish
      * @param allDay boolean all day event
      * @return boolean true if event is removed
-     * @throws Exception if error
+     * @throws RuntimeException if site is not found
      */
     public boolean removeEvent(final String userName,
                                final String password,
@@ -323,7 +325,7 @@ public class SitePagesService
                                Date to,
                                String timeStart,
                                String timeEnd,
-                               final boolean allDay) throws Exception
+                               final boolean allDay)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName) || StringUtils.isEmpty(what)
                 || StringUtils.isEmpty(from.toString()) || StringUtils.isEmpty(to.toString()))
@@ -338,7 +340,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/event/" + siteName + "/" + eventName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(client, userName, password, request);
+        HttpResponse response = client.executeRequest(userName, password, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -358,11 +360,18 @@ public class SitePagesService
      * @throws ParseException if error
      * @return String converted hour
      */
-    private String convertTo24Hour(String time) throws ParseException 
+    private String convertTo24Hour(String time)
     {
         DateFormat f1 = new SimpleDateFormat("hh:mm a"); 
         Date d = null;
-        d = f1.parse(time);
+        try
+        {
+            d = f1.parse(time);
+        }
+        catch (ParseException e)
+        {
+           throw new RuntimeException("Failed to parse the date:" + d, e);
+        }
         DateFormat f2 = new SimpleDateFormat("HH:mm");
         String x = f2.format(d);
         return x;
@@ -391,7 +400,7 @@ public class SitePagesService
      * @param content String wiki content
      * @param tags List of tags
      * @return true if wiki page is created (200 Status)
-     * @throws Exception if error
+     * @throws RuntimeException if site not found
      */
     @SuppressWarnings("unchecked")
     public boolean createWiki(final String userName,
@@ -399,7 +408,7 @@ public class SitePagesService
                               final String siteName,
                               String wikiTitle,
                               final String content,
-                              final List<String>tags) throws Exception
+                              final List<String>tags)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(wikiTitle))
@@ -418,7 +427,7 @@ public class SitePagesService
         body.put("pageTitle", wikiTitle);
         body.put("pagecontent", content);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, body, put);
+        HttpResponse response = client.executeRequest(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -443,12 +452,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param wikiTitle String wiki title
      * @return true if wiki exists (200 Status)
-     * @throws Exception if error
      */
     public boolean wikiExists(final String userName,
                               final String password,
                               final String siteName,
-                              String wikiTitle) throws Exception
+                              String wikiTitle)
     {
         if (wikiTitle.contains(" ")) 
         {
@@ -457,7 +465,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(client, userName, password, get);
+        HttpResponse response = client.executeRequest(userName, password, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -472,12 +480,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param wikiTitle String wiki title
      * @return true if wiki is removed (204 Status)
-     * @throws Exception if error
      */
     public boolean deleteWikiPage(final String userName,
                                   final String password,
                                   final String siteName,
-                                  String wikiTitle) throws Exception
+                                  String wikiTitle)
     {
         if (wikiTitle.contains(" ")) 
         {
@@ -486,7 +493,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -510,7 +517,6 @@ public class SitePagesService
      * @param draft boolean create blog as draft. If not it will be published
      * @param tags List of tags
      * @return true if blog post is created (200 Status)
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean createBlogPost(final String userName,
@@ -519,7 +525,7 @@ public class SitePagesService
                                   final String blogTitle,
                                   final String content,
                                   final boolean draft,
-                                  final List<String>tags) throws Exception
+                                  final List<String>tags)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(blogTitle))
@@ -534,7 +540,7 @@ public class SitePagesService
         body.put("content", content);
         body.put("draft", draft);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -560,13 +566,12 @@ public class SitePagesService
      * @param blogTitle String blog title
      * @param isDraft boolean is draft
      * @return String name of blog post
-     * @throws Exception if error
      */
     public String getBlogName(final String userName,
                               final String password,
                               final String siteName,
                               final String blogTitle,
-                              final boolean draft) throws Exception
+                              final boolean draft)
     {
         Map<String, String> ids = getIds(userName, password, siteName, blogTitle, Page.BLOG);
         if(!ids.isEmpty())
@@ -587,13 +592,12 @@ public class SitePagesService
      * @param blogTitle String blog title
      * @param isDraft boolean is draft
      * @return boolean true if blog post exists
-     * @throws Exception if error
      */
     public boolean blogExists(final String userName,
                               final String password,
                               final String siteName,
                               final String blogTitle,
-                              final boolean draft) throws Exception
+                              final boolean draft)
     {
         if(getBlogName(userName, password, siteName, blogTitle, draft).isEmpty())
         {
@@ -613,19 +617,19 @@ public class SitePagesService
      * @param blogTitle String blog title
      * @param isDraft boolean is draft
      * @return true if blog is removed (200 Status)
-     * @throws Exception if error
+     * @throws RuntimeException if blog is not found
      */
     public boolean deleteBlogPost(final String userName,
                                   final String password,
                                   final String siteName,
                                   final String blogTitle,
-                                  final boolean isDraft) throws Exception
+                                  final boolean isDraft)
     {
         String blogName = getBlogName(userName, password, siteName, blogTitle, isDraft);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -650,7 +654,7 @@ public class SitePagesService
      * @param internal boolean internal
      * @param tags List of tags
      * @return true if link is created (200 Status)
-     * @throws Exception if error
+     * @throws RuntimeException if site is not found
      */
     @SuppressWarnings("unchecked")
     public boolean createLink(final String userName,
@@ -660,7 +664,7 @@ public class SitePagesService
                               final String url,
                               final String description,
                               final boolean internal,
-                              final List<String>tags) throws Exception
+                              final List<String>tags)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(linkTitle))
@@ -679,7 +683,7 @@ public class SitePagesService
             body.put("internal", internal);
         }
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -704,12 +708,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param linkTitle String blog title
      * @return String name of blog post
-     * @throws Exception if error
      */
     public String getLinkName(final String userName,
                               final String password,
                               final String siteName,
-                              final String linkTitle) throws Exception
+                              final String linkTitle)
     {
         Map<String, String> ids = getIds(userName, password, siteName, linkTitle, Page.LINKS);
         if(!ids.isEmpty())
@@ -729,12 +732,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param linkTitle String blog title
      * @return boolean true if link exists
-     * @throws Exception if error
      */
     public boolean linkExists(final String userName,
                               final String password,
                               final String siteName,
-                              final String linkTitle) throws Exception
+                              final String linkTitle)
     {
         if(getLinkName(userName, password, siteName, linkTitle).isEmpty())
         {
@@ -754,14 +756,14 @@ public class SitePagesService
      * @param title String blog title
      * @param draftBlog boolean is blog draft
      * @return Map<String, String> name, nodeRef and replyUrl
-     * @throws Exception if error
+     * @throws RuntimeException if site is not found
      */
     @SuppressWarnings("unchecked")
     private Map<String, String> getIds(final String userName,
                                        final String password,
                                        final String siteName,
                                        final String title,
-                                       final Page page) throws Exception
+                                       final Page page)
     {
         String url = "";
         Map<String, String> ids = new HashMap<String, String>();
@@ -823,6 +825,10 @@ public class SitePagesService
                     break;
             }
         }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Failed to execute request:" + get, e);
+        }
         finally
         {
             get.releaseConnection();
@@ -838,13 +844,12 @@ public class SitePagesService
      * @param siteName String site name
      * @param linkTitle String blog title
      * @return true if link is removed (200 Status)
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean deleteLink(final String userName,
                               final String password,
                               final String siteName,
-                              final String linkTitle) throws Exception
+                              final String linkTitle)
     {
         String linkName = getLinkName(userName, password, siteName, linkTitle);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -854,7 +859,7 @@ public class SitePagesService
         JSONArray array = new JSONArray();
         array.add(linkName);
         body.put("items", array);
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -877,7 +882,7 @@ public class SitePagesService
      * @param text String topic content
      * @param tags List<String> tags
      * @return true if topic is created
-     * @throws Exception
+     * @throws RuntimeException if site is not found
      */
     @SuppressWarnings("unchecked")
     public boolean createDiscussion(final String userName,
@@ -885,7 +890,7 @@ public class SitePagesService
                                     final String siteName,
                                     final String discussionTitle,
                                     final String text,
-                                    final List<String>tags) throws Exception
+                                    final List<String>tags)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(discussionTitle))
@@ -899,7 +904,7 @@ public class SitePagesService
         body.put("title", discussionTitle);
         body.put("content", text);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -924,12 +929,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param discussionTitle String discussion title
      * @return String name (id) of the topic
-     * @throws Exception if error
      */
     public String getDiscussionName(final String userName,
                                     final String password,
                                     final String siteName,
-                                    final String discussionTitle) throws Exception
+                                    final String discussionTitle)
     {
         Map<String, String> ids = getIds(userName, password, siteName, discussionTitle, Page.DISCUSSIONS);
         if(!ids.isEmpty())
@@ -949,12 +953,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param discussionTitle String discussion title
      * @return true if topic exists
-     * @throws Exception if error
      */
     public boolean discussionExists(final String userName,
                                     final String password,
                                     final String siteName,
-                                    final String discussionTitle) throws Exception
+                                    final String discussionTitle)
     {
         if(getDiscussionName(userName, password, siteName, discussionTitle).isEmpty())
         {
@@ -973,18 +976,17 @@ public class SitePagesService
      * @param siteName String site name
      * @param discussionTitle String discussion title
      * @return true if deleted
-     * @throws Exception if error
      */
     public boolean deleteDiscussion(final String userName,
                                     final String password,
                                     final String siteName,
-                                    final String discussionTitle) throws Exception
+                                    final String discussionTitle)
     {
         String discussionName = getDiscussionName(userName, password, siteName, discussionTitle);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "?page=discussions-topicview";
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1005,12 +1007,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param discussionTitle String discussion title
      * @return List<String> of replies
-     * @throws Exception
      */
     public List<String> getDiscussionReplies(final String userName,
                                              final String password,
                                              final String siteName,
-                                             final String discussionTitle) throws Exception
+                                             final String discussionTitle)
     {
         return extractComments(getComments(userName, password, siteName, Page.DISCUSSIONS, discussionTitle));
     }
@@ -1019,7 +1020,7 @@ public class SitePagesService
                                      final String password,
                                      final String siteName,
                                      final Page page,
-                                     final String itemTitle) throws Exception
+                                     final String itemTitle)
     {
         String url;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -1046,7 +1047,14 @@ public class SitePagesService
         }
         HttpGet get = new HttpGet(url);
         HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        return clientWithAuth.execute(get);
+        try
+        {
+            return clientWithAuth.execute(get);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Unable to execute request " + get);
+        }
     }
     
     /**
@@ -1054,10 +1062,8 @@ public class SitePagesService
      * 
      * @param response HttpResponse the response
      * @return List of comments
-     * @throws org.json.simple.parser.ParseException
-     * @throws IOException
      */
-    private List<String> extractComments(HttpResponse response) throws IOException
+    private List<String> extractComments(HttpResponse response)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         List<String> replies = new ArrayList<String>();
@@ -1078,7 +1084,6 @@ public class SitePagesService
      * @param draftBlog boolean if blog is draft
      * @param comment String comment to add
      * @return true if comment is added successfully
-     * @throws Exception
      */
     @SuppressWarnings("unchecked")
     private boolean addComment(final String userName,
@@ -1086,7 +1091,7 @@ public class SitePagesService
                                final String siteName,
                                final String itemTitle,
                                final Page page,
-                               final String comment) throws Exception
+                               final String comment)
     {
         String commentsUrl = null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
@@ -1118,7 +1123,7 @@ public class SitePagesService
         body.put("page", page.pageId);
         body.put("itemTitle", itemTitle);
         body.put("content", comment);
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -1142,13 +1147,12 @@ public class SitePagesService
      * @param discussionTitle String topic title
      * @param reply String reply to topic
      * @return true if reply is added successfully
-     * @throws Exception
      */
     public boolean replyToDiscussion(final String userName,
                                      final String password,
                                      final String siteName,
                                      final String discussionTitle,
-                                     final String reply) throws Exception
+                                     final String reply)
     {
         return addComment(userName, password, siteName, discussionTitle, Page.DISCUSSIONS, reply);
     }
@@ -1162,14 +1166,13 @@ public class SitePagesService
      * @param draft boolean true if draft
      * @param comment String comment to add
      * @return true if comment is added
-     * @throws Exception if error
      */
     public boolean commentBlog(final String userName,
                                final String password, 
                                final String siteName,
                                final String blogTitle,
                                final boolean draft,
-                               final String comment) throws Exception
+                               final String comment)
     {
         return addComment(userName, password, siteName, blogTitle, Page.BLOG, comment);
     }
@@ -1182,13 +1185,12 @@ public class SitePagesService
      * @param linkTitle String link title
      * @param comment String comment
      * @return true if comment is added
-     * @throws Exception if error
      */
     public boolean commentLink(final String userName,
                                final String password, 
                                final String siteName,
                                final String linkTitle,
-                               final String comment) throws Exception
+                               final String comment)
     {
         return addComment(userName, password, siteName, linkTitle, Page.LINKS, comment);
     }
@@ -1201,12 +1203,11 @@ public class SitePagesService
      * @param blogTitle String blog title
      * @param draft boolean if blog is draft
      * @return List<String> of comments
-     * @throws Exception if error
      */
     public List<String> getBlogComments(final String userName,
                                         final String password,
                                         final String siteName,
-                                        final String blogTitle) throws Exception
+                                        final String blogTitle)
     {
         return extractComments(getComments(userName, password, siteName, Page.BLOG, blogTitle));
     }
@@ -1218,12 +1219,11 @@ public class SitePagesService
      * @param siteName String site name
      * @param linkTitle String link title
      * @return List<String> of comments
-     * @throws Exception if error
      */
     public List<String> getLinkComments(final String userName,
                                         final String password,
                                         final String siteName,
-                                        final String linkTitle) throws Exception
+                                        final String linkTitle)
     {
         return extractComments(getComments(userName, password, siteName, Page.LINKS, linkTitle));
     }
@@ -1237,22 +1237,21 @@ public class SitePagesService
      * @param itemTitle String title
      * @param comment String comment
      * @return String nodeRef of the comment
-     * @throws Exception if error
      */
     public String getCommentNodeRef(final String userName,
                                     final String password,
                                     final String siteName,
                                     final Page page,
                                     final String itemTitle,
-                                    final String comment) throws Exception
+                                    final String comment)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         HttpResponse response = getComments(userName, password, siteName, page, itemTitle);
-        return client.getSpecificElementFronJArray(response, "items", comment, "content", "nodeRef");
+        return client.getSpecificElementFromJArray(response, "items", comment, "content", "nodeRef");
     }
     
     /**
-     * 
+     * Delete comment from an item
      * @param userName String user name
      * @param password String password
      * @param siteName String site name
@@ -1260,20 +1259,19 @@ public class SitePagesService
      * @param itemTitle String item title
      * @param comment comment to delete
      * @return true if deleted
-     * @throws Exception if error
      */
     private boolean deleteComment(final String userName,
                                   final String password,
                                   final String siteName,
                                   final Page page,
                                   final String itemTitle,
-                                  final String comment) throws Exception
+                                  final String comment)
     {
        String nodeRef = getCommentNodeRef(userName, password, siteName, page, itemTitle, comment);
        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
        String url = client.getApiUrl() + "comment/node/" + nodeRef.replaceFirst(":/", "");
        HttpDelete delete = new HttpDelete(url);
-       HttpResponse response = client.executeRequest(client, userName, password, delete);
+       HttpResponse response = client.executeRequest(userName, password, delete);
        switch (response.getStatusLine().getStatusCode())
        {
            case HttpStatus.SC_OK:
@@ -1295,13 +1293,12 @@ public class SitePagesService
      * @param blogTitle String blog title
      * @param comment String comment to delete
      * @return true if deleted
-     * @throws Exception if error
      */
     public boolean deleteBlogComment(final String userName,
                                      final String password,
                                      final String siteName,
                                      final String blogTitle,
-                                     final String comment) throws Exception
+                                     final String comment)
     {
         return deleteComment(userName, password, siteName, Page.BLOG, blogTitle, comment);
     }
@@ -1314,13 +1311,12 @@ public class SitePagesService
      * @param linkTitle String link title
      * @param comment String comment to delete
      * @return true if deleted
-     * @throws Exception if error
      */
     public boolean deleteLinkComment(final String userName,
                                      final String password,
                                      final String siteName,
                                      final String linkTitle,
-                                     final String comment) throws Exception
+                                     final String comment)
     {
         return deleteComment(userName, password, siteName, Page.LINKS, linkTitle, comment);
     }

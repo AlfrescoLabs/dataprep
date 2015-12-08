@@ -39,7 +39,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -85,7 +84,6 @@ public class ContentActions extends CMISUtil
      * @param option action type
      * @param value String data
      * @return true if request is successful
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     private boolean addNewAction(final String userName,
@@ -93,7 +91,7 @@ public class ContentActions extends CMISUtil
                                  final String siteName,
                                  final String contentName,
                                  final ActionType option,
-                                 final String value) throws Exception
+                                 final String value)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName) || StringUtils.isEmpty(value))
@@ -110,7 +108,7 @@ public class ContentActions extends CMISUtil
         {
             body.put("myRating", true);
         }
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -140,14 +138,13 @@ public class ContentActions extends CMISUtil
      * @param optType action type
      * @param values List of values
      * @return true if request is successful
-     * @throws Exception if error
      */
     private boolean addMultipleActions(final String userName,
                                        final String password, 
                                        final String siteName,
                                        final String contentName,
                                        final ActionType optType,
-                                       final List<String> values) throws Exception 
+                                       final List<String> values)
     {
         String jsonInput = "";        
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
@@ -168,26 +165,15 @@ public class ContentActions extends CMISUtil
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            HttpResponse response = clientWithAuth.execute(post);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_CREATED:
-                    return true;
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid user name or password");
-                default:
-                    logger.error("Unable to add new action: " + response.toString());
-                    break;
-            }
+        HttpResponse response = client.executeRequest(userName, password, post);
+        if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
+        {      
+            return true;
         }
-        finally
+        else
         {
-            post.releaseConnection();
-            client.close();
-        } 
+            logger.error("Unable to add new action: " + response.toString());
+        }
         return false;
     }
 
@@ -201,14 +187,13 @@ public class ContentActions extends CMISUtil
      * @param optType content actions (e.g. tag, comments, likes)
      * @param actionValue value of the action(e.g tag value, comment content)
      * @return true if tag or comment is removed 
-     * @throws Exception if error
      */
     private boolean removeAction(final String userName,
                                  final String password,
                                  final String siteName,
                                  final String contentName,
                                  final ActionType optType,
-                                 final String actionValue) throws Exception
+                                 final String actionValue)
     {
         String optionNodeRef = "";
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
@@ -235,7 +220,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + optType.name + "/" + optionNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -262,13 +247,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param tag tag for file or folder
      * @return true if request is successful
-     * @throws Exception if error
      */
     public boolean addSingleTag(final String userName,
                                 final String password, 
                                 final String siteName,
                                 final String contentName,
-                                final String tag) throws Exception 
+                                final String tag)
     {
         return addNewAction(userName, password, siteName, contentName, ActionType.TAGS, tag);
     }
@@ -282,13 +266,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param tags list of tags for a file or folder
      * @return true if request is successful
-     * @throws Exception if error
      */
     public boolean addMultipleTags(final String userName,
                                    final String password, 
                                    final String siteName,
                                    final String contentName,
-                                   final List<String> tags) throws Exception 
+                                   final List<String> tags)
     {
         return addMultipleActions(userName, password, siteName, contentName, ActionType.TAGS, tags);
     }
@@ -302,13 +285,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param actionType content actions (e.g. tag, comments, likes)
      * @return String Json response
-     * @throws Exception if error
      */
     private String getOptionResponse(final String userName,
                                      final String password, 
                                      final String siteName,
                                      final String contentName,
-                                     final ActionType actionType) throws Exception
+                                     final ActionType actionType)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName))
@@ -322,8 +304,8 @@ public class ContentActions extends CMISUtil
         {
             reqUrl = reqUrl + "/likes";
         }
-        HttpGet get = new HttpGet(reqUrl);    
-        HttpResponse response = client.executeRequest(client, userName, password, get);
+        HttpGet get = new HttpGet(reqUrl);
+        HttpResponse response = client.executeRequest(userName, password, get);
         if(HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             return client.readStream(response.getEntity()).toJSONString(); 
@@ -339,13 +321,21 @@ public class ContentActions extends CMISUtil
      */
     @SuppressWarnings("unchecked")
     private List<String> getOptionValues(final String response,
-                                         final ActionType optType) throws ParseException
+                                         final ActionType optType)
     {
         List<String> values = new ArrayList<String>();
         if(!StringUtils.isEmpty(response))
         {
             JSONParser parser = new JSONParser();
-            Object obj = parser.parse(response);
+            Object obj;
+            try
+            {
+                obj = parser.parse(response);
+            }
+            catch (ParseException e)
+            {
+                throw new RuntimeException("Unable to parse response " + response);
+            }
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("list");
             JSONArray jArray = (JSONArray) list.get("entries");
@@ -374,13 +364,21 @@ public class ContentActions extends CMISUtil
     @SuppressWarnings("unchecked")
     private String getOptionNodeRef(final String response,
                                     final String value,
-                                    final ActionType optType) throws ParseException
+                                    final ActionType optType)
     {
         String nodeRef = "";
         if(!StringUtils.isEmpty(response))
         {
             JSONParser parser = new JSONParser();
-            Object obj = parser.parse(response);
+            Object obj;
+            try
+            {
+                obj = parser.parse(response);
+            }
+            catch (ParseException e)
+            {
+                throw new RuntimeException("Unable to parse response " + response);
+            }
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("list");
             JSONArray jArray = (JSONArray) list.get("entries");
@@ -411,12 +409,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return List list of tags for a file or folder
-     * @throws Exception if error
      */
     public List<String> getTagNamesFromContent(final String userName,
                                                final String password, 
                                                final String siteName,
-                                               final String contentName) throws Exception
+                                               final String contentName)
     {
         String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
         return getOptionValues(result, ActionType.TAGS);
@@ -431,13 +428,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param tagName tag of a file of folder
      * @return String nodeRef
-     * @throws Exception if error
      */
     public String getTagNodeRef(final String userName,
                                 final String password, 
                                 final String siteName,
                                 final String contentName,
-                                final String tagName) throws Exception
+                                final String tagName)
     {
         String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
         return getOptionNodeRef(result, tagName, ActionType.TAGS);
@@ -452,13 +448,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param tagName tag of a file or folder
      * @return true if deleted
-     * @throws Exception if error
-     */   
+     */
     public boolean removeTag(final String userName,
                              final String password,
                              final String siteName,
                              final String contentName,
-                             final String tagName) throws Exception
+                             final String tagName)
     {
         return removeAction(userName, password, siteName, contentName, ActionType.TAGS, tagName);
     }
@@ -472,13 +467,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param comment comment for a file or folder
      * @return true if request is successful
-     * @throws Exception if error
      */
     public boolean addComment(final String userName,
                               final String password,
                               final String siteName,
                               final String contentName,
-                              final String comment) throws Exception
+                              final String comment)
     {
         return addNewAction(userName, password, siteName, contentName, ActionType.COMMENTS, comment);
     }
@@ -492,13 +486,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param comments list of comments
      * @return true if request is successful
-     * @throws Exception if error
      */
     public boolean addMultipleComments(final String userName,
                                        final String password, 
                                        final String siteName,
                                        final String contentName,
-                                       final List<String> comments) throws Exception 
+                                       final List<String> comments)
     {
         return addMultipleActions(userName, password, siteName, contentName, ActionType.COMMENTS, comments);
     }
@@ -511,12 +504,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return List list of comments
-     * @throws Exception if error
      */
     public List<String> getComments(final String userName,
                                     final String password, 
                                     final String siteName,
-                                    final String contentName) throws Exception
+                                    final String contentName)
     {
         String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
         List<String> comments = getOptionValues(result, ActionType.COMMENTS);
@@ -532,13 +524,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param comment comment of a file or folder
      * @return String nodeRef
-     * @throws Exception if error
      */
     public String getCommentNodeRef(final String userName,
-                                    final String password, 
+                                    final String password,
                                     final String siteName,
                                     final String contentName,
-                                    final String comment) throws Exception
+                                    final String comment)
     {
         String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
         return getOptionNodeRef(result, comment, ActionType.COMMENTS);
@@ -553,13 +544,12 @@ public class ContentActions extends CMISUtil
      * @param contentName file or folder name
      * @param comment comment of a file or folder
      * @return true if deleted
-     * @throws Exception if error
-     */   
+     */
     public boolean removeComment(final String userName,
                                  final String password,
                                  final String siteName,
                                  final String contentName,
-                                 final String comment) throws Exception
+                                 final String comment)
     {
         return removeAction(userName, password, siteName, contentName, ActionType.COMMENTS, comment);
     }
@@ -572,12 +562,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return true if request is successful
-     * @throws Exception if error
      */
     public boolean likeContent(final String userName,
                                final String password,
                                final String siteName,
-                               final String contentName) throws Exception
+                               final String contentName)
     {
         return addNewAction(userName, password, siteName, contentName, ActionType.LIKES, "likes");
     }
@@ -590,18 +579,25 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return int likes
-     * @throws Exception if error
      */
     public int countLikes(final String userName,
                           final String password,
                           final String siteName,
-                          final String contentName) throws Exception
+                          final String contentName)
     {
         String result = getOptionResponse(userName, password, siteName, contentName, ActionType.LIKES);
         if(!StringUtils.isEmpty(result))
         {
             JSONParser parser = new JSONParser();
-            Object obj = parser.parse(result);
+            Object obj;
+            try
+            {
+                obj = parser.parse(result);
+            }
+            catch (ParseException e)
+            {
+                return 0;
+            }
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("entry");
             JSONObject aggregate = (JSONObject) list.get("aggregate");
@@ -619,12 +615,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return true if removed
-     * @throws Exception if error
-     */   
+     */
     public boolean removeLike(final String userName,
                               final String password,
                               final String siteName,
-                              final String contentName) throws Exception
+                              final String contentName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName))
@@ -639,7 +634,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + "/ratings/likes";
         HttpDelete delete = new HttpDelete(reqUrl);  
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -660,13 +655,12 @@ public class ContentActions extends CMISUtil
      * @param contentType ('file' or 'folder')
      * @param contentName file of folder name
      * @return true if marked as favorite
-     * @throws Exception if error
      */ 
     private boolean setFavorite(final String userName,
                                 final String password,
                                 final String siteName,
                                 final String contentType,
-                                final String contentName) throws Exception
+                                final String contentName)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName))
@@ -682,28 +676,17 @@ public class ContentActions extends CMISUtil
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            HttpResponse response = clientWithAuth.execute(post);
+            HttpResponse response = client.executeRequest(userName, password, post);
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_CREATED:
                     return true;
                 case HttpStatus.SC_NOT_FOUND:
                     throw new RuntimeException("Content doesn't exists " + contentName);
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid user name or password ");
                 default:
                     logger.error("Unable to mark as favorite: " + response.toString());
                     break;
             }
-        }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
-        }
         return false;
     }
 
@@ -715,12 +698,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param fileName file name
      * @return true if marked as favorite
-     * @throws Exception if error
      */ 
     public boolean setFileAsFavorite(final String userName,
                                      final String password,
                                      final String siteName,
-                                     final String fileName) throws Exception
+                                     final String fileName)
     {
         return setFavorite(userName, password, siteName, "file", fileName);
     }
@@ -733,12 +715,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param folderName folder name
      * @return true if marked as favorite
-     * @throws Exception if error
      */ 
     public boolean setFolderAsFavorite(final String userName,
                                        final String password,
                                        final String siteName,
-                                       final String folderName) throws Exception
+                                       final String folderName)
     {
         return setFavorite(userName, password, siteName, "folder", folderName);
     }
@@ -751,12 +732,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return true if favorite is removed
-     * @throws Exception if error
      */
     public boolean removeFavorite(final String userName,
                                   final String password,
                                   final String siteName,
-                                  final String contentName) throws Exception
+                                  final String contentName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName))
@@ -771,7 +751,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -791,12 +771,11 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return true if marked as favorite
-     * @throws Exception if error
      */
     public boolean isFavorite(final String userName,
                               final String password,
                               final String siteName,
-                              final String contentName) throws Exception
+                              final String contentName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName))
@@ -811,7 +790,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, get);
+        HttpResponse response = client.executeRequest(userName, password, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -832,12 +811,11 @@ public class ContentActions extends CMISUtil
      * @param siteId site name
      * @param fileName file
      * @return ObjectId object id of PWC
-     * @throws Exception if error
      */
     public ObjectId checkOut(final String userName,
                              final String password,
                              final String siteId,
-                             final String fileName) throws Exception
+                             final String fileName)
     {
         ObjectId id;
         try
@@ -861,12 +839,11 @@ public class ContentActions extends CMISUtil
      * @param siteId site name
      * @param fileName file
      * @return ObjectId object id of PWC
-     * @throws Exception if error
      */
     public void cancelCheckOut(final String userName,
                                final String password,
                                final String siteId,
-                               final String fileName) throws Exception
+                               final String fileName)
     {
         try
         {
@@ -892,7 +869,6 @@ public class ContentActions extends CMISUtil
      * @param majorVersion boolean true to set major version
      * @param checkinComment String check in comment
      * @return ObjectId object id of PWC
-     * @throws Exception if error
      */
     public ObjectId checkIn(final String userName,
                             final String password,
@@ -901,12 +877,14 @@ public class ContentActions extends CMISUtil
                             final DocumentType fileType,
                             final String newContent,
                             final boolean majorVersion,
-                            final String checkinComment) throws Exception
+                            final String checkinComment)
     {
         Document pwc = null;
         Session session = getCMISSession(userName, password);
         Document docToModify = getDocumentObject(session, siteId, docName);
         String id = docToModify.getVersionSeriesCheckedOutId();
+        InputStream stream = null;
+        ContentStream contentStream = null;
         if(!StringUtils.isEmpty(id))
         {
             pwc = (Document) session.getObject(id);
@@ -918,9 +896,16 @@ public class ContentActions extends CMISUtil
             pwc = (Document) session.getObject(idPwc);
         }
         byte[] content = newContent.getBytes();
-        InputStream stream = new ByteArrayInputStream(content);
-        ContentStream contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
-        return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
+        try
+        {
+            stream = new ByteArrayInputStream(content);
+            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+            return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
+        }
+        finally
+        {
+            closeStreams(stream, contentStream);
+        }
     }
     
     /**
@@ -931,12 +916,11 @@ public class ContentActions extends CMISUtil
      * @param siteId site name
      * @param fileName file
      * @return String file version
-     * @throws Exception if error
      */
     public String getVersion(final String userName,
                              final String password,
                              final String siteId,
-                             final String fileName) throws Exception
+                             final String fileName)
     {
         Session session = getCMISSession(userName, password);
         return getDocumentObject(session, siteId, fileName).getVersionLabel();
@@ -952,14 +936,13 @@ public class ContentActions extends CMISUtil
      * @param targetSite tartget site
      * @param targetFolder target folder. If null document library is set
      * @return CmisObject of new created object
-     * @throws Exception
      */
     public CmisObject copyTo(final String userName,
                              final String password,
                              final String sourceSite,
                              final String contentName,
                              final String targetSite,
-                             final String targetFolder) throws Exception
+                             final String targetFolder)
     {
         CmisObject objTarget = null;
         CmisObject copiedContent = null;
@@ -1047,14 +1030,13 @@ public class ContentActions extends CMISUtil
      * @param targetSite tartget site
      * @param targetFolder target folder. If null document library is set
      * @return CmisObject of new created object
-     * @throws Exception
      */
     public CmisObject moveTo(final String userName,
                              final String password,
                              final String sourceSite,
                              final String contentName,
                              final String targetSite,
-                             final String targetFolder) throws Exception
+                             final String targetFolder)
     {
         CmisObject objTarget = null;
         CmisObject movedContent = null;

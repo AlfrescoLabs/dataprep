@@ -49,7 +49,7 @@ public class ContentTest extends AbstractTest
     String plainDoc = "plainDoc";
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void testCreateFolderTwice() throws Exception
+    public void testCreateFolderTwice()
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -60,7 +60,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testCreateFolder() throws Exception
+    public void testCreateFolder()
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -73,7 +73,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void testCreateFolderInvalidSimbols() throws Exception
+    public void testCreateFolderInvalidSimbols()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -84,7 +84,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void createFolderInvalidUser() throws Exception
+    public void createFolderInvalidUser()
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -94,7 +94,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void createFolderInvalidSite() throws Exception
+    public void createFolderInvalidSite()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password, "firstname", "lastname");
@@ -102,7 +102,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testDeleteFolders() throws Exception
+    public void testDeleteFolders()
     {
         String siteName = "siteCMISDelete" + System.currentTimeMillis();
         String userName = "cmisUserDelete" + System.currentTimeMillis();
@@ -124,7 +124,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void deleteNonExistentFolder() throws Exception
+    public void deleteNonExistentFolder()
     {
         String userName = "cmisUserDelete" + System.currentTimeMillis();
         String siteName = "siteCMISDelete" + System.currentTimeMillis();
@@ -134,7 +134,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testCreateDocument() throws Exception
+    public void testCreateDocument()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -158,7 +158,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void testCreateDocInvalidSimbols() throws Exception
+    public void testCreateDocInvalidSimbols()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -169,7 +169,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void createDocFakeSite() throws Exception
+    public void createDocFakeSite()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password, "firstname", "lastname");
@@ -177,7 +177,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void createDuplicatedDoc() throws Exception
+    public void createDuplicatedDoc()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -188,7 +188,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createDocumentInFolder() throws Exception
+    public void createDocumentInFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -200,7 +200,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void createDocInFolderInvalidSymbols() throws Exception
+    public void createDocInFolderInvalidSymbols()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -213,7 +213,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void createDocInNonExistentFolder() throws Exception
+    public void createDocInNonExistentFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -223,7 +223,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createDocumentInSubFolder() throws Exception
+    public void createDocumentInSubFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -241,7 +241,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteDocumentFromRoot() throws Exception
+    public void deleteDocumentFromRoot()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -253,7 +253,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteDocumentFromFolder() throws Exception
+    public void deleteDocumentFromFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -266,7 +266,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void deleteDocumentInvalidSite() throws Exception
+    public void deleteDocumentInvalidSite()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -278,7 +278,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteTree() throws Exception
+    public void deleteTree()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -298,7 +298,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testUploadDocsInDocumentLibrary() throws Exception
+    public void testUploadDocsInDocumentLibrary()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -313,7 +313,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void testUploadDocsFromFileInsteadFolder() throws Exception
+    public void testUploadDocsFromFileInsteadFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -326,7 +326,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testUploadDocsInFolder() throws Exception
+    public void testUploadDocsInFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -343,7 +343,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void testUploadDocsInNonExistentFolder() throws Exception
+    public void testUploadDocsInNonExistentFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -353,7 +353,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void testUploadDocsInFileInsteadFolder() throws Exception
+    public void testUploadDocsInFileInsteadFolder()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -365,7 +365,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testCreateDocumentFile() throws Exception
+    public void testCreateDocumentFile()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -378,7 +378,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testDeleteFiles() throws Exception
+    public void testDeleteFiles()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -395,7 +395,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testDeleteNoFiles() throws Exception
+    public void testDeleteNoFiles()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -408,7 +408,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void testDeleteFilesFromFolders() throws Exception
+    public void testDeleteFilesFromFolders()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -432,7 +432,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void updateContent() throws Exception
+    public void updateContent()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -458,7 +458,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void updateContentEmpty() throws Exception
+    public void updateContentEmpty()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -471,7 +471,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void updateContentInvalidDoc() throws Exception
+    public void updateContentInvalidDoc()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -481,7 +481,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createFolderInRepository() throws Exception
+    public void createFolderInRepository()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password, "firstname", "lastname");
@@ -493,14 +493,14 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void createFolderInRepositoryTwice() throws Exception
+    public void createFolderInRepositoryTwice()
     {
         content.createFolderInRepository(admin, admin, folder, null);
         content.createFolderInRepository(admin, admin, folder, null);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void createFolderInRepositoryUnauthorized() throws Exception
+    public void createFolderInRepositoryUnauthorized()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password, "firstname", "lastname");
@@ -509,7 +509,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createFolderInRepositoryByPath() throws Exception
+    public void createFolderInRepositoryByPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
         Folder newFolder = content.createFolderInRepository(admin, admin, folder, "Guest Home");
@@ -519,14 +519,14 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void createFolderInRepositoryInvalidPath() throws Exception
+    public void createFolderInRepositoryInvalidPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
         content.createFolderInRepository(admin, admin, folder, "Shared/InvalidPath");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteFolderFromRepoUnauthorized() throws Exception
+    public void deleteFolderFromRepoUnauthorized()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, password, "firstname", "lastname");
@@ -537,7 +537,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteFolderFromRepo() throws Exception
+    public void deleteFolderFromRepo()
     {
         String folder = "newFolder" + System.currentTimeMillis();
         Folder newFolder = content.createFolderInRepository(admin, admin, folder, null);
@@ -547,7 +547,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteFolderFromRepoInvalidPath() throws Exception
+    public void deleteFolderFromRepoInvalidPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
         Folder newFolder = content.createFolderInRepository(admin, admin, folder, null);
@@ -556,7 +556,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createDocInRepository() throws Exception
+    public void createDocInRepository()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         Document theDoc = content.createDocumentInRepository(admin, admin, null, DocumentType.TEXT_PLAIN, doc, "doc content");
@@ -564,7 +564,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void createDocInRepositoryTwice() throws Exception
+    public void createDocInRepositoryTwice()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         content.createDocumentInRepository(admin, admin, null, DocumentType.TEXT_PLAIN, doc, "doc content");
@@ -572,7 +572,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createDocInRepositoryByPath() throws Exception
+    public void createDocInRepositoryByPath()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "shareFolder" + System.currentTimeMillis();
@@ -582,7 +582,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void createDocInRepositoryInvalidPath() throws Exception
+    public void createDocInRepositoryInvalidPath()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         Document theDoc = content.createDocumentInRepository(admin, admin, "invalidPath", DocumentType.TEXT_PLAIN, doc, "shared doc content");
@@ -590,7 +590,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void createFileInRepository() throws Exception
+    public void createFileInRepository()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
@@ -599,7 +599,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteFileFromRepository() throws Exception
+    public void deleteFileFromRepository()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
@@ -610,7 +610,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteFileFromRepoInvalidUser() throws Exception
+    public void deleteFileFromRepoInvalidUser()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         Document theDoc = content.createDocumentInRepository(admin, admin, "Shared", DocumentType.TEXT_PLAIN, doc, "shared doc content");
@@ -622,13 +622,13 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteFakeFileFromRepo() throws Exception
+    public void deleteFakeFileFromRepo()
     {
         content.deleteDocumentRepository(admin, admin, null, "fakeDoc");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteFolderWithChildrenNegative() throws Exception
+    public void deleteFolderWithChildrenNegative()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
@@ -640,7 +640,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteFolderWithChildren() throws Exception
+    public void deleteFolderWithChildren()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "shareFolder" + System.currentTimeMillis();
@@ -651,7 +651,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void uploadDocInSite() throws Exception
+    public void uploadDocInSite()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -663,7 +663,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void uploadDocInRepository() throws Exception
+    public void uploadDocInRepository()
     {
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
         Document d = content.uploadFileInRepository(admin, admin, "Shared", pathToFile);
@@ -672,7 +672,7 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void uploadDocTwice() throws Exception
+    public void uploadDocTwice()
     {
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-plaintext.txt";
         Document d = content.uploadFileInRepository(admin, admin, "Shared", pathToFile);
@@ -681,14 +681,14 @@ public class ContentTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void uploadDocFakePath() throws Exception
+    public void uploadDocFakePath()
     {
         String pathToFile = DATA_FOLDER + SLASH + "fakeFile.txt";
         content.uploadFileInRepository(admin, admin, null, pathToFile);
     }
     
     @Test
-    public void createDocInUserHomes() throws Exception
+    public void createDocInUserHomes()
     {
         String user = "user_" + System.currentTimeMillis();
         String doc = "repoDoc-" + System.currentTimeMillis();

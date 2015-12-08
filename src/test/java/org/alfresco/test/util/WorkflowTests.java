@@ -28,7 +28,7 @@ public class WorkflowTests extends AbstractTest
     private final String password = "password";
     
     @Test
-    public void createNewTask() throws Exception
+    public void createNewTask()
     {
         String siteName = "workflowSite" + System.currentTimeMillis();
         String userName = "wUser" + System.currentTimeMillis();
@@ -45,7 +45,7 @@ public class WorkflowTests extends AbstractTest
     }
     
     @Test
-    public void createNewTaskItemsByPath() throws Exception
+    public void createNewTaskItemsByPath()
     {
         String siteName = "workflowSite" + System.currentTimeMillis();
         String userName = "wUser" + System.currentTimeMillis();
@@ -65,7 +65,7 @@ public class WorkflowTests extends AbstractTest
     }
     
     @Test
-    public void createGroupReview() throws Exception
+    public void createGroupReview()
     {
         String siteName = "workflowSite" + System.currentTimeMillis();
         String userName = "WGUser" + System.currentTimeMillis();
@@ -89,7 +89,7 @@ public class WorkflowTests extends AbstractTest
     }
     
     @Test
-    public void createWorkflowMultipleReviewers() throws Exception
+    public void createWorkflowMultipleReviewers()
     {
         String siteName = "workflowSite" + System.currentTimeMillis();
         String userName = "multi-1" + System.currentTimeMillis();
@@ -117,7 +117,7 @@ public class WorkflowTests extends AbstractTest
     }
     
     @Test
-    public void createPooledReview() throws Exception
+    public void createPooledReview()
     {
         String siteName = "workflowSite" + System.currentTimeMillis();
         String userName = "WGUser" + System.currentTimeMillis();
@@ -141,7 +141,7 @@ public class WorkflowTests extends AbstractTest
     }
     
     @Test
-    public void createSingleReviewer() throws Exception
+    public void createSingleReviewer()
     {
         String siteName = "workflowSite" + System.currentTimeMillis();
         String userName = "wUser" + System.currentTimeMillis();

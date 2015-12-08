@@ -37,7 +37,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addContactList() throws Exception
+    public void addContactList()
     {
         String contactList = "contact" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.CONTACT_LIST, contactList, "contact description");
@@ -51,7 +51,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addEventAgenda() throws Exception
+    public void addEventAgenda()
     {
         String eventAgenda = "eventAgenda";
         String doc1 = "doc1" + System.currentTimeMillis();;
@@ -69,7 +69,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addEventAgendaFakeSite() throws Exception
+    public void addEventAgendaFakeSite()
     {
         String eventAgenda = "eventAgenda" + System.currentTimeMillis();
         String doc1 = "doc1" + System.currentTimeMillis();
@@ -83,7 +83,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void attachInvalidDoc() throws Exception
+    public void attachInvalidDoc()
     {
         String eventAgenda = "eventAgenda" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.EVENT_AGENDA, eventAgenda, eventAgenda);
@@ -95,7 +95,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addEventList() throws Exception
+    public void addEventList()
     {
         String eventAgenda = "eventList";
         String doc1 = "doc1" + System.currentTimeMillis();
@@ -114,7 +114,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addIssueList() throws Exception
+    public void addIssueList()
     {
         String issueList = "issueList";
         String userToAssign = "assignUser" + System.currentTimeMillis();
@@ -144,7 +144,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addLocationList() throws Exception
+    public void addLocationList()
     {
         String locationList = "LocationList";
         String doc1 = "doc1" + System.currentTimeMillis();
@@ -162,7 +162,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addMeetingListItem() throws Exception
+    public void addMeetingListItem()
     {
         String meetingList = "meetingList";
         String doc1 = "doc1" + System.currentTimeMillis();
@@ -179,7 +179,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addTaskAdvListItem() throws Exception
+    public void addTaskAdvListItem()
     {
         String taskAdv = "taskAdvList";
         String userToAssign = "assignUser" + System.currentTimeMillis();
@@ -209,7 +209,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addTaskSimpleItem() throws Exception
+    public void addTaskSimpleItem()
     {
         String taskSimple = "simpleTask";
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.TASKS_SIMPLE, taskSimple, "event description");
@@ -220,7 +220,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addToDoItem() throws Exception
+    public void addToDoItem()
     {
         String toDo = "toDoList";
         String userToAssign = "assignUser" + System.currentTimeMillis();

@@ -14,6 +14,7 @@
  */
 package org.alfresco.dataprep;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,8 +39,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,14 +85,13 @@ public class DataListsService extends CMISUtil
      * @param listName name of the new list
      * @param description String description
      * @return ObjectId id of the new created list
-     * @throws Exception 
      */
     public ObjectId createDataList(final String userName,
                                    final String password,
                                    final String siteName,
                                    final DataList listType,
                                    final String listName,
-                                   final String description) throws Exception
+                                   final String description)
     {
         getDataLists(userName, password, siteName);
         UUID uuid = UUID.randomUUID();
@@ -116,11 +118,10 @@ public class DataListsService extends CMISUtil
      * @param password String password
      * @param siteName String site name
      * @return HttpResponse response
-     * @throws Exception if error
      */
     private HttpResponse getDataLists(final String userName,
                                       final String password,
-                                      final String siteName) throws Exception
+                                      final String siteName)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/datalists/lists/site/" + siteName + "/dataLists";
@@ -131,37 +132,41 @@ public class DataListsService extends CMISUtil
             HttpResponse response = clientWithAuth.execute(get);
             return response;
         }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to execute request: " + get);
+        }
         finally
         {
             client.close();
         }
     }
     
-    /**
-     * 
-     * @param userName
-     * @param password
-     * @param siteName
-     * @param dataListTitle
-     * @return
-     * @throws Exception
-     */
     @SuppressWarnings("unchecked")
     private List<String> getDataListIds(final String userName,
                                         final String password,
                                         final String siteName,
-                                        final String dataListTitle) throws Exception
+                                        final String dataListTitle)
     {
         List<String>ids = new ArrayList<String>();
         HttpResponse response = getDataLists(userName, password, siteName);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
-                String strResponse = EntityUtils.toString(response.getEntity());
-                JSONParser parser = new JSONParser();
-                Object obj = parser.parse(strResponse);
+                String strResponse = "";
+                Object obj = null;
+                try
+                {
+                    strResponse = EntityUtils.toString(response.getEntity());
+                    JSONParser parser = new JSONParser();
+                    obj = parser.parse(strResponse);
+                }
+                catch (ParseException | IOException e)
+                {
+                    throw new RuntimeException("Failed to parse the response: " + strResponse);
+                }
                 JSONObject jsonObject = (JSONObject) obj;
-                org.json.simple.JSONArray jArray = (org.json.simple.JSONArray) jsonObject.get("datalists");
+                JSONArray jArray = (JSONArray) jsonObject.get("datalists");
                 Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
                 while (iterator.hasNext()) 
                 {
@@ -185,19 +190,35 @@ public class DataListsService extends CMISUtil
         return ids;
     }
     
+    /**
+     * Get data list node ref
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param dataListTitle String data list title
+     * @return String data list node ref
+     */
     public String getDataListNodeRef(final String userName,
                                      final String password,
                                      final String siteName,
-                                     final String dataListTitle) throws Exception
+                                     final String dataListTitle)
     {
         List<String> ids = getDataListIds(userName, password, siteName, dataListTitle);
         return ids.get(0);
     }
     
+    /**
+     * Get data list name
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param dataListTitle String data list title
+     * @return String data list name
+     */
     public String getDataListName(final String userName,
                                   final String password,
                                   final String siteName,
-                                  final String dataListTitle) throws Exception
+                                  final String dataListTitle)
     {
         List<String> ids = getDataListIds(userName, password, siteName, dataListTitle);
         return ids.get(1);
@@ -210,12 +231,12 @@ public class DataListsService extends CMISUtil
      * @param password String password
      * @param objectId ObjectId ID of created data list
      * @param propertiesMap details of the item
-     * @throws Exception if error
+     * @return {@link ObjectId} of new created item
      */
     private ObjectId addItem(final String userName,
                             final String password,
                             final ObjectId objectId,
-                            Map<String, Object> propertiesMap) throws Exception
+                            Map<String, Object> propertiesMap)
     {
         try
         {
@@ -242,8 +263,7 @@ public class DataListsService extends CMISUtil
      * @param phoneOffice String office phone
      * @param phoneMobile String mobile phone
      * @param notes String notes
-     * @return
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addContactListItem(final String userName,
                                        final String password,
@@ -256,7 +276,7 @@ public class DataListsService extends CMISUtil
                                        final String jobTitle,
                                        final String phoneOffice,
                                        final String phoneMobile,
-                                       final String notes) throws Exception
+                                       final String notes)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -289,8 +309,7 @@ public class DataListsService extends CMISUtil
      * @param audience String event audience
      * @param notes String notes
      * @param docsToAttach List<String> documents name to attach from siteName
-     * @return ObjectId event agenda item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addEventAgendaItem(final String userName,
                                        final String password,
@@ -303,7 +322,7 @@ public class DataListsService extends CMISUtil
                                        final String presenter,
                                        final String audience,
                                        final String notes,
-                                       final List<String> docsToAttach) throws Exception
+                                       final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -341,8 +360,7 @@ public class DataListsService extends CMISUtil
      * @param registration String registration
      * @param notes String notes
      * @param docsToAttach List<String> docs name to attach from siteName
-     * @return ObjectId of the created item
-     * @throws Exception if error
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addEventListItem(final String userName,
                                      final String password,
@@ -355,7 +373,7 @@ public class DataListsService extends CMISUtil
                                      Date endDate,
                                      final String registration,
                                      final String notes,
-                                     final List<String> docsToAttach) throws Exception
+                                     final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -399,8 +417,7 @@ public class DataListsService extends CMISUtil
      * @param dueDate Date due date
      * @param comments String issue comments
      * @param docsToAttach List<String> documents to attach to issue
-     * @return ObjectId new issue list item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addIssueListItem(final String userName,
                                      final String password,
@@ -414,7 +431,7 @@ public class DataListsService extends CMISUtil
                                      final String description,
                                      Date dueDate,
                                      final String comments,
-                                     final List<String> docsToAttach) throws Exception
+                                     final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -462,8 +479,7 @@ public class DataListsService extends CMISUtil
      * @param country String country
      * @param description String description
      * @param docsToAttach List<String> documents to attach to item
-     * @return ObjectId new location list item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addLocationItem(final String userName,
                                     final String password,
@@ -477,7 +493,7 @@ public class DataListsService extends CMISUtil
                                     final String state,
                                     final String country,
                                     final String description,
-                                    final List<String> docsToAttach) throws Exception
+                                    final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -519,8 +535,7 @@ public class DataListsService extends CMISUtil
      * @param time String time
      * @param owner String owner
      * @param docsToAttach List<String> documents to attach to item
-     * @return ObjectId new meeting agenda item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addMeetingItem(final String userName,
                                    final String password,
@@ -531,7 +546,7 @@ public class DataListsService extends CMISUtil
                                    final String description,
                                    final String time,
                                    final String owner,
-                                   final List<String> docsToAttach) throws Exception
+                                   final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -573,8 +588,7 @@ public class DataListsService extends CMISUtil
      * @param complete int complete (0-100)
      * @param comments String item comments
      * @param docsToAttach List<String> documents to attach to item
-     * @return ObjectId new task list advanced item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addTaskAdvancedItem(final String userName,
                                         final String password,
@@ -589,7 +603,7 @@ public class DataListsService extends CMISUtil
                                         final Status status,
                                         final int complete,
                                         final String comments,
-                                        final List<String> docsToAttach) throws Exception
+                                        final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -638,8 +652,7 @@ public class DataListsService extends CMISUtil
      * @param priority Priority item priority
      * @param status Status item status
      * @param comments String comments
-     * @return ObjectId new task simple item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addTaskSimpleItem(final String userName,
                                       final String password,
@@ -650,7 +663,7 @@ public class DataListsService extends CMISUtil
                                       final Date dueDate,
                                       final Priority priority,
                                       final Status status,
-                                      final String comments) throws Exception
+                                      final String comments)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -686,8 +699,7 @@ public class DataListsService extends CMISUtil
      * @param notes String notes
      * @param assignedToUser String assigned user
      * @param docsToAttach List<String> documents to attach to item
-     * @return ObjectId new to do item
-     * @throws Exception
+     * @return {@link ObjectId} of new created item
      */
     public ObjectId addToDoItem(final String userName,
                                 final String password,
@@ -699,7 +711,7 @@ public class DataListsService extends CMISUtil
                                 final Status status,
                                 final String notes,
                                 final String assignedToUser,
-                                final List<String> docsToAttach) throws Exception
+                                final List<String> docsToAttach)
     {
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         UUID uuid = UUID.randomUUID();
@@ -746,14 +758,13 @@ public class DataListsService extends CMISUtil
      * @param passwordAssigner String password
      * @param usersToAssign List<String> user names to be assigned
      * @param assignTo ObjectId the object that will be assigned
-     * @param objectTypeId String type
-     * @throws Exception if error
+     * @param objectTypeId String type id
      */
     private void assignUser(final String assigner,
                             final String passwordAssigner,
                             final List<String>usersToAssign,
                             final ObjectId assignTo,
-                            final String objectTypeId) throws Exception
+                            final String objectTypeId)
     {
         Session session = getCMISSession(assigner, passwordAssigner);
         for(int i = 0; i<usersToAssign.size(); i++)

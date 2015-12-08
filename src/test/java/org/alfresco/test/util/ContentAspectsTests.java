@@ -57,7 +57,7 @@ public class ContentAspectsTests extends AbstractTest
     String folder = "cmisFolder";
     
     @Test
-    public void addDocAspect() throws Exception
+    public void addDocAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -76,7 +76,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void addAspectInvalidDoc() throws Exception
+    public void addAspectInvalidDoc()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -91,7 +91,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addDocComplianceableAspect() throws Exception
+    public void addDocComplianceableAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -113,7 +113,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test 
-    public void addFolderComplianceableAspect() throws Exception
+    public void addFolderComplianceableAspect()
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -134,7 +134,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void removeDocComplianceable() throws Exception
+    public void removeDocComplianceable()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -157,7 +157,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test 
-    public void removeFolderComplianceable() throws Exception
+    public void removeFolderComplianceable()
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis(); 
@@ -179,7 +179,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void removeAspectInvalidContent() throws Exception
+    public void removeAspectInvalidContent()
     {
         String siteName = "siteCMIS-" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -194,7 +194,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addDocDublinCore() throws Exception
+    public void addDocDublinCore()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -221,7 +221,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void removeDublinCore() throws Exception
+    public void removeDublinCore()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -243,7 +243,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addEffectivity() throws Exception
+    public void addEffectivity()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -267,7 +267,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addGeographicAspect() throws Exception
+    public void addGeographicAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -289,7 +289,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addSummarizableAspect() throws Exception
+    public void addSummarizableAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -309,7 +309,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addTemplatableAspect() throws Exception
+    public void addTemplatableAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -330,7 +330,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addTemplatableFakeTemplate() throws Exception
+    public void addTemplatableFakeTemplate()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -347,7 +347,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void removeTemplatableAspect() throws Exception
+    public void removeTemplatableAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -369,7 +369,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addEmailedAspect() throws Exception
+    public void addEmailedAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -397,7 +397,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addIndexControlAspect() throws Exception
+    public void addIndexControlAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -417,7 +417,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addRestrictableAspectAspect() throws Exception
+    public void addRestrictableAspectAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -437,7 +437,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addClasifiableAspect() throws Exception
+    public void addClasifiableAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -461,7 +461,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void removeClasifiableAspect() throws Exception
+    public void removeClasifiableAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -489,7 +489,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addAudioAspect() throws Exception
+    public void addAudioAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -508,7 +508,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addExifAspect() throws Exception
+    public void addExifAspect()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
         String userName = "cmisUser" + System.currentTimeMillis();
@@ -527,7 +527,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void addTagDocument() throws Exception
+    public void addTagDocument()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -551,7 +551,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void getBasicProperties() throws Exception
+    public void getBasicProperties()
     {
         String siteName = "siteBasic" + System.currentTimeMillis();
         String userName = "userBasic" + System.currentTimeMillis();
@@ -579,7 +579,7 @@ public class ContentAspectsTests extends AbstractTest
     }
     
     @Test
-    public void setBasicProperties() throws Exception
+    public void setBasicProperties()
     {
         String siteName = "siteSetBasic" + System.currentTimeMillis();
         String userName = "userSetBasic" + System.currentTimeMillis();

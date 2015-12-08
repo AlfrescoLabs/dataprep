@@ -48,6 +48,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
@@ -93,14 +94,13 @@ public class SiteService
      * @param siteId site identifier
      * @param description site description
      * @param visibility site visibility type
-     * @throws IOException io error
      */
     public void create(final String username,
                        final String password,
                        final String domain,
                        final String siteId,
                        final String description,
-                       final Visibility visibility) throws IOException
+                       final Visibility visibility)
     {
         create(username, password, domain, siteId, siteId, description, visibility);
     }
@@ -114,7 +114,6 @@ public class SiteService
     * @param title SiteName
     * @param description site description
     * @param visibility site visibility
-    * @throws IOException io error
     */
    public void create(final String username,
                       final String password,
@@ -122,15 +121,22 @@ public class SiteService
                       final String siteId,
                       final String title,
                       final String description,
-                      final Visibility visibility) throws IOException
+                      final Visibility visibility)
    {
        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
-       publicApi.createSite(domain,
-                            siteId,
-                            "site-dashboard", 
-                            title,
-                            description, 
-                            visibility);
+       try
+       {
+           publicApi.createSite(domain,
+                                siteId,
+                                "site-dashboard", 
+                                title,
+                                description, 
+                                visibility);
+       }
+       catch (IOException e)
+       {
+           throw new RuntimeException("Failed to create site:" + siteId);
+       }
    }
     /**
      * Checks if site exists
@@ -139,11 +145,10 @@ public class SiteService
      * @param username site user
      * @param password user password
      * @return true if exists
-     * @throws Exception if error
      */
-    public boolean exists(final String siteId, 
+    public boolean exists(final String siteId,
                           final String username,
-                          final String password) throws Exception
+                          final String password)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         try
@@ -174,7 +179,7 @@ public class SiteService
      */
     public void delete(final String username,
                        final String password,
-                       final String domain, 
+                       final String domain,
                        final String siteId)
     {
         Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
@@ -186,11 +191,10 @@ public class SiteService
      * 
      * @param username site user
      * @param password user password
-     * @return list of sites
-     * @throws Exception if error
+     * @return List<String> list of sites
      */
     public List<String> getSites(final String userName,
-                                 final String password) throws Exception
+                                 final String password)
     {
         List<String> mySitesList = new ArrayList<String>();
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -213,12 +217,17 @@ public class SiteService
                 }
             }
             return mySitesList;
+        }
+        catch (IOException e)
+        {
+            logger.error("Failed to execute request:" + get);
         } 
         finally
         {
             get.releaseConnection();
             client.close();
         }
+        return mySitesList;
     }
     
     /**
@@ -232,7 +241,7 @@ public class SiteService
      */
     public String getSiteNodeRef(final String userName,
                                  final String password,
-                                 final String siteName) throws Exception
+                                 final String siteName)
     {
         String siteNodeRef = "";
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
@@ -260,8 +269,12 @@ public class SiteService
             }
             else
             {
-                throw new RuntimeException("Unable to get node ref of " + siteName + " " + response.getStatusLine());
+                logger.error("Unable to get node ref of " + siteName + " " + response.getStatusLine());
             }
+        }
+        catch (IOException | ParseException e)
+        {
+            logger.error("Failed to execute request:" + get);
         }
         finally
         {
@@ -278,11 +291,11 @@ public class SiteService
      * @param password String password
      * @param siteName String site name
      * @return true if marked as favorite
-     * @throws Exception if error
+     * @throws RuntimeException if site doesn't exists
      */
     public boolean setFavorite(final String userName,
                                final String password,
-                               final String siteName) throws Exception
+                               final String siteName)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
@@ -297,28 +310,17 @@ public class SiteService
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
+        HttpResponse response = client.executeRequest(userName, password, post);
+        switch (response.getStatusLine().getStatusCode())
         {
-            HttpResponse response = clientWithAuth.execute(post);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_CREATED:
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Site doesn't exists " + siteName);
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new RuntimeException("Invalid user name or password");
-                default:
-                    logger.error("Unable to mark as favorite: " + response.toString());
-                    break;
-            }
+            case HttpStatus.SC_CREATED:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Site doesn't exists " + siteName);
+            default:
+                logger.error("Unable to mark as favorite: " + response.toString());
+                break;
         }
-        finally
-        {
-            post.releaseConnection();
-            client.close();
-        } 
         return false;
     }
     
@@ -329,11 +331,10 @@ public class SiteService
      * @param password String password
      * @param siteName String site name
      * @return true if marked as favorite
-     * @throws Exception if error
      */
     public boolean isFavorite(final String userName,
                               final String password,
-                              final String siteName) throws Exception
+                              final String siteName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
@@ -342,9 +343,8 @@ public class SiteService
         String nodeRef = getSiteNodeRef(userName, password, siteName);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + nodeRef;
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = clientWithAuth.execute(get);
+        HttpResponse response = client.executeRequest(userName, password, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -356,7 +356,7 @@ public class SiteService
         else
         {
             return false;
-        }   
+        }
     }
     
     /**
@@ -366,11 +366,10 @@ public class SiteService
      * @param password String password
      * @param siteName String site name
      * @return true if favorite is removed
-     * @throws Exception if error
      */
     public boolean removeFavorite(final String userName,
                                   final String password,
-                                  final String siteName) throws Exception
+                                  final String siteName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
@@ -384,7 +383,7 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + siteNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, userName, password, delete);
+        HttpResponse response = client.executeRequest(userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -396,7 +395,7 @@ public class SiteService
         else
         {
             return false;
-        }   
+        }
     }
     
     /**
@@ -409,7 +408,6 @@ public class SiteService
      * @param page - single page to be added
      * @param pages - list of pages to be added
      * @return true if the page is added
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     private boolean addPages(final String userName,
@@ -417,7 +415,7 @@ public class SiteService
                              final String siteName,
                              final boolean multiplePages,
                              final Page page,
-                             final List<Page> pages) throws Exception
+                             final List<Page> pages)
     {
         if(!exists(siteName, userName, password))
         {
@@ -448,7 +446,7 @@ public class SiteService
         body.put("pages", array);
         body.put("themeId", "");
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -475,13 +473,12 @@ public class SiteService
      * @param page to add
      * @param oldPages - pages that were added previously
      * @return true if the page is added
-     * @throws Exception if error
      */
     public boolean addPageToSite(final String userName,
                                  final String password,
                                  final String siteName,
                                  final Page page,
-                                 final List<Page> oldPages) throws Exception
+                                 final List<Page> oldPages)
     {
         return addPages(userName, password, siteName, false, page, oldPages);
     }
@@ -494,12 +491,11 @@ public class SiteService
      * @param siteName String site name
      * @param pages to add
      * @return true if pages are added
-     * @throws Exception if error
      */
     public boolean addPagesToSite(final String userName,
                                  final String password,
                                  final String siteName,
-                                 final List<Page> pages) throws Exception
+                                 final List<Page> pages)
     {
         return addPages(userName, password, siteName, true, null, pages);
     }
@@ -515,7 +511,6 @@ public class SiteService
      * @param column int index of columns
      * @param position int position in column
      * @return true if the dashlet is added
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean addDashlet(final String userName,
@@ -524,7 +519,7 @@ public class SiteService
                               final SiteDashlet dashlet,
                               final DashletLayout layout,
                               final int column,
-                              final int position) throws Exception
+                              final int position)
     {        
         if(!exists(siteName, userName, password))
         {
@@ -557,7 +552,7 @@ public class SiteService
         array.add(newDashlet);
         body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -582,14 +577,13 @@ public class SiteService
      * @param description String site description
      * @param compliance RMSiteCompliance site compliance
      * @return true if site is created
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean createRMSite(final String userName,
                                 final String password,
                                 final String title,
                                 final String description,
-                                final RMSiteCompliance compliance) throws Exception
+                                final RMSiteCompliance compliance)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(title))
         {
@@ -649,6 +643,10 @@ public class SiteService
                     logger.error("Unable to create RM site: " + response.toString());
                     break;
             }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to execute the request");
         }
         finally
         {

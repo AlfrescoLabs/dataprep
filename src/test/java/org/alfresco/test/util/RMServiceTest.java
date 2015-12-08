@@ -41,19 +41,19 @@ public class RMServiceTest extends AbstractTest
         siteId = "michael" + System.currentTimeMillis();
     }
     @Test
-    public void createRMSite() throws Exception
+    public void createRMSite()
     {   
         Assert.assertTrue(site.createRMSite(ADMIN, ADMIN, "Records Management", "RM Site Description", RMSiteCompliance.STANDARD));
     }
     
     @Test(expectedExceptions = RuntimeException.class, dependsOnMethods="createRMSite")
-    public void addRMSiteTwice() throws Exception
+    public void addRMSiteTwice()
     {   
         site.createRMSite(ADMIN, ADMIN, "FirstRMSite", "description", RMSiteCompliance.STANDARD);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void createRMSiteFakeCredentials() throws Exception
+    public void createRMSiteFakeCredentials()
     {
         Assert.assertTrue(site.createRMSite(ADMIN, "fakepass", "FirstRMSite", "", RMSiteCompliance.STANDARD));
     }

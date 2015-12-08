@@ -14,6 +14,8 @@
  */
 package org.alfresco.dataprep;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,6 +38,7 @@ import org.apache.chemistry.opencmis.client.api.Tree;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
@@ -149,10 +152,10 @@ public class CMISUtil
      * @param userName String identifier
      * @param password String password
      * @return Session the session
-     * @throws Exception if error
+     * @throws CmisRuntimeException if invalid user and password
      */
-    public Session getCMISSession(final String userName, 
-                                  final String password) throws Exception
+    public Session getCMISSession(final String userName,
+                                  final String password)
     {
         SessionFactory factory = SessionFactoryImpl.newInstance();
         Map<String, String> parameter = new HashMap<String, String>();
@@ -185,12 +188,12 @@ public class CMISUtil
      * @param siteName String site identifier
      * @param contentName String content identifier
      * @return String node identifier
-     * @throws Exception if error
+     * @throws CmisRuntimeException if site is not found
      */
     public String getNodeRef(final String userName,
                              final String password,
                              final String siteName,
-                             final String contentName) throws Exception
+                             final String contentName)
     {
         String nodeRef = "";
         contents.clear();
@@ -225,11 +228,11 @@ public class CMISUtil
      * @param siteName String site identifier
      * @param contentName String content identifier
      * @return String node identifier
-     * @throws Exception if error
+     * @throws CmisRuntimeException if site is not found
      */
     public String getNodeRef(final Session session,
                              final String siteName,
-                             final String contentName) throws Exception
+                             final String contentName)
     {
         String nodeRef = "";
         contents.clear();
@@ -276,12 +279,11 @@ public class CMISUtil
      * @param contentName String content identifier
      * @param path String path to the object (e.g. 'Shared'). If empty or null 'Company home' is set.
      * @return String node identifier
-     * @throws Exception if error
      */
     public String getNodeRefFromRepo(final String userName,
                                      final String password,
                                      final String contentName,
-                                     String path) throws Exception
+                                     String path)
     {
         String nodeRef = "";
         Session session = getCMISSession(userName, password);
@@ -319,11 +321,10 @@ public class CMISUtil
      * @param password String password
      * @param pathToContent String path to item (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @return String node ref of the item
-     * @throws Exception if error
      */
     public String getNodeRefFromPath(final String userName,
                                      final String password,
-                                     final String pathToContent) throws Exception
+                                     final String pathToContent)
     {
         Session session = getCMISSession(userName, password);
         if(StringUtils.isEmpty(pathToContent))
@@ -348,11 +349,10 @@ public class CMISUtil
      * @param password String password
      * @param contentNodeRef String node identifier
      * @param documentAspects aspect to apply on node
-     * @throws Exception if error
      */
     public void addAspect(final Session session,
                           final String contentNodeRef,
-                          List<DocumentAspect> documentAspects) throws Exception
+                          List<DocumentAspect> documentAspects)
     {
         try
         {
@@ -389,11 +389,10 @@ public class CMISUtil
      * @param password String password
      * @param contentNodeRef String node identifier
      * @param propertiesMap Map of properties
-     * @throws Exception if error
      */
     public void addProperties(final Session session,
                               final String contentNodeRef,
-                              Map<String, Object> propertiesMap) throws Exception
+                              Map<String, Object> propertiesMap)
     {
         try
         {
@@ -414,12 +413,11 @@ public class CMISUtil
      * @param siteName String site identifier
      * @param contentName String content identifier
      * @return {@link Property} list of content properties
-     * @throws Exception if error
      */
     public List<Property<?>> getProperties(final String userName,
                                            final String password,
                                            final String siteName,
-                                           final String contentName) throws Exception
+                                           final String contentName)
     {
         Session session = getCMISSession(userName, password);
         String nodeRef = getNodeRef(session, siteName, contentName);
@@ -458,7 +456,7 @@ public class CMISUtil
      * 
      * @param propertyList List of {@link Property}
      * @param propertyName String name of property
-     * @return List of values 
+     * @return List of values
      */
     public List<?> getValues(final List<Property<?>> propertyList, 
                              final String propertyName)
@@ -481,11 +479,10 @@ public class CMISUtil
      * @param password String password
      * @param categoryName String category name
      * @return String node identifier
-     * @throws Exception if error
      */
     public String getCategoryNodeRef(final String userName,
                                      final String password,
-                                     final String categoryName) throws Exception
+                                     final String categoryName)
     {
         List<CmisObject> objList = new ArrayList<CmisObject>();
         String categoryNodeRef = "";
@@ -515,11 +512,10 @@ public class CMISUtil
      * @param userName String user name
      * @param password String password
      * @return String nodeRef of userName
-     * @throws Exception
      */
     public String getUserNodeRef(final String userManager,
                                  final String password,
-                                 final String searchedUser) throws Exception
+                                 final String searchedUser)
     {
         Session session = getCMISSession(userManager, password);
         String objectId = "";
@@ -539,13 +535,12 @@ public class CMISUtil
      * @param siteName String site name
      * @param docsToAttach String document to attach
      * @param attachToObj ObjectId attach to object
-     * @throws Exception
      */
     public void attachDocuments(final String userName,
                                 final String password,
                                 final String siteName,
                                 final List<String> docsToAttach,
-                                final ObjectId attachToObj) throws Exception
+                                final ObjectId attachToObj)
     {
         Session session = getCMISSession(userName, password);
         for(int i = 0; i<docsToAttach.size(); i++)
@@ -587,11 +582,10 @@ public class CMISUtil
      * @param siteId site id
      * @param contentName file or folder name
      * @return CmisObject cmis object
-     * @throws Exception if error
      */
     public CmisObject getCmisObject(final Session session,
                                     final String siteId,
-                                    final String contentName) throws Exception
+                                    final String contentName)
     {
         if (StringUtils.isEmpty(siteId) || StringUtils.isEmpty(contentName))
         {
@@ -613,11 +607,10 @@ public class CMISUtil
      * @param siteId site id
      * @param contentName file or folder name
      * @return CmisObject cmis object
-     * @throws Exception if error
      */
     public Document getDocumentObject(final Session session,
                                       final String siteId,
-                                      final String fileName) throws Exception
+                                      final String fileName)
     {
         Document d = null;
         CmisObject docObj = getCmisObject(session, siteId, fileName);
@@ -639,11 +632,10 @@ public class CMISUtil
      * @param siteId site id
      * @param contentName file or folder name
      * @return CmisObject cmis object
-     * @throws Exception if error
      */
     public Folder getFolderObject(final Session session,
                                   final String siteId,
-                                  final String folderName) throws Exception
+                                  final String folderName)
     {
         Folder f = null;
         CmisObject folderObj = getCmisObject(session, siteId, folderName);
@@ -656,6 +648,25 @@ public class CMISUtil
             throw new CmisRuntimeException("Content " + folderName + " is not a folder");
         }
         return f;
+    }
+    
+    /**
+     * Close streams
+     * @param stream
+     * @param contentStream
+     */
+    public void closeStreams(InputStream stream,
+                             ContentStream contentStream)
+    {
+        try
+        {
+            stream.close();
+            contentStream.getStream().close();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Unable to close the stream");
+        }
     }
 }
 

@@ -40,7 +40,6 @@ import org.testng.annotations.Test;
  * 
  * @author Bogdan Bocancea
  */
-
 public class ContentActionsTests extends AbstractTest
 {   
     @Autowired private UserService userService;
@@ -55,7 +54,7 @@ public class ContentActionsTests extends AbstractTest
     String commentDoc = "commentDoc";
     
     @Test
-    public void addSingleTagDocument() throws Exception
+    public void addSingleTagDocument()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -75,7 +74,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addTagSymbols() throws Exception
+    public void addTagSymbols()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -94,7 +93,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addMultipleTagsDocument() throws Exception
+    public void addMultipleTagsDocument()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -121,7 +120,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addTagInvalidContent() throws Exception
+    public void addTagInvalidContent()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -137,7 +136,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addTagInvalidUser() throws Exception
+    public void addTagInvalidUser()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -155,7 +154,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addTagInvalidSite() throws Exception
+    public void addTagInvalidSite()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -172,7 +171,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test 
-    public void addTagFolder() throws Exception
+    public void addTagFolder()
     {
         String siteName = "siteTag-" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -192,7 +191,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addMultipleTagsFolder() throws Exception
+    public void addMultipleTagsFolder()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -219,7 +218,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void deleteTag() throws Exception
+    public void deleteTag()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -240,7 +239,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteTagInvalidTag() throws Exception
+    public void deleteTagInvalidTag()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -259,7 +258,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteTagInvalidContent() throws Exception
+    public void deleteTagInvalidContent()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -278,7 +277,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void deleteTagInvalidSite() throws Exception
+    public void deleteTagInvalidSite()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -297,7 +296,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addCommentForDocument() throws Exception
+    public void addCommentForDocument()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -316,7 +315,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addCommentForFolder() throws Exception
+    public void addCommentForFolder()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -335,7 +334,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addCommentInvalidContent() throws Exception
+    public void addCommentInvalidContent()
     {
         String siteName = "siteTag" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -351,7 +350,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addCommentInvalidSite() throws Exception
+    public void addCommentInvalidSite()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
@@ -368,7 +367,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void addEmptyComment() throws Exception
+    public void addEmptyComment()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -377,7 +376,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void deleteCommentDocument() throws Exception
+    public void deleteCommentDocument()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -399,7 +398,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addMultipleCommentsDocument() throws Exception
+    public void addMultipleCommentsDocument()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -426,7 +425,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void likeDocument() throws Exception
+    public void likeDocument()
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
@@ -449,7 +448,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void likeInvalidDoc() throws Exception
+    public void likeInvalidDoc()
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
@@ -464,7 +463,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void likeInvalidUser() throws Exception
+    public void likeInvalidUser()
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
@@ -481,7 +480,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void removeLike() throws Exception
+    public void removeLike()
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
@@ -506,7 +505,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteLikeInvalidDoc() throws Exception
+    public void deleteLikeInvalidDoc()
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
@@ -521,7 +520,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void likeFolder() throws Exception
+    public void likeFolder()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis(); 
@@ -539,7 +538,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void removeLikeFromFolder() throws Exception
+    public void removeLikeFromFolder()
     {
         String siteName = "siteLike" + System.currentTimeMillis();
         String userName = "likeUser" + System.currentTimeMillis();
@@ -563,7 +562,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void setFavoriteDocument() throws Exception
+    public void setFavoriteDocument()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -581,7 +580,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test 
-    public void setFavoriteFolder() throws Exception
+    public void setFavoriteFolder()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -598,7 +597,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void favoriteFakeDocument() throws Exception
+    public void favoriteFakeDocument()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -613,7 +612,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void favoriteFakeFolder() throws Exception
+    public void favoriteFakeFolder()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -628,7 +627,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void favoriteFakeSite() throws Exception
+    public void favoriteFakeSite()
     {
         String userName = "favUser" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, "fname", "lname");
@@ -636,7 +635,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void setFavoriteDocumentTwice() throws Exception
+    public void setFavoriteDocumentTwice()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -654,7 +653,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void removeDocumentFavorite() throws Exception
+    public void removeDocumentFavorite()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -673,7 +672,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test 
-    public void removeFavoriteFolder() throws Exception
+    public void removeFavoriteFolder()
     {
         String siteName = "siteFav" + System.currentTimeMillis();
         String userName = "favUser" + System.currentTimeMillis();
@@ -691,7 +690,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void editOffline() throws Exception
+    public void editOffline()
     {
         String siteName = "editSite" + System.currentTimeMillis();
         String userName = "editUser" + System.currentTimeMillis();
@@ -710,7 +709,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void cancelNotEditedFile() throws Exception
+    public void cancelNotEditedFile()
     {
         String siteName = "editSite" + System.currentTimeMillis();
         String docName = "editDoc";
@@ -725,7 +724,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void editOfflineFolder() throws Exception
+    public void editOfflineFolder()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String folder = "folderTest";
@@ -740,7 +739,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void editOfflineTwice() throws Exception
+    public void editOfflineTwice()
     {
         String siteName = "editSite" + System.currentTimeMillis();
         String userName = "editUser" + System.currentTimeMillis();
@@ -758,7 +757,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void checkIn() throws Exception
+    public void checkIn()
     {
         String siteName = "checkInSite" + System.currentTimeMillis();
         String userName = "checkInUser" + System.currentTimeMillis();
@@ -780,7 +779,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void folderCopyTo() throws Exception
+    public void folderCopyTo()
     {
         String siteName = "copyToSite" + System.currentTimeMillis();
         String userName = "copytoUser" + System.currentTimeMillis();
@@ -808,7 +807,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void copyFileAnotherSite() throws Exception
+    public void copyFileAnotherSite()
     {
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         String siteName2 = "targetSite" + System.currentTimeMillis();
@@ -822,7 +821,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void copyFileNonExistentTarget() throws Exception
+    public void copyFileNonExistentTarget()
     {
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         String fileToCopy = "fileToCopy";
@@ -832,7 +831,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void copyFileNonExistentSource() throws Exception
+    public void copyFileNonExistentSource()
     {
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
@@ -840,7 +839,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void moveTo() throws Exception
+    public void moveTo()
     {
         String siteName = "moveToSite" + System.currentTimeMillis();
         String userName = "moveUser" + System.currentTimeMillis();
@@ -872,7 +871,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void moveFileNonExistentTarget() throws Exception
+    public void moveFileNonExistentTarget()
     {
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         String fileToMove = "fileToCopy";
@@ -882,7 +881,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
-    public void moveFileNonExistentSource() throws Exception
+    public void moveFileNonExistentSource()
     {
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "mydomain", siteName1,  "my site description", Visibility.PUBLIC);
@@ -890,7 +889,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void moveFileAnotherSite() throws Exception
+    public void moveFileAnotherSite()
     {
         String siteName1 = "sourceSite" + System.currentTimeMillis();
         String siteName2 = "targetSite" + System.currentTimeMillis();
@@ -904,7 +903,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addCommentConsumer() throws Exception
+    public void addCommentConsumer()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -925,7 +924,7 @@ public class ContentActionsTests extends AbstractTest
     
     //TODO: uncomment after ACE-4614 is fixed
     //@Test
-    public void addCommentContributor() throws Exception
+    public void addCommentContributor()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -947,7 +946,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void addCommentCollaborator() throws Exception
+    public void addCommentCollaborator()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -969,7 +968,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteCommentColaborator() throws Exception
+    public void deleteCommentColaborator()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -990,7 +989,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteCommentContributor() throws Exception
+    public void deleteCommentContributor()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();
@@ -1011,7 +1010,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void deleteCommentManager() throws Exception
+    public void deleteCommentManager()
     {
         String siteName = "siteComment" + System.currentTimeMillis();
         String userName = "commentUser" + System.currentTimeMillis();

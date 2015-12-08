@@ -46,12 +46,11 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param aspect aspect to add
-     * @throws Exception if error 
      */
     public void addAspect(final Session session,
                           final String siteName,
                           final String contentName,
-                          DocumentAspect aspect) throws Exception
+                          DocumentAspect aspect)
     {
         String contentNodeRef = getNodeRef(session, siteName, contentName);
         List<DocumentAspect> aspectsToAdd = new ArrayList<DocumentAspect>();
@@ -67,13 +66,12 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param aspect aspect to add
-     * @throws Exception if error 
      */
     public void addAspect(final String userName,
                           final String password,
                           final String siteName,
                           final String contentName,
-                          DocumentAspect aspect) throws Exception
+                          DocumentAspect aspect)
     {
         Session session = getCMISSession(userName, password);
         String contentNodeRef = getNodeRef(session, siteName, contentName);
@@ -90,13 +88,12 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param aspectToRemove aspect to be removed
-     * @throws Exception if error
      */
     public void removeAspect(final String userName,
                              final String password,
                              final String siteName,
                              final String contentName,
-                             DocumentAspect aspectToRemove) throws Exception
+                             DocumentAspect aspectToRemove)
     {
         try
         {
@@ -130,13 +127,12 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param removeAfter date value for RemoveAfter property
-     * @throws Exception if error
      */
     public void addComplianceable(final String userName,
                                   final String password,
                                   final String siteName,
                                   final String contentName,
-                                  final Date removeAfter) throws Exception
+                                  final Date removeAfter)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.COMPLIANCEABLE);
@@ -161,7 +157,6 @@ public class ContentAspects extends CMISUtil
      * @param coverage value for coverage property
      * @param rights value for rights property
      * @param subject value for subject property
-     * @throws Exception if error
      */
     public void addDublinCore(final String userName,
                               final String password,
@@ -174,7 +169,7 @@ public class ContentAspects extends CMISUtil
                               final String source,
                               final String coverage,
                               final String rights,
-                              final String subject) throws Exception
+                              final String subject)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.DUBLIN_CORE);
@@ -200,15 +195,13 @@ public class ContentAspects extends CMISUtil
      * @param contentName file or folder name
      * @param fromDate date value for From property
      * @param toDate date value for To property
-     * @throws Exception if error
-     * 
      */
     public void addEffectivity(final String userName,
                                final String password,
                                final String siteName,
                                final String contentName,
                                final Date fromDate,
-                               final Date toDate) throws Exception
+                               final Date toDate)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.EFFECTIVITY);
@@ -228,14 +221,13 @@ public class ContentAspects extends CMISUtil
      * @param contentName file or folder name
      * @param longitude value for longitude property 
      * @param latitude value for latitude property 
-     * @throws Exception if error
      */
     public void addGeographicAspect(final String userName,
                                     final String password,
                                     final String siteName,
                                     final String contentName,
                                     final double longitude,
-                                    final double latitude) throws Exception
+                                    final double latitude)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.GEOGRAPHIC);
@@ -254,13 +246,12 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param summary value for summary property
-     * @throws Exception if error
      */
     public void addSummarizable(final String userName,
                                 final String password,
                                 final String siteName,
                                 final String contentName,
-                                final String summary) throws Exception
+                                final String summary)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.SUMMARIZABLE);
@@ -278,14 +269,13 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param templateContent name of template
-     * @throws Exception if error
-     * 
+     * @throws CmisRuntimeException if invalid template
      */
     public void addTemplatable(final String userName,
                                final String password,
                                final String siteName,
                                final String contentName,
-                               final String templateContent) throws Exception
+                               final String templateContent)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.TEMPLATABLE);
@@ -316,7 +306,6 @@ public class ContentAspects extends CMISUtil
      * @param subject value of subject
      * @param originator value for originator
      * @param sentDate date for sentDate property
-     * @throws Exception if error
      */
     public void addEmailed(final String userName,
                            final String password,
@@ -326,7 +315,7 @@ public class ContentAspects extends CMISUtil
                            final List<String> addressees,
                            final String subject,
                            final String originator,
-                           final Date sentDate) throws Exception
+                           final Date sentDate)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.EMAILED);
@@ -349,15 +338,13 @@ public class ContentAspects extends CMISUtil
      * @param contentName file or folder name
      * @param isIndexed value of IsIndexed property
      * @param contentIndexed value of ContentIndexed property
-     * @throws Exception if error 
-     * 
      */
     public void addIndexControl(final String userName,
                                 final String password,
                                 final String siteName,
                                 final String contentName,
                                 final boolean isIndexed,
-                                final boolean contentIndexed) throws Exception
+                                final boolean contentIndexed)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.INDEX_CONTROL);
@@ -376,13 +363,12 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param hours no of hours for OfflineExpiresAfter property
-     * @throws Exception if error  
      */
     public void addRestrictable(final String userName,
                                 final String password,
                                 final String siteName,
                                 final String contentName,
-                                final int hours) throws Exception
+                                final int hours)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.RESTRICTABLE);
@@ -401,13 +387,12 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @param categoryName list of categories
-     * @throws Exception if error  
      */
     public void addClasifiable(final String userName,
                                final String password,
                                final String siteName,
                                final String contentName,
-                               final List<String> categoryName) throws Exception
+                               final List<String> categoryName)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.CLASSIFIABLE); 
@@ -430,12 +415,11 @@ public class ContentAspects extends CMISUtil
      * @param siteName site name
      * @param contentName file or folder name
      * @return {@link Map} return map of the basic properties
-     * @throws Exception if error  
      */
     public Map<String, Object> getBasicProperties(final String userName,
                                                   final String password,
                                                   final String siteName,
-                                                  final String contentName) throws Exception
+                                                  final String contentName)
     {
         List<Property<?>> basicProperties=getProperties(userName, password, siteName, contentName);
         Map<String, Object> propertiesMap = new HashMap<String, Object>();
@@ -463,7 +447,6 @@ public class ContentAspects extends CMISUtil
      * @param docTitle new value for title of document
      * @param docDescription new value for description of document
      * @param author new value for author od the document
-     * @throws Exception if error  
      */
     public void setBasicProperties(final String userName,
                                    final String password,
@@ -472,7 +455,7 @@ public class ContentAspects extends CMISUtil
                                    final String docName,
                                    final String docTitle,
                                    final String docDescription,
-                                   final String author) throws Exception
+                                   final String author)
     {
         Session session = getCMISSession(userName, password);
         Map<String, Object> propertyMap = new HashMap<String, Object>();

@@ -43,7 +43,7 @@ public class SitePagesActionTests extends AbstractTest
     private String admin = "admin";
 
     @Test
-    public void addCalendarEvent() throws Exception
+    public void addCalendarEvent()
     {
         String siteId = "calendar-site" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "myDomain", siteId, "my site description", Visibility.PUBLIC);
@@ -60,7 +60,7 @@ public class SitePagesActionTests extends AbstractTest
     }
 
     @Test
-    public void addCalendarEvent24h() throws Exception
+    public void addCalendarEvent24h()
     {
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -74,7 +74,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void addCalendarEventNullParams() throws Exception
+    public void addCalendarEventNullParams()
     {
         String siteId = "calendar-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -85,7 +85,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void addCalendarEventAllDay() throws Exception
+    public void addCalendarEventAllDay()
     {
         String siteId = "calendar-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -99,7 +99,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addCalendarEventFakeSite() throws Exception
+    public void addCalendarEventFakeSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, userName, userName, userName, userName);
@@ -108,7 +108,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void removeEvent() throws Exception
+    public void removeEvent()
     {
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -125,7 +125,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeEventInvalidCredentials() throws Exception
+    public void removeEventInvalidCredentials()
     {
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -140,7 +140,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeEventInvalidSite() throws Exception
+    public void removeEventInvalidSite()
     {
         String siteId = "calendar-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -155,7 +155,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createWikiPage() throws Exception
+    public void createWikiPage()
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -175,7 +175,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void removeWikiPage() throws Exception
+    public void removeWikiPage()
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -192,7 +192,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeNonExistentWikiPage() throws Exception
+    public void removeNonExistentWikiPage()
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -202,7 +202,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeWikiNonExistentSite() throws Exception
+    public void removeWikiNonExistentSite()
     {
         String siteId = "wiki-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -214,7 +214,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createBlog() throws Exception
+    public void createBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -233,7 +233,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void createBlogInvalidSite() throws Exception
+    public void createBlogInvalidSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
         String draftBlog = "draft" + System.currentTimeMillis(); 
@@ -242,7 +242,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void createBlogInvalidUser() throws Exception
+    public void createBlogInvalidUser()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -252,7 +252,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void deleteBlog() throws Exception
+    public void deleteBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -267,7 +267,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteBlogInvalidBlog() throws Exception
+    public void deleteBlogInvalidBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -279,7 +279,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteBlogInvalidSite() throws Exception
+    public void deleteBlogInvalidSite()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -291,7 +291,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createLink() throws Exception
+    public void createLink()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -307,7 +307,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void createLinkInvalidSite() throws Exception
+    public void createLinkInvalidSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
         String linkTitle = "link" + System.currentTimeMillis();
@@ -316,7 +316,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void createLinkInvalidUser() throws Exception
+    public void createLinkInvalidUser()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -326,7 +326,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void deleteLink() throws Exception
+    public void deleteLink()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -341,7 +341,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteLinkInvalidLink() throws Exception
+    public void deleteLinkInvalidLink()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -353,7 +353,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteLinkInvalidSite() throws Exception
+    public void deleteLinkInvalidSite()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -365,7 +365,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createDiscussionTopic() throws Exception
+    public void createDiscussionTopic()
     {
         String siteId = "topic-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -381,7 +381,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void deleteDiscussionTopic() throws Exception
+    public void deleteDiscussionTopic()
     {
         String siteId = "topic-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -402,7 +402,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void replyToTopic() throws Exception
+    public void replyToTopic()
     {
         String siteId = "topic-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -419,7 +419,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void commentBlog() throws Exception
+    public void commentBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -440,7 +440,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void commentLink() throws Exception
+    public void commentLink()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -464,7 +464,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void commentNonExistentBlog() throws Exception
+    public void commentNonExistentBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -475,7 +475,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void commentLinkNonExistentSite() throws Exception
+    public void commentLinkNonExistentSite()
     {
         String siteId = "link-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -488,7 +488,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void getCommentsFakeBlog() throws Exception
+    public void getCommentsFakeBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -499,7 +499,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void getCommentsBlogsFakeSite() throws Exception
+    public void getCommentsBlogsFakeSite()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -510,7 +510,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void getTopicDiscussionFakeSite() throws Exception
+    public void getTopicDiscussionFakeSite()
     {
         String siteId = "topic-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -523,7 +523,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void deleteCommentBlog() throws Exception
+    public void deleteCommentBlog()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -543,7 +543,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void commentBlogConsumer() throws Exception
+    public void commentBlogConsumer()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -560,7 +560,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void commentBlogContributor() throws Exception
+    public void commentBlogContributor()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -577,7 +577,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void commentBlogCollaborator() throws Exception
+    public void commentBlogCollaborator()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -594,7 +594,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void deleteCommentContributor() throws Exception
+    public void deleteCommentContributor()
     {
         String siteId = "blog-site" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();

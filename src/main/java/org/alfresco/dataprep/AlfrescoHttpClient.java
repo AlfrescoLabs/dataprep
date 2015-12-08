@@ -16,7 +16,6 @@ package org.alfresco.dataprep;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -92,11 +91,9 @@ public class AlfrescoHttpClient
      * 
      * @param username user identifier
      * @param password user password
-     * @throws ParseException if error
-     * @throws IOException if error
-     * @return Sting authentication ticket
+     * @return String authentication ticket
      */
-    public String getAlfTicket(String username, String password) 
+    public String getAlfTicket(String username, String password)
     {
         if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
         {
@@ -126,13 +123,12 @@ public class AlfrescoHttpClient
     /**
      * Get the alfresco version
      * @return String version of alfresco
-     * @throws Exception if error
      */
-    public String getAlfrescoVersion() throws Exception
+    public String getAlfrescoVersion()
     {
         String url = apiUrl + "server";
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.execute(get);
+        HttpResponse response = executeRequest(get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             try
@@ -156,9 +152,8 @@ public class AlfrescoHttpClient
      * 
      * @param json {@link JSONObject} content
      * @return {@link StringEntity} content.
-     * @throws UnsupportedEncodingException if unsupported
      */
-    public StringEntity setMessageBody(final JSONObject json) throws UnsupportedEncodingException
+    public StringEntity setMessageBody(final JSONObject json)
     {
         if (json == null || json.toString().isEmpty())
         {
@@ -177,7 +172,6 @@ public class AlfrescoHttpClient
      * Execute HttpClient request.
      * @param request to send 
      * @return {@link HttpResponse} response
-     * @throws Exception if error
      */
     public HttpResponse executeRequest(HttpRequestBase request)
     {
@@ -191,7 +185,7 @@ public class AlfrescoHttpClient
             }
             return response;
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             logger.error(response);
             throw new RuntimeException("Error while executing request", e);
@@ -200,30 +194,26 @@ public class AlfrescoHttpClient
     
     /**
      * Execute HttpClient request.
-     * @param client AlfrescoHttpClient client
      * @param userName String user name 
      * @param password String password
-     * @param url String api url
      * @param request HttpRequestBase the request
      * @return {@link HttpResponse} response
-     * @throws Exception if error
      */
-    public HttpResponse executeRequest(AlfrescoHttpClient client,
-                                      final String userName,
-                                      final String password,
-                                      HttpRequestBase request) throws Exception
+    public HttpResponse executeRequest(final String userName,
+                                       final String password,
+                                       HttpRequestBase request)
     {
         HttpResponse response = null;
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+        client = getHttpClientWithBasicAuth(userName, password);
         try
         {
-            response = clientWithAuth.execute(request);
+            response = client.execute(request);
             if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
             {
                 throw new RuntimeException("Invalid user name or password");
             }
-        } 
-        catch(Exception e)
+        }
+        catch (IOException e)
         {
             logger.error(response);
             throw new RuntimeException("Error while executing request", e);
@@ -231,7 +221,7 @@ public class AlfrescoHttpClient
         finally
         {
             request.releaseConnection();
-            client.close();
+            close();
         }
         return response;
     }
@@ -239,40 +229,29 @@ public class AlfrescoHttpClient
     /**
      * Execute HttpClient POST OR PUT
      * 
-     * @param client AlfrescoHttpClient client
      * @param userName String user name 
      * @param password String password
-     * @param url String api url
      * @param body JSONObject body of the request
      * @param request HttpEntityEnclosingRequestBase the request
      * @return {@link HttpResponse} response
-     * @throws Exception if error
      */
-    public HttpResponse executeRequest(AlfrescoHttpClient client,
-                                      final String userName,
-                                      final String password,
-                                      final JSONObject body,
-                                      HttpEntityEnclosingRequestBase request) throws Exception
+    public HttpResponse executeRequest(final String userName,
+                                       final String password,
+                                       final JSONObject body,
+                                       HttpEntityEnclosingRequestBase request)
     {
         HttpResponse response = null;
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            request.setEntity(setMessageBody(body));
-        } 
-        catch(UnsupportedEncodingException e)
-        {
-            throw new RuntimeException("Body content error: " ,e);
-        }
+        client = getHttpClientWithBasicAuth(userName, password);
+        request.setEntity(setMessageBody(body));
         try
         {   
-            response = clientWithAuth.execute(request);
+            response = client.execute(request);
             if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
             {
                 throw new RuntimeException("Invalid user name or password");
             }
         } 
-        catch(Exception e)
+        catch(IOException e)
         {
             logger.error(response);
             throw new RuntimeException("Error while executing request", e);
@@ -280,7 +259,7 @@ public class AlfrescoHttpClient
         finally
         {
             request.releaseConnection();
-            client.close();
+            close();
         }
         return response;
     }
@@ -289,14 +268,14 @@ public class AlfrescoHttpClient
      * Get basic http client with basic credential.
      * @param username String username 
      * @param password String password
-     * @return {@link HttpClient} client
+     * @return {@link CloseableHttpClient} client
      */
-    public HttpClient getHttpClientWithBasicAuth(String username, String password)
+    public CloseableHttpClient getHttpClientWithBasicAuth(String username, String password)
     {
         CredentialsProvider provider = new BasicCredentialsProvider();
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
         provider.setCredentials(AuthScope.ANY, credentials);
-        HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+        CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
         return client;
     }
     
@@ -339,13 +318,20 @@ public class AlfrescoHttpClient
      * @param result json message
      * @param param key identifier
      * @return String value of key
-     * @throws ParseException if error parsing
      */
     public String getParameterFromJSON(String result,
-                                       String param) throws ParseException
+                                       String param)
     {
         JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(result);
+        JSONObject obj;
+        try
+        {
+            obj = (JSONObject) parser.parse(result);
+        }
+        catch (ParseException e)
+        {
+            throw new RuntimeException("Failed to parse the result: " + result);
+        }
         return (String) obj.get(param);
     }
     
@@ -356,16 +342,22 @@ public class AlfrescoHttpClient
      * @param array String the name of the array
      * @param elementFromArray element from array
      * @return List<String> elements found in the array
-     * @throws ParseException
-     * @throws IOException
      */
     public List<String> getElementsFromJsonArray(HttpResponse response,
                                                  String array,
-                                                 String elementFromArray) throws IOException
+                                                 String elementFromArray)
     {
         List<String>elements = new ArrayList<String>();
         HttpEntity entity = response.getEntity();
-        String responseString = EntityUtils.toString(entity , "UTF-8");
+        String responseString = "";
+        try
+        {
+            responseString = EntityUtils.toString(entity , "UTF-8");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to read the response");
+        }
         Object obj = JSONValue.parse(responseString);
         JSONObject jsonObject = (JSONObject) obj;
         JSONArray jArray = (JSONArray) jsonObject.get(array);
@@ -377,14 +369,22 @@ public class AlfrescoHttpClient
         return elements;
     }
     
-    public String getSpecificElementFronJArray(HttpResponse response,
+    public String getSpecificElementFromJArray(HttpResponse response,
                                                String array,
                                                String itemName,
                                                String itemParameter,
-                                               String requiredElement) throws IOException
+                                               String requiredElement)
     {
         HttpEntity entity = response.getEntity();
-        String responseString = EntityUtils.toString(entity , "UTF-8");
+        String responseString = "";
+        try
+        {
+            responseString = EntityUtils.toString(entity , "UTF-8");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to read the response");
+        }
         Object obj = JSONValue.parse(responseString);
         JSONObject jsonObject = (JSONObject) obj;
         JSONArray jArray = (JSONArray) jsonObject.get(array);
@@ -404,6 +404,23 @@ public class AlfrescoHttpClient
      * @throws IOException if error
      */
     public void close() 
+    {
+        try
+        {
+            client.close();
+        } 
+        catch (IOException e)
+        {
+            logger.error("Unable to close http client" ,e);
+        }
+    }
+    
+    /**
+     * Closes the HttpClient.
+     * @param client CloseableHttpClient the client
+     * @throws IOException if error
+     */
+    public void close(CloseableHttpClient client) 
     {
         try
         {

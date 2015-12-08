@@ -77,7 +77,7 @@ public class WorkflowService extends CMISUtil
                                   final List<String> docsToAttach,
                                   final List<String> pathsToDocs,
                                   final int requiredApprovePercent,
-                                  final boolean sendEmail) throws Exception
+                                  final boolean sendEmail)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
@@ -133,7 +133,7 @@ public class WorkflowService extends CMISUtil
         body.put("items", items);
         try
         {
-            HttpResponse response = client.executeRequest(client, userName, password, body, post);
+            HttpResponse response = client.executeRequest(userName, password, body, post);
             logger.info("Response code: " + response.getStatusLine().getStatusCode());
             switch (response.getStatusLine().getStatusCode())
             {
@@ -168,7 +168,6 @@ public class WorkflowService extends CMISUtil
      * @param documents List<String> documents to add to the task
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startNewTask(final String userName,
                                 final String password,
@@ -178,7 +177,7 @@ public class WorkflowService extends CMISUtil
                                 final Priority priority,
                                 final String documentsSite,
                                 final List<String> documents,
-                                final boolean sendEmail) throws Exception
+                                final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -198,7 +197,6 @@ public class WorkflowService extends CMISUtil
      * @param pathsToItems List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startNewTask(final String userName,
                                 final String password,
@@ -207,7 +205,7 @@ public class WorkflowService extends CMISUtil
                                 final String assignee,
                                 final Priority priority,
                                 final List<String> pathsToItems,
-                                final boolean sendEmail) throws Exception
+                                final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -229,7 +227,6 @@ public class WorkflowService extends CMISUtil
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startGroupReview(final String userName,
                                     final String password,
@@ -240,7 +237,7 @@ public class WorkflowService extends CMISUtil
                                     final String documentsSite,
                                     final List<String> documents,
                                     final int requiredApprovePercent,
-                                    final boolean sendEmail) throws Exception
+                                    final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.GroupReview, message, dueDate, priority,
                 null, assignedGroup, false, documentsSite, documents, null, requiredApprovePercent, sendEmail);
@@ -259,7 +256,6 @@ public class WorkflowService extends CMISUtil
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startGroupReview(final String userName,
                                     final String password,
@@ -269,7 +265,7 @@ public class WorkflowService extends CMISUtil
                                     final Priority priority,
                                     final List<String> pathToDocs,
                                     final int requiredApprovePercent,
-                                    final boolean sendEmail) throws Exception
+                                    final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.GroupReview, message, dueDate, priority,
                 null, assignedGroup, true, null, null, pathToDocs, requiredApprovePercent, sendEmail);
@@ -289,7 +285,6 @@ public class WorkflowService extends CMISUtil
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startMultipleReviewers(final String userName,
                                           final String password,
@@ -300,7 +295,7 @@ public class WorkflowService extends CMISUtil
                                           final String documentsSite,
                                           final List<String> documents,
                                           final int requiredApprovePercent,
-                                          final boolean sendEmail)  throws Exception
+                                          final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.MultipleReviewers, message, dueDate, priority, reviewers,
                 null, false, documentsSite, documents, null, requiredApprovePercent, sendEmail);
@@ -319,7 +314,6 @@ public class WorkflowService extends CMISUtil
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startMultipleReviewers(final String userName,
                                           final String password,
@@ -329,7 +323,7 @@ public class WorkflowService extends CMISUtil
                                           final Priority priority,
                                           final List<String> pathsToDocuments,
                                           final int requiredApprovePercent,
-                                          final boolean sendEmail) throws Exception
+                                          final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.MultipleReviewers, message, dueDate, priority, reviewers,
                 null, true, null, null, pathsToDocuments, requiredApprovePercent, sendEmail);
@@ -348,7 +342,6 @@ public class WorkflowService extends CMISUtil
      * @param documents List<String> documents to add to the task
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startPooledReview(final String userName,
                                      final String password,
@@ -358,7 +351,7 @@ public class WorkflowService extends CMISUtil
                                      final Priority priority,
                                      final String documentsSite,
                                      final List<String> documents,
-                                     final boolean sendEmail) throws Exception
+                                     final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.PooledReview, message, dueDate, priority,
                 null, assignedGroup, false, documentsSite, documents, null, 0, sendEmail);
@@ -376,7 +369,6 @@ public class WorkflowService extends CMISUtil
      * @param pathToDocs List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startPooledReview(final String userName,
                                      final String password,
@@ -385,7 +377,7 @@ public class WorkflowService extends CMISUtil
                                      final String assignedGroup,
                                      final Priority priority,
                                      final List<String> pathToDocs,
-                                     final boolean sendEmail) throws Exception
+                                     final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.PooledReview, message, dueDate, priority,
                 null, assignedGroup, true, null, null, pathToDocs, 0, sendEmail);
@@ -404,7 +396,6 @@ public class WorkflowService extends CMISUtil
      * @param documents List<String> documents to add to the task
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startSingleReview(final String userName,
                                      final String password,
@@ -414,7 +405,7 @@ public class WorkflowService extends CMISUtil
                                      final Priority priority,
                                      final String documentsSite,
                                      final List<String> documents,
-                                     final boolean sendEmail) throws Exception
+                                     final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -434,7 +425,6 @@ public class WorkflowService extends CMISUtil
      * @param pathsToItems List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param sendEmail boolean send email
      * @return true if created 
-     * @throws Exception if error
      */
     public boolean startSingleReview(final String userName,
                                      final String password,
@@ -443,7 +433,7 @@ public class WorkflowService extends CMISUtil
                                      final String assignee,
                                      final Priority priority,
                                      final List<String> pathsToItems,
-                                     final boolean sendEmail) throws Exception
+                                     final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);

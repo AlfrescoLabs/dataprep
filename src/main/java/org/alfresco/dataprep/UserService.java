@@ -14,6 +14,8 @@
  */
 package org.alfresco.dataprep;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -24,6 +26,7 @@ import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -70,7 +73,6 @@ public class UserService extends CMISUtil
      * @param firstName first name
      * @param lastName last name
      * @return true if successful
-     * @throws Exception 
      */
     public boolean create(final String adminUser,
                           final String adminPass,
@@ -78,7 +80,7 @@ public class UserService extends CMISUtil
                           final String password,
                           final String email,
                           final String firstName,
-                          final String lastName) throws Exception 
+                          final String lastName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) ||
             StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass) || 
@@ -95,7 +97,7 @@ public class UserService extends CMISUtil
             logger.trace("Create user using Url - " + reqURL);
         }
         HttpPost post = new HttpPost(reqURL);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, post);
+        HttpResponse response = client.executeRequest(adminUser, adminPass, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -128,10 +130,10 @@ public class UserService extends CMISUtil
      * @return {@link JSONObject} of user entity
      */
     @SuppressWarnings("unchecked")
-    private JSONObject encode(final String userName, 
-                              final String password, 
-                              final String firstName, 
-                              final String lastName, 
+    private JSONObject encode(final String userName,
+                              final String password,
+                              final String firstName,
+                              final String lastName,
                               final String email)
     {
         JSONObject body = new JSONObject();
@@ -150,16 +152,15 @@ public class UserService extends CMISUtil
      * @param adminPass admin credential
      * @param username user identifier 
      * @return true if user exists
-     * @throws Exception if error
      */
-    public boolean userExists(final String adminUser, 
-                              final String adminPass, 
-                              final String username) throws Exception 
+    public boolean userExists(final String adminUser,
+                              final String adminPass,
+                              final String username)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "people/" + URIUtil.encodeWithinPath(username);
+        String url = client.getApiUrl() + "people/" + encodeUserName(username);
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, get);
+        HttpResponse response = client.executeRequest(adminUser, adminPass, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -173,20 +174,19 @@ public class UserService extends CMISUtil
      * @param adminPass admin credential
      * @param userName String identifier user identifier
      * @return true if successful 
-     * @throws Exception if error
      */
-    public boolean delete(final String adminUser, 
-                          final String adminPass, 
-                          final String userName) throws Exception
+    public boolean delete(final String adminUser,
+                          final String adminPass,
+                          final String userName)
     {
         if (StringUtils.isEmpty(userName) ||  StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass))
         {
             throw new IllegalArgumentException("Null Parameters: Please correct");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getApiUrl() + "people/" + URIUtil.encodeWithinPath(userName);
+        String url = client.getApiUrl() + "people/" + encodeUserName(userName);
         HttpDelete httpDelete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, httpDelete);
+        HttpResponse response = client.executeRequest(adminUser, adminPass, httpDelete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -204,6 +204,18 @@ public class UserService extends CMISUtil
         return false;
     }
     
+    private String encodeUserName(String userName)
+    {
+        try
+        {
+            return URIUtil.encodeWithinPath(userName);
+        }
+        catch (URIException e)
+        {
+            throw new RuntimeException("Failed to encode user " + userName);
+        }
+    }
+    
     /**
      * Utility to invite a enterprise user to Site and accept the invitation
      * 
@@ -213,13 +225,12 @@ public class UserService extends CMISUtil
      * @param siteName site identifier which invite user.
      * @param role user role
      * @return true if invite is successful
-     * @exception if error
      */
-    public boolean inviteUserToSiteAndAccept(final String invitingUserName, 
-                                             final String invitingUserPassword, 
+    public boolean inviteUserToSiteAndAccept(final String invitingUserName,
+                                             final String invitingUserPassword,
                                              final String userToInvite,
                                              final String siteName,
-                                             final String role) throws Exception
+                                             final String role)
     {      
         if (StringUtils.isEmpty(invitingUserName) ||  StringUtils.isEmpty(invitingUserPassword) || StringUtils.isEmpty(userToInvite) ||
                 StringUtils.isEmpty(siteName) || StringUtils.isEmpty(role) )
@@ -268,7 +279,11 @@ public class UserService extends CMISUtil
                     logger.error("Unable to invite user: " + response.toString());
                     break;
             }
-        } 
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to execute request: " + get);
+        }
         finally
         {
             get.releaseConnection();
@@ -283,7 +298,6 @@ public class UserService extends CMISUtil
      * @param inviteId identifier
      * @param inviteTicket authentication ticket
      * @return true if invite is successful
-     * @throws Exception if error
      */
     private boolean acceptSiteInvitation(final String inviteId,
                                          final String inviteTicket)
@@ -326,12 +340,11 @@ public class UserService extends CMISUtil
      * @param password String password
      * @param siteId site identifier
      * @return true if request is successful
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean requestSiteMembership(final String userName,
-                                         final String password, 
-                                         final String siteId) throws Exception 
+                                         final String password,
+                                         final String siteId)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteId))
         {
@@ -343,7 +356,7 @@ public class UserService extends CMISUtil
         HttpPost post  = new HttpPost(reqUrl);
         JSONObject body = new JSONObject();
         body.put("id", siteId);
-        HttpResponse response = client.executeRequest(client, userName, password, body, post);
+        HttpResponse response = client.executeRequest(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -372,14 +385,13 @@ public class UserService extends CMISUtil
      * @param siteId  site id
      * @param role String role to be applied
      * @return true if request is successful
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean createSiteMember(final String siteManager,
-                                    final String passwordManager, 
+                                    final String passwordManager,
                                     final String userName,
                                     final String siteId,
-                                    final String role) throws Exception
+                                    final String role)
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
                 || StringUtils.isEmpty(userName) || StringUtils.isEmpty(role))
@@ -393,7 +405,7 @@ public class UserService extends CMISUtil
         JSONObject body = new JSONObject();
         body.put("id", userName);
         body.put("role", role);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, body, post);
+        HttpResponse response = client.executeRequest(siteManager, passwordManager, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -424,12 +436,11 @@ public class UserService extends CMISUtil
      * @param userName String identifier - user that made the request to the Site
      * @param siteId site identifier
      * @return true if request is deleted (204 Status)
-     * @throws Exception if error
      */
     public boolean removePendingSiteRequest(final String siteManager,
                                             final String passwordManager,
                                             final String userName,
-                                            final String siteId) throws Exception
+                                            final String siteId)
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
                 || StringUtils.isEmpty(userName))
@@ -439,7 +450,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/site-membership-requests/" + siteId;
         HttpDelete delete  = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, delete);
+        HttpResponse response = client.executeRequest(siteManager, passwordManager, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -461,12 +472,11 @@ public class UserService extends CMISUtil
      * @param userName String identifier - user that made the request to the Site
      * @param siteId String site id
      * @return true if request is deleted (204 Status)
-     * @throws Exception if error
      */
     public boolean removeSiteMembership(final String siteManager,
                                         final String passwordManager,
                                         final String userName,
-                                        final String siteId) throws Exception
+                                        final String siteId)
     {
         if (StringUtils.isEmpty(siteManager) || StringUtils.isEmpty(passwordManager) || StringUtils.isEmpty(siteId) 
                 || StringUtils.isEmpty(userName))
@@ -476,7 +486,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships/" + userName;
         HttpDelete delete  = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, siteManager, passwordManager, delete);
+        HttpResponse response = client.executeRequest(siteManager, passwordManager, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -499,14 +509,13 @@ public class UserService extends CMISUtil
      * @param userName String identifier - user name
      * @param role String role
      * @return true if request is successful (Status: 200)
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean changeUserRole(final String siteManager,
                                   final String passwordManager,
                                   final String siteName,
                                   final String userName,
-                                  final String role) throws Exception
+                                  final String role)
     {
         String reqUrl;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -516,7 +525,7 @@ public class UserService extends CMISUtil
         HttpPut put = new HttpPut(reqUrl);
         HttpResponse response = null;
         put.setEntity(client.setMessageBody(userBody));
-        response = client.executeRequest(client, siteManager, passwordManager, userBody, put);
+        response = client.executeRequest(siteManager, passwordManager, userBody, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -543,11 +552,10 @@ public class UserService extends CMISUtil
      * @param userPass user password
      * @param siteName String site name
      * @return total number of site members
-     * @throws Exception if error
      */
     public int countSiteMembers(final String userName,
                                 final String userPass,
-                                final String siteName) throws Exception
+                                final String siteName)
     { 
         int count=0;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(userPass) || StringUtils.isEmpty(siteName))
@@ -569,6 +577,10 @@ public class UserService extends CMISUtil
                 count = array.size();
             }
         }
+        catch (IOException e)
+        {
+            logger.error("Failed to read the response");
+        }
         finally
         {
             request.releaseConnection();
@@ -583,10 +595,9 @@ public class UserService extends CMISUtil
      * @param userName login user name
      * @param userPass login user password
      * @return true for successful user login
-     * @throws Exception if error
      */
     public HttpState login(final String userName,
-                           final String userPass) throws Exception
+                           final String userPass)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(userPass))
         {
@@ -607,16 +618,23 @@ public class UserService extends CMISUtil
                       new NameValuePair("success", "/share/page/user/" + userName + "/dashboard"),
                       new NameValuePair("failure", "/share/page/type/login?error=true")});
         post.setRequestBody(formParams);
-        int postStatus = theClient.executeMethod(post);
-        if(302 == postStatus)
+        try
         {
-            state = theClient.getState();
-            post.releaseConnection();
-            org.apache.commons.httpclient.methods.GetMethod get = new org.apache.commons.httpclient.methods.GetMethod(
-                    client.getAlfrescoUrl() + "share/page/user/" + userName + "/dashboard");
-            theClient.setState(state);
-            theClient.executeMethod(get);
-            get.releaseConnection();
+            int postStatus = theClient.executeMethod(post);
+            if(302 == postStatus)
+            {
+                state = theClient.getState();
+                post.releaseConnection();
+                org.apache.commons.httpclient.methods.GetMethod get = new org.apache.commons.httpclient.methods.GetMethod(
+                        client.getAlfrescoUrl() + "share/page/user/" + userName + "/dashboard");
+                theClient.setState(state);
+                theClient.executeMethod(get);
+                get.releaseConnection();
+            }
+        }
+        catch(IOException e)
+        {
+            throw new RuntimeException("Failed to execute the request");
         }
         return state;
     }
@@ -631,7 +649,6 @@ public class UserService extends CMISUtil
      * @param column int column index
      * @param position position in column
      * @return true if the dashlet is added
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean addDashlet(final String userName,
@@ -639,7 +656,7 @@ public class UserService extends CMISUtil
                               final UserDashlet dashlet,
                               final DashletLayout layout,
                               final int column,
-                              final int position) throws Exception
+                              final int position)
     {
         login(userName, password);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -702,16 +719,22 @@ public class UserService extends CMISUtil
      * Logout the current user from share.
      * 
      * @return HttpState 
-     * @throws Exception if error
      */
-    public HttpState logout() throws Exception
+    public HttpState logout()
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         HttpState state = null;
         org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
         String reqURL = client.getAlfrescoUrl() + "share/page/dologout";
         org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
-        theClient.executeMethod(post);
+        try
+        {
+            theClient.executeMethod(post);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to execute the request");
+        }
         state = theClient.getState();
         return state;
     }
@@ -723,13 +746,12 @@ public class UserService extends CMISUtil
      * @param password String password
      * @param userToFollow String user to be followed
      * @return true if user is followed successfully
-     * @throws Exception
      */
     @SuppressWarnings("unchecked")
     private boolean toFollowOrUnfollow(final String userName,
                                        final String password,
-                                       final String userToFollowOrNot, 
-                                       final boolean follow) throws Exception
+                                       final String userToFollowOrNot,
+                                       final boolean follow)
     {
         String url;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -748,8 +770,15 @@ public class UserService extends CMISUtil
         HttpPost request = new HttpPost(url);
         JSONArray requestBody = new JSONArray();
         requestBody.add(userToFollowOrNot);
-        request.setEntity(new StringEntity(requestBody.toString()));
-        HttpResponse response = client.executeRequest(client, userName, password, request);
+        try
+        {
+            request.setEntity(new StringEntity(requestBody.toString()));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Failed to process the request body" + requestBody);
+        }
+        HttpResponse response = client.executeRequest(userName, password, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -784,11 +813,10 @@ public class UserService extends CMISUtil
      * @param password String password
      * @param userToFollow String user to be followed
      * @return true if user is followed successfully
-     * @throws Exception
      */
     public boolean followUser(final String userName,
                               final String password,
-                              final String userToFollow) throws Exception
+                              final String userToFollow)
     {
         return toFollowOrUnfollow(userName, password, userToFollow, true);
     }
@@ -800,11 +828,10 @@ public class UserService extends CMISUtil
      * @param password String password
      * @param userToFollow String user to be followed
      * @return true if user is followed successfully
-     * @throws Exception
      */
     public boolean unfollowUser(final String userName,
                               final String password,
-                              final String userToFollow) throws Exception
+                              final String userToFollow)
     {
         return toFollowOrUnfollow(userName, password, userToFollow, false);
     }
@@ -815,11 +842,10 @@ public class UserService extends CMISUtil
      * @param userName
      * @param password
      * @return List<String> list of followers
-     * @throws Exception
      */
     private List<String> getFollowUsers(final String userName,
                                         final String password,
-                                        final boolean followers) throws Exception
+                                        final boolean followers)
     {
         String reqURL;
         List<String> userFollowers = new ArrayList<String>();
@@ -842,6 +868,10 @@ public class UserService extends CMISUtil
                 userFollowers = client.getElementsFromJsonArray(response, "people", "userName");
             }
             return userFollowers;
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to execute the request: " + get);
         } 
         finally
         {
@@ -856,10 +886,9 @@ public class UserService extends CMISUtil
      * @param userName
      * @param password
      * @return List<String> list of followers
-     * @throws Exception
      */
     public List<String> getFollowers(final String userName,
-                                     final String password) throws Exception
+                                     final String password)
     {
         return getFollowUsers(userName, password, true);
     }
@@ -870,10 +899,9 @@ public class UserService extends CMISUtil
      * @param userName
      * @param password
      * @return List<String> list of followers
-     * @throws Exception
      */
     public List<String> getFollowingUsers(final String userName,
-                                          final String password) throws Exception
+                                          final String password)
     {
         return getFollowUsers(userName, password, false);
     }
@@ -885,19 +913,18 @@ public class UserService extends CMISUtil
      * @param adminPass String admin password
      * @param categoryName String category name
      * @return true if category is created
-     * @throws Exception if error
      */
     @SuppressWarnings("unchecked")
     public boolean createRootCategory(final String adminUser,
                                       final String adminPass,
-                                      final String categoryName) throws Exception
+                                      final String categoryName)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "category";
         HttpPost post  = new HttpPost(url);
         JSONObject body = new JSONObject();
         body.put("name", categoryName);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, post);
+        HttpResponse response = client.executeRequest(adminUser, adminPass, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -920,14 +947,13 @@ public class UserService extends CMISUtil
      * @param adminPass String admmin password
      * @param parentCategory String parent category
      * @param subCategory String subcategory
-     * @return true if category is created
-     * @throws Exception 
+     * @return true if category is created 
      */
     @SuppressWarnings("unchecked")
     public boolean createSubCategory(final String adminUser,
                                      final String adminPass,
                                      final String parentCategory,
-                                     final String subCategory) throws Exception
+                                     final String subCategory)
     {
         String rootCategNodeRef = getCategoryNodeRef(adminPass, adminPass, parentCategory);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -935,7 +961,7 @@ public class UserService extends CMISUtil
         HttpPost post  = new HttpPost(url);
         JSONObject body = new JSONObject();
         body.put("name", subCategory);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, body, post);
+        HttpResponse response = client.executeRequest(adminUser, adminPass, body, post);
         if( HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -958,17 +984,16 @@ public class UserService extends CMISUtil
      * @param adminPass String admin password
      * @param categoryName String category to delete
      * @return true if category is deleted
-     * @throws Exception if error
      */
     public boolean deleteCategory(final String adminUser,
                                   final String adminPass,
-                                  final String categoryName) throws Exception
+                                  final String categoryName)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String categNodeRef = getCategoryNodeRef(adminPass, adminPass, categoryName);
         String url = client.getApiUrl() + "category/workspace/SpacesStore/" + categNodeRef;
         HttpDelete delete  = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(client, adminUser, adminPass, delete);
+        HttpResponse response = client.executeRequest(adminUser, adminPass, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -988,11 +1013,10 @@ public class UserService extends CMISUtil
      * @param adminUser String admin user
      * @param adminPass String admin password
      * @param categoryName String category to check
-     * @throws Exception
      */
     public boolean categoryExists(final String adminUser,
                                   final String adminPass,
-                                  final String categoryName) throws Exception
+                                  final String categoryName)
     {
         if(!getCategoryNodeRef(adminPass, adminPass, categoryName).isEmpty())
         {

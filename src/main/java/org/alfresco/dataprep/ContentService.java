@@ -17,6 +17,8 @@ package org.alfresco.dataprep;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,15 +70,14 @@ public class ContentService extends CMISUtil
      * @param siteName site name
      * @param inRepository if folder is created in repository
      * @param path path from repository (e.g. Shared)
-     * @return Folder CMIS folder object
-     * @throws Exception if error
+     * @return {@link Folder} CMIS folder object
      */
     private Folder addFolder(final String userName,
                              final String password,
                              final String folderName,
                              final String siteName,
                              final boolean inRepository,
-                             String path) throws Exception
+                             String path)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
@@ -137,13 +138,12 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param folderName folder name
      * @param siteName site name
-     * @return Folder CMIS folder object
-     * @throws Exception if error
+     * @return {@link Folder} CMIS folder object
      */
     public Folder createFolder(final String userName,
                                final String password,
                                final String folderName,
-                               final String siteName) throws Exception
+                               final String siteName)
     {
         return addFolder(userName, password, folderName, siteName, false, null);
     }
@@ -157,12 +157,11 @@ public class ContentService extends CMISUtil
      * @param folderName folder name
      * @param path (e.g: 'Shared', 'Data Dictionary/Scripts)
      * @return Folder CMIS folder object
-     * @throws Exception if error
      */
     public Folder createFolderInRepository(final String userName,
                                            final String password,
                                            final String folderName,
-                                           final String path) throws Exception
+                                           final String path)
     {
         if(StringUtils.isEmpty(userName))
         {
@@ -178,12 +177,13 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param folderName folder name
-     * @throws Exception if error
+     * @throws CmisRuntimeException if invalid folder 
+     * or if folder has items in it.
      */
     public void deleteFolder(final String userName,
                              final String password,
                              final String siteName,
-                             final String folderName) throws Exception
+                             final String folderName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
@@ -206,19 +206,18 @@ public class ContentService extends CMISUtil
     }
 
     /**
-     * Delete a folder from site.
+     * Delete a folder by path
      * If the folder is in ROOT(Company Home) set path to NULL.
      * 
      * @param userName login username
      * @param password login password
      * @param folderName folder name
      * @param path String path to folder(e.g.: Shared, Guest Home)
-     * @throws Exception if error
      */
     public void deleteFolderFromRepository(final String userName,
                                            final String password,
                                            final String folderName,
-                                           final String path) throws Exception
+                                           final String path)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
@@ -253,15 +252,14 @@ public class ContentService extends CMISUtil
      * @param fileType DocumentType file type
      * @param docName String file name
      * @param docContent file content
-     * @return Document CMIS document object
-     * @throws Exception if error
+     * @return {@link Document} CMIS document object
      */
     public Document createDocument(final String userName,
                                    final String password,
                                    final String siteName,
                                    final DocumentType fileType,
                                    final File docName,
-                                   final String docContent) throws Exception
+                                   final String docContent)
     {
         return createDoc(userName, password, siteName, fileType, true, null, docName, docContent, false, null);
     }
@@ -275,15 +273,14 @@ public class ContentService extends CMISUtil
      * @param fileType DocumentType file type
      * @param docName file name
      * @param docContent file content
-     * @return Document CMIS document object
-     * @throws Exception if error
+     * @return {@link Document} CMIS document object
      */
     public Document createDocument(final String userName,
                                    final String password,
                                    final String siteName,
                                    final DocumentType fileType,
                                    final String docName,
-                                   final String docContent) throws Exception
+                                   final String docContent)
     {
         return createDoc(userName, password, siteName, fileType, false, docName, null, docContent, false, null);
     }
@@ -298,15 +295,14 @@ public class ContentService extends CMISUtil
      * @param fileType DocumentType file type
      * @param docName file name
      * @param docContent file content
-     * @return Document CMIS document object
-     * @throws Exception if error
+     * @return {@link Document} CMIS document object
      */
     public Document createDocumentInRepository(final String userName,
                                                final String password,
                                                final String path,
                                                final DocumentType fileType,
                                                final String docName,
-                                               final String docContent) throws Exception
+                                               final String docContent)
     {
         return createDoc(userName, password, null, fileType, false, docName, null, docContent, true, path);
     }
@@ -322,14 +318,13 @@ public class ContentService extends CMISUtil
      * @param docName File file name
      * @param docContent file content
      * @return Document CMIS document object
-     * @throws Exception if error
      */
     public Document createDocumentInRepository(final String userName,
                                                final String password,
                                                final String path,
                                                final DocumentType fileType,
                                                final File docName,
-                                               final String docContent) throws Exception
+                                               final String docContent)
     {
         return createDoc(userName, password, null, fileType, true, null, docName, docContent, true, path);
     }
@@ -347,8 +342,7 @@ public class ContentService extends CMISUtil
      * @param docContent file content
      * @param inRepository boolean create in repository
      * @param path path in repository
-     * @return Document CMIS document object
-     * @throws Exception if error
+     * @return {@link Document} CMIS document object
      */
     private Document createDoc(final String userName,
                                final String password,
@@ -359,7 +353,7 @@ public class ContentService extends CMISUtil
                                final File docFile,
                                final String docContent,
                                final boolean inRepository,
-                               String path) throws Exception
+                               String path)
     {
         ContentStream contentStream = null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
@@ -442,8 +436,7 @@ public class ContentService extends CMISUtil
         }
         finally
         {
-            stream.close();
-            contentStream.getStream().close();
+            closeStreams(stream, contentStream);
         }
     }
 
@@ -457,8 +450,7 @@ public class ContentService extends CMISUtil
      * @param fileType DocumentType file type
      * @param docName file name
      * @param docContent file content
-     * @return Document CMIS document object
-     * @throws Exception if error
+     * @return {@link Document} CMIS document object
      */
     public Document createDocumentInFolder(final String userName,
                                            final String password,
@@ -466,7 +458,7 @@ public class ContentService extends CMISUtil
                                            final String folderName,
                                            final DocumentType fileType,
                                            final String docName,
-                                           final String docContent) throws Exception
+                                           final String docContent)
     {
         ContentStream contentStream = null;
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName)
@@ -511,8 +503,7 @@ public class ContentService extends CMISUtil
         }
         finally
         {
-            stream.close();
-            contentStream.getStream().close();
+            closeStreams(stream, contentStream);
         }
         return d;
     }
@@ -524,12 +515,11 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param docName file name
-     * @throws Exception if error
      */
     public void deleteDocument(final String userName,
                                final String password,
                                final String siteName,
-                               final String docName) throws Exception
+                               final String docName)
     {   
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName) 
                 || StringUtils.isEmpty(siteName))
@@ -565,12 +555,11 @@ public class ContentService extends CMISUtil
      * @param password password
      * @param path path in repository
      * @param docName file name
-     * @throws Exception if error
      */
     public void deleteDocumentRepository(final String userName,
                                          final String password,
                                          final String path,
-                                         final String docName) throws Exception
+                                         final String docName)
     {   
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName))
         {
@@ -606,14 +595,14 @@ public class ContentService extends CMISUtil
      * @param siteName site name
      * @param path in repository
      * @param folderName folder name
-     * @throws Exception if error
+     * @throws CmisRuntimeException if invalid folder
      */
     private void deleteTreeFolder(final String userName,
                                   final String password,
                                   final boolean inRepository,
                                   final String siteName,
                                   String path,
-                                  final String folderName) throws Exception
+                                  final String folderName)
     {   
         String folderId;
         try
@@ -655,12 +644,11 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param folderName folder name
-     * @throws Exception if error
      */
     public void deleteTree(final String userName,
                            final String password,
                            final String siteName,
-                           final String folderName) throws Exception
+                           final String folderName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName) 
                 || StringUtils.isEmpty(folderName))
@@ -678,12 +666,11 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param path path to folder (e.g. 'Shared')
      * @param folderName folder name
-     * @throws Exception if error
      */
     public void deleteTreeRepository(final String userName,
                                      final String password,
                                      final String path,
-                                     final String folderName) throws Exception
+                                     final String folderName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
         {
@@ -701,25 +688,32 @@ public class ContentService extends CMISUtil
      * @param siteName site name
      * @param pathInRepo path in repository
      * @param pathToFile path to file
-     * @return Document uploaded file
-     * @throws Exception if error
+     * @return {@link Document} uploaded file
      */
     private Document uploadFile(final String userName,
                                 final String password,
                                 final boolean inRepo,
                                 final String siteName,
                                 String pathInRepo,
-                                final String pathToFile) throws Exception
+                                final String pathToFile)
     {
         ContentStream contentStream = null;
         String fileExtention = null;
         File file = new File(pathToFile);
-        if (!file.exists() || !file.isFile())
+        if (!file.isFile())
         {
             throw new UnsupportedOperationException("Invalid Path: " + file.getPath());
         }
         fileExtention = FilenameUtils.getExtension(file.getPath());
-        FileInputStream fileContent = new FileInputStream(file);
+        FileInputStream fileContent = null;
+        try
+        {
+            fileContent = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new CmisRuntimeException("Invalid file " + file.getName(), e);
+        }
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         properties.put(PropertyIds.NAME, file.getName());
@@ -761,8 +755,7 @@ public class ContentService extends CMISUtil
         }
         finally
         {
-            fileContent.close();
-            contentStream.getStream().close();
+            closeStreams(fileContent, contentStream);
         }
     }
 
@@ -773,13 +766,12 @@ public class ContentService extends CMISUtil
      * @param password user password
      * @param siteName site name
      * @param pathToFile path to file
-     * @return Document uploaded file
-     * @throws Exception if error
+     * @return {@link Document}t uploaded file
      */
     public Document uploadFileInSite(final String userName,
                                      final String password,
                                      final String siteName,
-                                     final String pathToFile) throws Exception
+                                     final String pathToFile)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(pathToFile))
@@ -797,13 +789,12 @@ public class ContentService extends CMISUtil
      * @param password user password
      * @param pathInRepo path in repository. If NULL, ROOT is set!
      * @param pathToFile path to file
-     * @return Document uploaded file
-     * @throws Exception if error
+     * @return {@link Document} uploaded file
      */
     public Document uploadFileInRepository(final String userName,
                                            final String password,
                                            final String pathInRepo,
-                                           final String pathToFile) throws Exception
+                                           final String pathToFile)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(pathToFile))
         {
@@ -820,32 +811,35 @@ public class ContentService extends CMISUtil
      * @param password user password
      * @param siteName site name
      * @return list of uploaded documents
-     * @throws Exception if error
      */
     public List<Document> uploadFiles(final String filesPath,
                                       final String userName,
                                       final String password,
-                                      final String siteName) throws Exception
+                                      final String siteName)
     {
         ContentStream contentStream = null;
         List<Document> uploadedFiles=new ArrayList<Document>();
         String fileName = null;
         String fileExtention = null;
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }
         File dir = new File(filesPath);
-        if (!dir.exists() || !dir.isDirectory())
+        if (!dir.isDirectory())
         {
-            throw new UnsupportedOperationException("Invalid Path: " + dir.getPath());
+            throw new UnsupportedOperationException(dir.getName() + " is not a directory");
         }
         File[] fileList = dir.listFiles();
         for (File file : fileList)
         {
             fileName = file.getName();
             fileExtention = FilenameUtils.getExtension(file.getPath());
-            FileInputStream fileContent = new FileInputStream(file);
+            FileInputStream fileContent;
+            try
+            {
+                fileContent = new FileInputStream(file);
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new CmisRuntimeException("Directory " + dir.getName() + " not found", e);
+            }
             Map<String, String> properties = new HashMap<String, String>();
             properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             properties.put(PropertyIds.NAME, fileName);
@@ -867,8 +861,7 @@ public class ContentService extends CMISUtil
             }
             finally
             {
-                fileContent.close();
-                contentStream.getStream().close();
+                closeStreams(fileContent, contentStream);
             }
         }
         return uploadedFiles;
@@ -883,27 +876,22 @@ public class ContentService extends CMISUtil
      * @param siteName site name
      * @param folderName folder name where files are uploaded
      * @return list of uploaded documents
-     * @throws Exception if error
      */
     public List<Document> uploadFilesInFolder(final String filesPath,
                                               final String userName,
                                               final String password,
                                               final String siteName,
-                                              final String folderName) throws Exception
+                                              final String folderName)
     {
         List<Document> uploadedFiles=new ArrayList<Document>();
         String fileName=null;
         String fileExtention=null;
         CmisObject folderObj=null;
         ContentStream contentStream=null;
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }
         File dir = new File(filesPath);
-        if (!dir.exists() || !dir.isDirectory())
+        if (!dir.isDirectory())
         {
-            throw new IllegalArgumentException("Invalid Path: " + dir.getPath());
+            throw new IllegalArgumentException(dir.getName() + " is not a directory");
         }
         Session session = getCMISSession(userName, password);
         String folderId = getNodeRef(userName, password, siteName, folderName);
@@ -916,7 +904,15 @@ public class ContentService extends CMISUtil
         {
             fileName=file.getName();
             fileExtention=FilenameUtils.getExtension(file.getPath());
-            FileInputStream fileContent=new FileInputStream(file);
+            FileInputStream fileContent;
+            try
+            {
+                fileContent = new FileInputStream(file);
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new CmisRuntimeException(dir.getName() + " not found");
+            }
             Map<String, String> properties = new HashMap<String, String>();
             properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             properties.put(PropertyIds.NAME, fileName);
@@ -942,8 +938,7 @@ public class ContentService extends CMISUtil
             }
             finally
             {
-                fileContent.close();
-                contentStream.getStream().close();
+                closeStreams(fileContent, contentStream);
             }
         }
         return uploadedFiles;
@@ -956,12 +951,11 @@ public class ContentService extends CMISUtil
      * @param password user password
      * @param siteName site name
      * @param fileNames names of files to be deleted
-     * @throws Exception if error
      */
     public void deleteFiles(final String userName,
                             final String password,
                             final String siteName,
-                            final String... fileNames) throws Exception
+                            final String... fileNames)
     {
         for(int i=0; i<fileNames.length; i++)
         {
@@ -977,13 +971,11 @@ public class ContentService extends CMISUtil
      * @param siteName site name
      * @param docName file name
      * @return String content of document
-     * @throws Exception if error
-     * 
      */
     public String getDocumentContent(final String userName,
                                      final String password,
                                      final String siteName,
-                                     final String docName) throws Exception
+                                     final String docName)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String docNodeRef = getNodeRef(userName, password, siteName, docName);
@@ -998,6 +990,10 @@ public class ContentService extends CMISUtil
                 HttpEntity entity = response.getEntity();
                 return EntityUtils.toString(entity, "UTF-8");
             }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Unable to execute request " + get);
         }
         finally
         {
@@ -1015,15 +1011,14 @@ public class ContentService extends CMISUtil
      * @param docType file type
      * @param docName file name
      * @param newContent new content of the file
-     * @throws Exception if error
-     * @return if updated
+     * @return true if updated
      */
     public boolean updateDocumentContent(final String userName,
                                          final String password,
                                          final String siteName,
                                          final DocumentType docType,
                                          final String docName,
-                                         final String newContent) throws Exception
+                                         final String newContent)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String docNodeRef = getNodeRef(userName, password, siteName, docName);
@@ -1047,6 +1042,10 @@ public class ContentService extends CMISUtil
             {
                 return true;
             }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Unable to execute request " + request);
         }
         finally
         {

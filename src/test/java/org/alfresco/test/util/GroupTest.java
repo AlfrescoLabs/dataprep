@@ -26,7 +26,7 @@ public class GroupTest extends AbstractTest
     String admin = "admin";
 
     @Test
-    public void createGroup() throws Exception
+    public void createGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(admin, admin, groupName));
@@ -34,7 +34,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void createSameGroup() throws Exception
+    public void createSameGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(admin, admin, groupName));
@@ -42,7 +42,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void createGroupNonAdminUser() throws Exception
+    public void createGroupNonAdminUser()
     {
         String groupName = "group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -52,7 +52,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addUserToGroup() throws Exception
+    public void addUserToGroup()
     {
         String groupName = "Group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -68,7 +68,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addUserToSystemGroup() throws Exception
+    public void addUserToSystemGroup()
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
@@ -76,7 +76,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addNonExistentUserToGroup() throws Exception
+    public void addNonExistentUserToGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(admin, admin, groupName));
@@ -84,7 +84,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addUserToNonExistenGroup() throws Exception
+    public void addUserToNonExistenGroup()
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
@@ -92,7 +92,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addUserToGroupTwice() throws Exception
+    public void addUserToGroupTwice()
     {
         String groupName = "group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -103,7 +103,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addNonExistentSubGroup() throws Exception
+    public void addNonExistentSubGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         String subGroup = "subgroup" + System.currentTimeMillis();
@@ -113,7 +113,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addExistentSubGroup() throws Exception
+    public void addExistentSubGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         String subGroup = "subgroup" + System.currentTimeMillis();
@@ -125,14 +125,14 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void addSubGroupToNonExistentGroup() throws Exception
+    public void addSubGroupToNonExistentGroup()
     {
         String subGroup = "subgroup" + System.currentTimeMillis();
         Assert.assertFalse(groupService.addSubGroup(admin, admin, "fakeGroup", subGroup));
     }
 
     @Test
-    public void removeUserFromGroup() throws Exception
+    public void removeUserFromGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -144,7 +144,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void removeNonExistentUserFromGroup() throws Exception
+    public void removeNonExistentUserFromGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(admin, admin, groupName));
@@ -152,7 +152,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void removeSubgroupFromGroup() throws Exception
+    public void removeSubgroupFromGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         String subGroup = "subgroup" + System.currentTimeMillis();
@@ -162,7 +162,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void removeGroup() throws Exception
+    public void removeGroup()
     {
         String groupName = "group" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(admin, admin, groupName));
@@ -171,7 +171,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void removeGroupNonAdminUser() throws Exception
+    public void removeGroupNonAdminUser()
     {
         String groupName = "group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -181,7 +181,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void inviteGroupToSite() throws Exception
+    public void inviteGroupToSite()
     {
         String siteId = "siteinvite-" + System.currentTimeMillis();
         String groupName = "group" + System.currentTimeMillis();
@@ -197,7 +197,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void inviteGroupInvalidSite() throws Exception
+    public void inviteGroupInvalidSite()
     {
         String groupName = "group" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -208,7 +208,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void inviteGroupInvalidManager() throws Exception
+    public void inviteGroupInvalidManager()
     {
         String siteId = "siteinvite-" + System.currentTimeMillis();
         String groupName = "group" + System.currentTimeMillis();
@@ -221,7 +221,7 @@ public class GroupTest extends AbstractTest
     }
 
     @Test
-    public void changeGroupRole() throws Exception
+    public void changeGroupRole()
     {
         String siteId = "siteinvite-" + System.currentTimeMillis();
         String groupName = "group" + System.currentTimeMillis();

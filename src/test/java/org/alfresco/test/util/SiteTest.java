@@ -14,7 +14,6 @@
  */
 package org.alfresco.test.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,8 +36,7 @@ import org.testng.annotations.Test;
 public class SiteTest extends AbstractTest 
 {
     private static final String MY_DOMAIN = "mydomain";
-    @Autowired
-    private SiteService site;
+    @Autowired private SiteService site;
     private String siteId;
     private String secondSite;
     
@@ -50,7 +48,7 @@ public class SiteTest extends AbstractTest
     }
     
     @Test
-    public void create() throws Exception
+    public void create()
     {
         site.create(ADMIN,
                     ADMIN,
@@ -61,17 +59,16 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(dependsOnMethods="create")
-    public void exists() throws Exception
+    public void exists()
     {
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertTrue(exists);
     }
     /**
      * Test to create a site with shortname and title 
-     * @throws Exception
      */
     @Test
-    public void createWithSiteURLName() throws Exception
+    public void createWithSiteURLName()
     {
         site.create(ADMIN,
                     ADMIN,
@@ -83,21 +80,21 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(dependsOnMethods="createWithSiteURLName")
-    public void createWithSiteURLNameExists() throws Exception
+    public void createWithSiteURLNameExists()
     {
         boolean exists = site.exists(secondSite, ADMIN, ADMIN);
         Assert.assertTrue(exists);
     }
     
     @Test
-    public void fakeSiteDoesNotExists() throws Exception
+    public void fakeSiteDoesNotExists()
     {
         boolean exists = site.exists("bs-site",ADMIN, ADMIN);
         Assert.assertFalse(exists);
     }
     
     @Test(expectedExceptions=AlfrescoException.class)
-    public void createSiteWithInvalidDetails() throws IOException
+    public void createSiteWithInvalidDetails()
     {
         String siteId = "michael" + System.currentTimeMillis();
         site.create(ADMIN,
@@ -109,7 +106,7 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(dependsOnMethods="exists")
-    public void getAllSites() throws Exception
+    public void getAllSites()
     {
         List<String> sites= site.getSites(ADMIN, ADMIN);
         Assert.assertNotEquals(sites.size(), 0);
@@ -117,45 +114,45 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(dependsOnMethods="getAllSites")
-    public void setFavorite() throws Exception
+    public void setFavorite()
     {
         Assert.assertTrue(site.setFavorite(ADMIN, ADMIN, siteId));
         Assert.assertTrue(site.isFavorite(ADMIN, ADMIN, siteId));
     }
     
     @Test(dependsOnMethods="setFavorite")
-    public void removeFavorite() throws Exception
+    public void removeFavorite()
     {
         Assert.assertTrue(site.removeFavorite(ADMIN, ADMIN, siteId));
         Assert.assertFalse(site.isFavorite(ADMIN, ADMIN, siteId));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void favoriteFakeSite() throws Exception
+    public void favoriteFakeSite()
     {
         site.setFavorite(ADMIN, ADMIN, "fakeSite");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeFavFakeSite() throws Exception
+    public void removeFavFakeSite()
     {
         site.removeFavorite(ADMIN, ADMIN, "fakeSite");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void favSiteInvalidUser() throws Exception
+    public void favSiteInvalidUser()
     {
         site.setFavorite("fakeUser", ADMIN, siteId);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeFavInvalidUser() throws Exception
+    public void removeFavInvalidUser()
     {
         site.removeFavorite("fakeUser", ADMIN, siteId);
     }
     
     @Test(dependsOnMethods="removeFavorite")
-    public void addPagesToSite() throws Exception
+    public void addPagesToSite()
     {
         List<Page> pagesToAdd = new ArrayList<Page>();
         pagesToAdd.add(Page.WIKI);
@@ -166,19 +163,19 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addPageToInvalidSite() throws Exception
+    public void addPageToInvalidSite()
     {
         site.addPageToSite(ADMIN, ADMIN, "fakeSite", Page.BLOG, null);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addPageToInvalidUser() throws Exception
+    public void addPageToInvalidUser()
     {   
         site.addPageToSite("fakeUser", "fakePass", siteId, Page.BLOG, null);
     }
     
     @Test(dependsOnMethods="addPagesToSite")
-    public void addDashlets() throws Exception
+    public void addDashlets()
     {   
         Assert.assertTrue(site.addDashlet(ADMIN, ADMIN, siteId, SiteDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1));
         Assert.assertTrue(site.addDashlet(ADMIN, ADMIN, siteId, SiteDashlet.SITE_CALENDAR, DashletLayout.THREE_COLUMNS, 3, 2));
@@ -187,19 +184,19 @@ public class SiteTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addDashletInvalidUser() throws Exception
+    public void addDashletInvalidUser()
     {   
         site.addDashlet("fakeUser", "fakePass", siteId, SiteDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addDashletToInvalidSite() throws Exception
+    public void addDashletToInvalidSite()
     {
         site.addDashlet(ADMIN, ADMIN, "fakeSite", SiteDashlet.ADDONS_RSS_FEED, DashletLayout.FOUR_COLUMNS, 2, 1);
     }
     
     @Test(dependsOnMethods="addDashlets")
-    public void delete() throws Exception
+    public void delete()
     {
         List<String> sites= site.getSites(ADMIN, ADMIN);
         Assert.assertTrue(sites.contains(siteId));

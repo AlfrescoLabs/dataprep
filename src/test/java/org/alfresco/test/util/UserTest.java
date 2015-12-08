@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
-import org.alfresco.dataprep.GroupService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ public class UserTest extends AbstractTest
 {
     @Autowired private SiteService site;
     @Autowired private UserService userService;
-    @Autowired private GroupService groupService;
     String userName = "userm-" + System.currentTimeMillis();
     String firstName = "fname-" + System.currentTimeMillis();
     String lastName = "lname-" + System.currentTimeMillis();
@@ -44,25 +42,25 @@ public class UserTest extends AbstractTest
     String admin = "admin";
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void createUserInvalidUserName() throws Exception
+    public void createUserInvalidUserName()
     {
         userService.create(admin, admin, null, password, email, firstName, lastName);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void createUserInvalidPassword() throws Exception
+    public void createUserInvalidPassword()
     {
         userService.create(admin, admin, userName, null, email, firstName, lastName);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void createUserNullAdmin() throws Exception
+    public void createUserNullAdmin()
     {
         userService.create(null, admin, userName, password, email, firstName, lastName);
     }
 
     @Test
-    public void creatEnterpriseUser() throws Exception
+    public void creatEnterpriseUser()
     {
         boolean result = userService.create(admin, admin, userName, password, email, firstName, lastName);
         Assert.assertTrue(result);
@@ -70,13 +68,13 @@ public class UserTest extends AbstractTest
     }
 
     @Test
-    public void checkUserExistsWhenHeDoesnt() throws Exception
+    public void checkUserExistsWhenHeDoesnt()
     {
         Assert.assertFalse(userService.userExists(admin, admin, "booo"));
     }
 
     @Test
-    public void createSameEnterpriseUser() throws Exception
+    public void createSameEnterpriseUser()
     {
         String userName = "sameUserR1";
         String password = "password";
@@ -86,7 +84,7 @@ public class UserTest extends AbstractTest
     }
 
     @Test
-    public void deleteUser() throws Exception
+    public void deleteUser()
     {
         String userName = "deleteUser";
         userService.create(admin, admin, userName, password, email, firstName, lastName);
@@ -95,14 +93,14 @@ public class UserTest extends AbstractTest
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteNonExistent() throws Exception
+    public void deleteNonExistent()
     {
         String userName = "booo";
         userService.delete(admin, admin, userName);
     }
 
     @Test
-    public void deleteUserContainingSpecialCharacters() throws Exception
+    public void deleteUserContainingSpecialCharacters()
     {
         String userNameWithSpecialCharacters = "delete \"#user;<=>with?[]^special`{|}characters";
         userService.create(admin, admin, userNameWithSpecialCharacters, password, email, firstName, lastName);
@@ -111,25 +109,25 @@ public class UserTest extends AbstractTest
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void inviteUserInvalidinvitingUser() throws Exception
+    public void inviteUserInvalidinvitingUser()
     {
         userService.inviteUserToSiteAndAccept(null, password, "userToInvite", "site", "SiteConsumer");
     }
     
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void inviteUserInvalidSite() throws Exception
+    public void inviteUserInvalidSite()
     {
         userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", null , "SiteConsumer");
     }
     
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void inviteUserInvalidRole() throws Exception
+    public void inviteUserInvalidRole()
     {
         userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", "site", null);
     }
 
     @Test
-    public void inviteUserToSiteAndAccept() throws Exception
+    public void inviteUserToSiteAndAccept()
     {
         String userManager = "userSiteManager" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
@@ -143,7 +141,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void inviteUserToNonExistentSite() throws Exception
+    public void inviteUserToNonExistentSite()
     {
         String userManager = "userSiteManager" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
@@ -153,7 +151,7 @@ public class UserTest extends AbstractTest
     }
   
     @Test
-    public void requestSiteMembership() throws Exception
+    public void requestSiteMembership()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -168,7 +166,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void requestSiteMembershipTwice() throws Exception
+    public void requestSiteMembershipTwice()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -184,7 +182,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void requestSiteMembershipNoExistentSite() throws Exception
+    public void requestSiteMembershipNoExistentSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
@@ -192,7 +190,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void requestSiteMembershipNoExistentUser() throws Exception
+    public void requestSiteMembershipNoExistentUser()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         site.create(admin,
@@ -205,7 +203,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void removePendingRequestModeratedSite() throws Exception
+    public void removePendingRequestModeratedSite()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -221,7 +219,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removePendingRequestPublicSite() throws Exception
+    public void removePendingRequestPublicSite()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -237,7 +235,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removePendingReqNonExistentSite() throws Exception
+    public void removePendingReqNonExistentSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
@@ -245,7 +243,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void removeSiteMembership() throws Exception
+    public void removeSiteMembership()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -261,7 +259,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void removeSiteMembershipByUser() throws Exception
+    public void removeSiteMembershipByUser()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -277,7 +275,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void removeSiteMembershipNonMemberUser() throws Exception
+    public void removeSiteMembershipNonMemberUser()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -295,7 +293,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void removeSiteMembershiNoExistentUser() throws Exception
+    public void removeSiteMembershiNoExistentUser()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         site.create(admin,
@@ -308,7 +306,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeSiteMembFakeSiteManager() throws Exception
+    public void removeSiteMembFakeSiteManager()
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -324,7 +322,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void removeSiteMembershipNoExistentSite() throws Exception
+    public void removeSiteMembershipNoExistentSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
@@ -334,7 +332,7 @@ public class UserTest extends AbstractTest
     
     
     @Test
-    public void countSiteMembers() throws Exception
+    public void countSiteMembers()
     {
         String userManager = "user1-" + System.currentTimeMillis();
         String userToInvite = "user2-" + System.currentTimeMillis();
@@ -350,7 +348,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void countSiteMembersWithNoInvitee() throws Exception
+    public void countSiteMembersWithNoInvitee()
     {
         String userName = "user-" + System.currentTimeMillis();
         String siteName = "site-" + System.currentTimeMillis();
@@ -362,7 +360,7 @@ public class UserTest extends AbstractTest
     }
    
     @Test
-    public void addDashlets() throws Exception
+    public void addDashlets()
     {
         String theUser = "alfrescouser" + System.currentTimeMillis();
         userService.create(admin, admin, theUser, password, theUser, firstName, lastName);
@@ -375,13 +373,13 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void addDashletToInvalidUser() throws Exception
+    public void addDashletToInvalidUser()
     {   
         Assert.assertFalse(userService.addDashlet("fakeUser", "fakePass", UserDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1));
     }
     
     @Test
-    public void changeUserRole() throws Exception
+    public void changeUserRole()
     {
         String siteId = "siteInvite-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -392,7 +390,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void changeRoleInvalidMember() throws Exception
+    public void changeRoleInvalidMember()
     {
         String siteId = "siteInvite-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -402,7 +400,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void changeRoleInvalidSite() throws Exception
+    public void changeRoleInvalidSite()
     {
         String siteId = "siteInvite-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -413,7 +411,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void changeRoleInvalidRole() throws Exception
+    public void changeRoleInvalidRole()
     {
         String siteId = "siteInvite-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
@@ -424,7 +422,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void addMemberToModeratedSite() throws Exception
+    public void addMemberToModeratedSite()
     {
         String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
@@ -436,7 +434,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void addMemberToPrivateSite() throws Exception
+    public void addMemberToPrivateSite()
     { 
         String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
@@ -448,7 +446,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addMemberToInvalidSite() throws Exception
+    public void addMemberToInvalidSite()
     { 
         String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
@@ -458,7 +456,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void addMemberInvalidRole() throws Exception
+    public void addMemberInvalidRole()
     { 
         String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
@@ -470,7 +468,7 @@ public class UserTest extends AbstractTest
     }
 
     @Test
-    public void addMemberToSiteTwice() throws Exception
+    public void addMemberToSiteTwice()
     {
         String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
@@ -483,7 +481,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void followUser() throws Exception
+    public void followUser()
     {
         String user = "user" + System.currentTimeMillis();
         String userToFollow1 = "userFollow-1" + System.currentTimeMillis();
@@ -504,13 +502,13 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void followInvalidUser() throws Exception
+    public void followInvalidUser()
     {
         Assert.assertFalse(userService.followUser(ADMIN, ADMIN, "fakeUser"));
     }
     
     @Test
-    public void getFollowers() throws Exception
+    public void getFollowers()
     {
         String userToFollow = "user" + System.currentTimeMillis();
         String user1 = "userFollow-1" + System.currentTimeMillis();
@@ -531,7 +529,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void unfollowUser() throws Exception
+    public void unfollowUser()
     {
         String user = "user" + System.currentTimeMillis();
         String userToFollow1 = "userFollow-1" + System.currentTimeMillis();
@@ -553,7 +551,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void createRootCategory() throws Exception
+    public void createRootCategory()
     {
         String rootCateg = "firstCateg" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
@@ -561,7 +559,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void createRootCategoryTwice() throws Exception
+    public void createRootCategoryTwice()
     {
         String rootCateg = "firstCateg" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
@@ -569,7 +567,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void createSubCategory() throws Exception
+    public void createSubCategory()
     {
         String rootCateg = "rootCateg" + System.currentTimeMillis();
         String subCateg1 = "sub1";
@@ -582,7 +580,7 @@ public class UserTest extends AbstractTest
     }
     
     @Test
-    public void deleteRootCategory() throws Exception
+    public void deleteRootCategory()
     {
         String rootCateg = "firstCateg" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
@@ -590,13 +588,13 @@ public class UserTest extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void deleteInvalidCategory() throws Exception
+    public void deleteInvalidCategory()
     {
         userService.deleteCategory(admin, admin, "fakeCategory");
     }
     
     @Test
-    public void deleteSubCategory() throws Exception
+    public void deleteSubCategory()
     {
         String rootCateg = "rootCateg" + System.currentTimeMillis();
         String subCateg1 = "sub1";
