@@ -330,7 +330,7 @@ public class AlfrescoHttpClient
         }
         catch (ParseException e)
         {
-            throw new RuntimeException("Failed to parse the result: " + result);
+            throw new RuntimeException("Failed to parse the result: " + result, e);
         }
         return (String) obj.get(param);
     }
@@ -356,7 +356,7 @@ public class AlfrescoHttpClient
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Failed to read the response");
+            throw new RuntimeException("Failed to read the response", e);
         }
         Object obj = JSONValue.parse(responseString);
         JSONObject jsonObject = (JSONObject) obj;
@@ -383,7 +383,7 @@ public class AlfrescoHttpClient
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Failed to read the response");
+            throw new RuntimeException("Failed to read the response", e);
         }
         Object obj = JSONValue.parse(responseString);
         JSONObject jsonObject = (JSONObject) obj;

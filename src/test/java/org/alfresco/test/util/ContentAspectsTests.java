@@ -206,9 +206,9 @@ public class ContentAspectsTests extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());        
+        Assert.assertFalse(doc1.getId().isEmpty());
         contentAspect.addDublinCore(userName, password, siteName, plainDoc, userName, userName, "Plain text", userName, 
-                plainDoc, "90", "Best Rights", plainDoc);    
+                plainDoc, "90", "Best Rights", plainDoc);
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         Assert.assertEquals(contentAspect.getPropertyValue(properties, "cm:contributor"), userName);
         Assert.assertEquals(contentAspect.getPropertyValue(properties, "cm:publisher"), userName);
@@ -471,7 +471,7 @@ public class ContentAspectsTests extends AbstractTest
                     "mydomain",
                     siteName, 
                     "my site description", 
-                    Visibility.PUBLIC);        
+                    Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
         List<String> categories = new ArrayList<String>();
@@ -481,7 +481,7 @@ public class ContentAspectsTests extends AbstractTest
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         List<?> values = contentAspect.getValues(properties, "cm:categories");
         Assert.assertEquals(values.get(0), contentAspect.getCategoryNodeRef(userName, password, categories.get(0)));
-        Assert.assertEquals(values.get(1), contentAspect.getCategoryNodeRef(userName, password, categories.get(1)));      
+        Assert.assertEquals(values.get(1), contentAspect.getCategoryNodeRef(userName, password, categories.get(1)));
         contentAspect.removeAspect(userName, password, siteName, plainDoc, DocumentAspect.CLASSIFIABLE);
         properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         values = contentAspect.getValues(properties, "cm:categories");

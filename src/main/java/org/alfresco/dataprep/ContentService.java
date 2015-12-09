@@ -206,32 +206,26 @@ public class ContentService extends CMISUtil
     }
 
     /**
-     * Delete a folder by path
-     * If the folder is in ROOT(Company Home) set path to NULL.
-     * 
+     * Delete a folder or document by path
+     * If the folder is in 'Company Home' set the folder or document name in path.
      * @param userName login username
      * @param password login password
-     * @param folderName folder name
-     * @param path String path to folder(e.g.: Shared, Guest Home)
+     * @param path String path to folder or document(e.g.: Shared/file.docx, Guest Home/folder)
+     * @throws CmisRuntimeException if error
      */
-    public void deleteFolderFromRepository(final String userName,
-                                           final String password,
-                                           final String folderName,
-                                           final String path)
+    public void deleteContentByPath(final String userName,
+                                    final String password,
+                                    final String path)
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }
         try
         {
             Session session = getCMISSession(userName, password);
-            String folderId = getNodeRefFromRepo(userName, password, folderName, path);
+            String folderId = getNodeRefByPath(userName, password, path);
             session.getObject(folderId).delete();
         }
         catch(CmisInvalidArgumentException nf)
         {
-            throw new CmisRuntimeException("Invalid folder " + folderName, nf);
+            throw new CmisRuntimeException("Invalid content " + path, nf);
         }    
         catch(CmisConstraintException ce)
         {
@@ -239,7 +233,7 @@ public class ContentService extends CMISUtil
         }
         catch (CmisUnauthorizedException ue)
         {
-            throw new CmisRuntimeException("User " + userName + " is not authorized to create folder in repository");
+            throw new CmisRuntimeException("User " + userName + " is not authorized to delete this content: " + path, ue);
         }
     }
 
@@ -548,45 +542,6 @@ public class ContentService extends CMISUtil
     }
 
     /**
-     * Delete a document created in repository.
-     * If the document is in ROOT (Company Home) set path to NULL.
-     * 
-     * @param userName username
-     * @param password password
-     * @param path path in repository
-     * @param docName file name
-     */
-    public void deleteDocumentRepository(final String userName,
-                                         final String password,
-                                         final String path,
-                                         final String docName)
-    {   
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(docName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }
-        try
-        {
-            String docId; 
-            Session session = getCMISSession(userName, password); 
-            docId = getNodeRefFromRepo(userName, password, docName, path);
-            session.getObject(docId).delete();
-        }
-        catch(CmisObjectNotFoundException nf)
-        {
-            throw new CmisRuntimeException("Invalid path: " + path, nf);
-        }
-        catch(CmisInvalidArgumentException ia)
-        {
-            throw new CmisRuntimeException("Invalid file: " + docName, ia);
-        }
-        catch(CmisUnauthorizedException ue)
-        {
-            throw new CmisRuntimeException("User " + userName + "doesn't have rights to delete " + docName, ue);
-        }
-    }
-
-    /**
      * Delete a parent folder that has children
      * 
      * @param userName login username
@@ -601,7 +556,7 @@ public class ContentService extends CMISUtil
                                   final String password,
                                   final boolean inRepository,
                                   final String siteName,
-                                  String path,
+                                  String pathToFolder,
                                   final String folderName)
     {   
         String folderId;
@@ -614,11 +569,7 @@ public class ContentService extends CMISUtil
             }
             else
             {
-                if(path == null)
-                {
-                    path = "";
-                }
-                folderId = getNodeRefFromRepo(userName, password, folderName, path);
+                folderId = getNodeRefByPath(userName, password, pathToFolder);
             }
             CmisObject o = session.getObject(folderId);
             if(o instanceof Folder)
@@ -665,18 +616,16 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param path path to folder (e.g. 'Shared')
-     * @param folderName folder name
      */
-    public void deleteTreeRepository(final String userName,
-                                     final String password,
-                                     final String path,
-                                     final String folderName)
+    public void deleteTreeByPath(final String userName,
+                                 final String password,
+                                 final String pathToFolder)
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
         {
             throw new IllegalArgumentException("Parameter missing");
         }
-        deleteTreeFolder(userName, password, true, null, path, folderName);
+        deleteTreeFolder(userName, password, true, null, pathToFolder, null);
     }
 
     /**

@@ -237,7 +237,6 @@ public class SiteService
      * @param password String password
      * @param siteName String site name
      * @return String site node ref
-     * @throws Exception if error
      */
     public String getSiteNodeRef(final String userName,
                                  final String password,

@@ -83,7 +83,7 @@ public class UserService extends CMISUtil
                           final String lastName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) ||
-            StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass) || 
+            StringUtils.isEmpty(adminUser) || StringUtils.isEmpty(adminPass) ||
             StringUtils.isEmpty(email) || StringUtils.isEmpty(firstName) ||
             StringUtils.isEmpty(lastName))
         {

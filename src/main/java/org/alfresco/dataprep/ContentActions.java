@@ -146,7 +146,7 @@ public class ContentActions extends CMISUtil
                                        final ActionType optType,
                                        final List<String> values)
     {
-        String jsonInput = "";        
+        String jsonInput = "";
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
             || StringUtils.isEmpty(contentName) || StringUtils.isEmpty(values.toString()))
         {
@@ -161,7 +161,7 @@ public class ContentActions extends CMISUtil
         {
             jsonInput = ( jsonInput + "},{" + "\"" + optType.bodyParam  + "\"" + ": \"" + values.get(i) + "\"" );
         }
-        jsonInput = ( jsonInput + "}]" ); 
+        jsonInput = ( jsonInput + "}]" );
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
@@ -596,7 +596,7 @@ public class ContentActions extends CMISUtil
             }
             catch (ParseException e)
             {
-                return 0;
+                throw new RuntimeException("Unable to parse the response " + result, e);
             }
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject list = (JSONObject) jsonObject.get("entry");

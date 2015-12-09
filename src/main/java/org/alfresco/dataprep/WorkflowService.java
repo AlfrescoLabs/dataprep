@@ -104,7 +104,7 @@ public class WorkflowService extends CMISUtil
             {
                 for(int i = 0; i<pathsToDocs.size(); i++)
                 {
-                    items.add(getNodeRefFromPath(userName, password, pathsToDocs.get(i)));
+                    items.add(getNodeRefByPath(userName, password, pathsToDocs.get(i)));
                 }
             }
         }

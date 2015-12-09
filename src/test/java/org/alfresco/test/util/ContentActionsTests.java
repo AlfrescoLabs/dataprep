@@ -843,7 +843,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "moveToSite" + System.currentTimeMillis();
         String userName = "moveUser" + System.currentTimeMillis();
-        String copyDoc = "moveFile" + System.currentTimeMillis();
+        String moveDoc = "moveFile" + System.currentTimeMillis();
         String targetFolder = "targeFolder";
         String sourceFolder = "sourceFolder";
         String subFolder = "subFolder";
@@ -860,13 +860,14 @@ public class ContentActionsTests extends AbstractTest
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, subFolder);
         f1.createFolder(properties);
-        content.createDocumentInFolder(userName, password, siteName, sourceFolder, DocumentType.TEXT_PLAIN, copyDoc, copyDoc);
-        content.createDocumentInFolder(userName, password, siteName, subFolder, DocumentType.TEXT_PLAIN, copyDoc + "R1", copyDoc + "R1");
+        content.createDocumentInFolder(userName, password, siteName, sourceFolder, DocumentType.TEXT_PLAIN, moveDoc, moveDoc);
+        content.createDocumentInFolder(userName, password, siteName, subFolder, DocumentType.TEXT_PLAIN, moveDoc + "R1", moveDoc + "R1");
         Folder objectMoved = (Folder) contentAction.moveTo(userName, password, siteName, subFolder, siteName, targetFolder);
+        
         Assert.assertTrue(objectMoved.getFolderParent().getName().equals(targetFolder));
-        Assert.assertFalse(content.getNodeRefFromRepo(userName, password, copyDoc,
-                "Sites/" + siteName + "/documentLibrary/" + sourceFolder).isEmpty());
-        Assert.assertTrue(content.getNodeRefFromRepo(userName, password, subFolder, 
+        Assert.assertFalse(content.getNodeRefByPath(userName, password,
+                "Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + moveDoc).isEmpty());
+        Assert.assertTrue(content.getNodeRefByPath(userName, password, 
                 "Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + subFolder).isEmpty());
     }
     

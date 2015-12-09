@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -269,51 +268,6 @@ public class CMISUtil
         }
         return contents;
     }
-
-    /**
-     * Gets the object id for a document or folder in repository
-     * It looks for the item in the folder specified in the path.
-     * 
-     * @param userName String identifier
-     * @param password String password
-     * @param contentName String content identifier
-     * @param path String path to the object (e.g. 'Shared'). If empty or null 'Company home' is set.
-     * @return String node identifier
-     */
-    public String getNodeRefFromRepo(final String userName,
-                                     final String password,
-                                     final String contentName,
-                                     String path)
-    {
-        String nodeRef = "";
-        Session session = getCMISSession(userName, password);
-        if(path == null)
-        {
-            path = "";
-        }
-        try
-        {
-            CmisObject repo = session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
-            Folder folder = (Folder) repo;
-            ItemIterable<CmisObject> children = folder.getChildren();
-            ItemIterable<CmisObject> page = children.getPage();
-            Iterator<CmisObject> pageItems = page.iterator();
-            while(pageItems.hasNext())
-            {
-                CmisObject item = pageItems.next();
-                if(item.getName().equalsIgnoreCase(contentName))
-                {
-                    nodeRef = item.getId();
-                    break;
-                }
-            }
-        }
-        catch(CmisObjectNotFoundException nf)
-        {
-            return nodeRef;
-        }  
-        return nodeRef;
-    }
     
     /**
      * Get the node ref for a item by path
@@ -322,9 +276,9 @@ public class CMISUtil
      * @param pathToContent String path to item (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @return String node ref of the item
      */
-    public String getNodeRefFromPath(final String userName,
-                                     final String password,
-                                     final String pathToContent)
+    public String getNodeRefByPath(final String userName,
+                                   final String password,
+                                   final String pathToContent)
     {
         Session session = getCMISSession(userName, password);
         if(StringUtils.isEmpty(pathToContent))
@@ -665,7 +619,7 @@ public class CMISUtil
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Unable to close the stream");
+            throw new RuntimeException("Unable to close the stream", e);
         }
     }
 }
