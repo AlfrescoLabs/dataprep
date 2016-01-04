@@ -264,7 +264,8 @@ public class UserService extends CMISUtil
                         logger.trace("User successfully invited: " + userToInvite);
                     }
                     String alfVersion = client.getAlfrescoVersion();
-                    if(alfVersion.contains("5.1"))
+                    double v = Double.valueOf(StringUtils.substring(alfVersion, 0, 3));
+                    if(v >= 5.1)
                     {
                         return true;
                     }
@@ -571,7 +572,7 @@ public class UserService extends CMISUtil
             if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();
-                String responseString = EntityUtils.toString(entity, "UTF-8"); 
+                String responseString = EntityUtils.toString(entity, "UTF-8");
                 Object obj = JSONValue.parse(responseString);
                 JSONArray array = (JSONArray)obj;
                 count = array.size();

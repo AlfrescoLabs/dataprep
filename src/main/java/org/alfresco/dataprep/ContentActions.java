@@ -340,7 +340,7 @@ public class ContentActions extends CMISUtil
             JSONObject list = (JSONObject) jsonObject.get("list");
             JSONArray jArray = (JSONArray) list.get("entries");
             Iterator<JSONObject> iterator = jArray.iterator();
-            while (iterator.hasNext()) 
+            while (iterator.hasNext())
             {
                 JSONObject factObj = (JSONObject) iterator.next();
                 JSONObject entry = (JSONObject) factObj.get("entry");
@@ -817,17 +817,15 @@ public class ContentActions extends CMISUtil
                              final String siteId,
                              final String fileName)
     {
-        ObjectId id;
         try
         {
             Session session = getCMISSession(userName, password);
-            id = getDocumentObject(session, siteId, fileName).checkOut();
+            return getDocumentObject(session, siteId, fileName).checkOut();
         }
         catch(CmisVersioningException cv)
         {
             throw new CmisRuntimeException("File " + fileName + " is already checked out", cv);
         }
-        return id;
     }
     
     /**
@@ -1015,7 +1013,7 @@ public class ContentActions extends CMISUtil
             } 
             else if (obj instanceof Folder)
             {
-               copyFolder( (Folder) obj, targetFolder);
+               copyFolder((Folder) obj, targetFolder);
             }
         }
     }

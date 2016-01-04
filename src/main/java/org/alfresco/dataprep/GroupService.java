@@ -376,7 +376,7 @@ public class GroupService
         HttpResponse response = getGroupDetails(adminUser, adminPass, groupName);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            HttpEntity entity = response. getEntity();
+            HttpEntity entity = response.getEntity();
             JSONObject obj = null;
             try
             {

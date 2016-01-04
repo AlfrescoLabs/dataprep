@@ -207,7 +207,7 @@ public class SiteService
             if(200 == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();
-                String responseString = EntityUtils.toString(entity , "UTF-8"); 
+                String responseString = EntityUtils.toString(entity , "UTF-8");
                 Object obj=JSONValue.parse(responseString);
                 JSONArray jarray=(JSONArray)obj;
                 for (Object item:jarray)
