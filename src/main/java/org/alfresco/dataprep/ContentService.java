@@ -575,6 +575,7 @@ public class ContentService extends CMISUtil
             if(o instanceof Folder)
             {
                 Folder f = (Folder)o;
+                f.refresh();
                 f.deleteTree(true, UnfileObject.DELETE, true);
             }
             else

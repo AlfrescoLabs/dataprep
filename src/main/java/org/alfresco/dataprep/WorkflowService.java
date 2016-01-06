@@ -70,19 +70,19 @@ public class WorkflowService extends CMISUtil
 
     @SuppressWarnings("unchecked")
     private String startWorkflow(final String userName,
-                                  final String password,
-                                  final WorkflowType workflowType,
-                                  final String message,
-                                  Date due,
-                                  Priority priority,
-                                  final List<String> assignedUsers,
-                                  final String assignedGroup,
-                                  final boolean docsByPath,
-                                  final String documentsSite,
-                                  final List<String> docsToAttach,
-                                  final List<String> pathsToDocs,
-                                  final int requiredApprovePercent,
-                                  final boolean sendEmail)
+                                 final String password,
+                                 final WorkflowType workflowType,
+                                 final String message,
+                                 Date due,
+                                 Priority priority,
+                                 final List<String> assignedUsers,
+                                 final String assignedGroup,
+                                 final boolean docsByPath,
+                                 final String documentsSite,
+                                 final List<String> docsToAttach,
+                                 final List<String> pathsToDocs,
+                                 final int requiredApprovePercent,
+                                 final boolean sendEmail)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");

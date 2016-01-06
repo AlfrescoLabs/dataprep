@@ -29,6 +29,7 @@ import org.alfresco.dataprep.WorkflowService;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -44,150 +45,92 @@ public class WorkflowTests extends AbstractTest
     @Autowired UserService userService;
     @Autowired GroupService groupService;
     @Autowired SitePagesService sitePages;
-    private final String password = "password";
+    private String workflowUser = "workflowUser" + System.currentTimeMillis();
+    private String workflowSite = "workflowSite" + System.currentTimeMillis();
+    private String plainDoc = "plainDoc";
+    private String msWord = "msWord";
+    private List<String> docs = new ArrayList<String>();
+    private List<String> pathToItems = new ArrayList<String>();
+    private String groupName = "workGroup" + System.currentTimeMillis();
+    private List<String> reviewers = new ArrayList<String>();
+    private String reviewer1 = "reviewer1" + System.currentTimeMillis();
+    private String reviewer2 = "reviewer1" + System.currentTimeMillis();
+    
+    @BeforeClass(alwaysRun = true)
+    public void userSetup()
+    {
+        userService.create(ADMIN, ADMIN, workflowUser, password, workflowUser + domain, "firstname", "lastname");
+        siteService.create(workflowUser, password, "mydomain", workflowSite, "my site description", Visibility.PUBLIC);
+        contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
+        contentService.createDocument(workflowUser, password, workflowSite, DocumentType.MSWORD, msWord, msWord);
+        docs.add(plainDoc);
+        docs.add(msWord);
+        pathToItems.add("Sites/" + workflowSite + "/documentLibrary/" + plainDoc);
+        pathToItems.add("Sites/" + workflowSite + "/documentLibrary/" + msWord);
+        groupService.createGroup(ADMIN, ADMIN, groupName);
+        groupService.addUserToGroup(ADMIN, ADMIN, groupName, workflowUser);
+        userService.create(ADMIN, ADMIN, reviewer1, password, reviewer1 + domain, "firstname1", "lastname1");
+        userService.create(ADMIN, ADMIN, reviewer2, password, reviewer2 + domain, "firstname2", "lastname2");
+        reviewers.add(reviewer1);
+        reviewers.add(reviewer2);
+    }
     
     @Test
     public void createNewTask()
     {
-        String siteName = "workflowSite" + System.currentTimeMillis();
-        String userName = "wUser" + System.currentTimeMillis();
-        String plainDoc = "plain";
-        String msWord = "msWord";
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain, "firstname", "lastname");
-        siteService.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        contentService.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
-        List<String> docs = new ArrayList<String>();
-        docs.add(plainDoc);
-        docs.add(msWord);
-        String workflowId = workflow.startNewTask(userName, password, "New Task Message", new Date(), userName, Priority.High, siteName, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "New Task Message", new Date(), workflowUser,
+                Priority.High, workflowSite, docs, true);
         Assert.assertTrue(!workflowId.isEmpty());
-        String taskId = workflow.getTaskId(userName, password, workflowId);
+        String taskId = workflow.getTaskId(workflowUser, password, workflowId);
         Assert.assertTrue(!taskId.isEmpty());
     }
     
     @Test
     public void createNewTaskItemsByPath()
     {
-        String siteName = "workflowSite" + System.currentTimeMillis();
-        String userName = "wUser" + System.currentTimeMillis();
-        String plainDoc = "plainDoc";
-        String msWord = "msWord";
-        String xls = "excel";
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain, "firstname", "lastname");
-        siteService.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        contentService.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSEXCEL, xls, xls);
-        List<String> pathToItems = new ArrayList<String>();
-        pathToItems.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
-        pathToItems.add("Sites/" + siteName + "/documentLibrary/" + msWord);
-        pathToItems.add("Sites/" + siteName + "/documentLibrary/" + xls);
-        Assert.assertTrue(!workflow.startNewTask(userName, password, "NewTaskByPaths", new Date(), userName, Priority.Low, pathToItems, true).isEmpty());
+        Assert.assertTrue(!workflow.startNewTask(workflowUser, password, "NewTaskByPaths", new Date(), workflowUser,
+                Priority.Low, pathToItems, true).isEmpty());
     }
     
     @Test
     public void createGroupReview()
     {
-        String siteName = "workflowSite" + System.currentTimeMillis();
-        String userName = "WGUser" + System.currentTimeMillis();
-        String plainDoc = "plain";
-        String msWord = "msWord";
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain, "firstname", "lastname");
-        siteService.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        contentService.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
-        List<String> docs = new ArrayList<String>();
-        docs.add(plainDoc);
-        docs.add(msWord);
-        List<String> docsByPath = new ArrayList<String>();
-        docsByPath.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
-        docsByPath.add("Sites/" + siteName + "/documentLibrary/" + msWord);
-        String groupName = "workGroup" + System.currentTimeMillis();
-        Assert.assertTrue(groupService.createGroup(ADMIN, ADMIN, groupName));
-        Assert.assertTrue(groupService.addUserToGroup(ADMIN, ADMIN, groupName, userName));
-        Assert.assertTrue(!workflow.startGroupReview(userName, password, "group message", new Date(), groupName, Priority.Low, siteName, docs, 27, false).isEmpty());
-        Assert.assertTrue(!workflow.startGroupReview(userName, password, "itemsByPath", new Date(), groupName, Priority.High, docsByPath, 69, true).isEmpty());
+        Assert.assertTrue(!workflow.startGroupReview(workflowUser, password, "group message", new Date(), groupName,
+                Priority.Low, workflowSite, docs, 27, false).isEmpty());
+        Assert.assertTrue(!workflow.startGroupReview(workflowUser, password, "itemsByPath", new Date(), groupName,
+                Priority.High, pathToItems, 69, true).isEmpty());
     }
     
     @Test
     public void createWorkflowMultipleReviewers()
     {
-        String siteName = "workflowSite" + System.currentTimeMillis();
-        String userName = "multi-1" + System.currentTimeMillis();
-        String userName2 = "multi-2" + System.currentTimeMillis();
-        String userName3 = "multi-3" + System.currentTimeMillis();
-        String plainDoc = "plain";
-        String msWord = "msWord";
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain, "firstname", "lastname");
-        userService.create(ADMIN, ADMIN, userName2, password, userName2 + domain, "firstname2", "lastname2");
-        userService.create(ADMIN, ADMIN, userName3, password, userName3 + domain, "firstname3", "lastname3");
-        siteService.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        contentService.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
-        List<String> docs = new ArrayList<String>();
-        docs.add(plainDoc);
-        docs.add(msWord);
-        List<String> reviewers = new ArrayList<String>();
-        reviewers.add(userName2);
-        reviewers.add(userName3);
-        List<String> paths = new ArrayList<String>();
-        paths.add("Sites/" + siteName + "/documentLibrary/" + msWord);
-        paths.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
-        String workflowId = workflow.startMultipleReviewers(userName, password, "multipleReviews", new Date(),
-                reviewers, Priority.High, siteName, docs, 98, false);
+        String workflowId = workflow.startMultipleReviewers(workflowUser, password, "multipleReviews", new Date(),
+                reviewers, Priority.High, workflowSite, docs, 98, false);
         Assert.assertFalse(workflowId.isEmpty());
-        String taskUser1 = workflow.getTaskId(userName2, password, workflowId);
+        String taskUser1 = workflow.getTaskId(reviewer1, password, workflowId);
         Assert.assertFalse(taskUser1.isEmpty());
-        String taskUser2 = workflow.getTaskId(userName3, password, workflowId);
+        String taskUser2 = workflow.getTaskId(reviewer2, password, workflowId);
         Assert.assertFalse(taskUser2.isEmpty());
         Assert.assertNotSame(taskUser2, taskUser1);
-        Assert.assertTrue(!workflow.startMultipleReviewers(userName, password, "pathMultiple", new Date(), reviewers, 
-                Priority.Low, paths, 80, true).isEmpty());
+        Assert.assertTrue(!workflow.startMultipleReviewers(workflowUser, password, "pathMultiple", new Date(), reviewers, 
+                Priority.Low, pathToItems, 80, true).isEmpty());
     }
     
     @Test
     public void createPooledReview()
     {
-        String siteName = "workflowSite" + System.currentTimeMillis();
-        String userName = "WGUser" + System.currentTimeMillis();
-        String plainDoc = "plain";
-        String msWord = "msWord";
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain, "firstname", "lastname");
-        siteService.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        contentService.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
-        List<String> docs = new ArrayList<String>();
-        docs.add(plainDoc);
-        docs.add(msWord);
-        List<String> docsByPath = new ArrayList<String>();
-        docsByPath.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
-        docsByPath.add("Sites/" + siteName + "/documentLibrary/" + msWord);
-        String groupName = "workGroup" + System.currentTimeMillis();
-        Assert.assertTrue(groupService.createGroup(ADMIN, ADMIN, groupName));
-        Assert.assertTrue(groupService.addUserToGroup(ADMIN, ADMIN, groupName, userName));
-        Assert.assertTrue(!workflow.startPooledReview(userName, password, "pooledPathItems", new Date(), groupName, Priority.High, docsByPath, false).isEmpty());
-        Assert.assertTrue(!workflow.startPooledReview(userName, password, "pooledReview", new Date(), groupName, Priority.Normal, siteName, docs, false).isEmpty());
+        Assert.assertTrue(!workflow.startPooledReview(workflowUser, password, "pooledPathItems", new Date(), groupName, 
+                Priority.High, pathToItems, false).isEmpty());
+        Assert.assertTrue(!workflow.startPooledReview(workflowUser, password, "pooledReview", new Date(), groupName, 
+                Priority.Normal, workflowSite, docs, false).isEmpty());
     }
     
     @Test
     public void createSingleReviewer()
     {
-        String siteName = "workflowSite" + System.currentTimeMillis();
-        String userName = "wUser" + System.currentTimeMillis();
-        String plainDoc = "plain";
-        String msWord = "msWord";
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain, "firstname", "lastname");
-        siteService.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        contentService.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        contentService.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
-        List<String> docs = new ArrayList<String>();
-        docs.add(plainDoc);
-        docs.add(msWord);
-        List<String> docsByPath = new ArrayList<String>();
-        docsByPath.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
-        docsByPath.add("Sites/" + siteName + "/documentLibrary/" + msWord);
-        Assert.assertTrue(!workflow.startSingleReview(userName, password, "singleReview Path", new Date(), userName, Priority.High, docsByPath, true).isEmpty());
-        Assert.assertTrue(!workflow.startSingleReview(userName, password, "singleReviewer", new Date(), userName, Priority.Low, siteName, docs, false).isEmpty());
+        Assert.assertTrue(!workflow.startSingleReview(workflowUser, password, "singleReview Path", new Date(), workflowUser, 
+                Priority.High, pathToItems, true).isEmpty());
+        Assert.assertTrue(!workflow.startSingleReview(workflowUser, password, "singleReviewer", new Date(), workflowUser, 
+                Priority.Low, workflowSite, docs, false).isEmpty());
     }
 }

@@ -23,6 +23,7 @@ import org.alfresco.dataprep.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -37,10 +38,18 @@ public class UserTest extends AbstractTest
     String userName = "userm-" + System.currentTimeMillis();
     String firstName = "fname-" + System.currentTimeMillis();
     String lastName = "lname-" + System.currentTimeMillis();
-    String password = "password";
     String email = userName;
     String admin = "admin";
+    String globalUser = "global" + System.currentTimeMillis();
+    String globalSite = "gSite" + System.currentTimeMillis();
 
+    @BeforeClass(alwaysRun = true)
+    public void userSetup()
+    {
+        userService.create(admin, admin, globalUser, password, globalUser + domain, firstName, lastName);
+        site.create(globalUser, password, "mydomain", globalSite, globalSite, Visibility.PUBLIC);
+    }
+    
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName()
     {
@@ -129,77 +138,41 @@ public class UserTest extends AbstractTest
     @Test
     public void inviteUserToSiteAndAccept()
     {
-        String userManager = "userSiteManager" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
-        String emailUserManager = userManager + "@test.com";
         String emailUserInvited = userToInvite + "@test.com";
-        String siteId = "site" + System.currentTimeMillis();
-        userService.create(admin, admin, userManager, password, emailUserManager, firstName, lastName);
         userService.create(admin, admin, userToInvite, password, emailUserInvited, "z" + firstName, lastName);
-        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PUBLIC);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, siteId, "SiteConsumer"));
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(globalUser, password, userToInvite, globalSite, "SiteConsumer"));
     }
     
     @Test
     public void inviteUserToNonExistentSite()
     {
-        String userManager = "userSiteManager" + System.currentTimeMillis();
         String userToInvite = "inviteUser" + System.currentTimeMillis();
-        String emailUserManager = userManager + "@test.com";
-        userService.create(admin, admin, userManager, password, emailUserManager, firstName, lastName);
-        Assert.assertFalse(userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, "whatSite", "SiteConsumer"));
+        Assert.assertFalse(userService.inviteUserToSiteAndAccept(globalUser, password, userToInvite, "whatSite", "SiteConsumer"));
     }
   
     @Test
     public void requestSiteMembership()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertTrue(userService.requestSiteMembership(admin, admin, globalSite));
     }
     
-    @Test
+    @Test(dependsOnMethods="requestSiteMembership")
     public void requestSiteMembershipTwice()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        Assert.assertFalse(userService.requestSiteMembership(userName, password, siteId));
+        Assert.assertFalse(userService.requestSiteMembership(admin, admin, globalSite));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void requestSiteMembershipNoExistentSite()
     {
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        userService.requestSiteMembership(userName, password, "fakeSite");
+        userService.requestSiteMembership(admin, admin, "fakeSite");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void requestSiteMembershipNoExistentUser()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        userService.requestSiteMembership("fakeUser", password, "fakeSite");
+        userService.requestSiteMembership("fakeUser", "fakePass", globalSite);
     }
     
     @Test
@@ -221,116 +194,68 @@ public class UserTest extends AbstractTest
     @Test(expectedExceptions = RuntimeException.class)
     public void removePendingRequestPublicSite()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        Assert.assertFalse(userService.removePendingSiteRequest(admin, admin, userName, siteId));
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
+        Assert.assertFalse(userService.removePendingSiteRequest(globalUser, password, userName, globalSite));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removePendingReqNonExistentSite()
     {
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
         userService.removePendingSiteRequest(admin, admin, userName, "fakeSite");
     }
     
     @Test
     public void removeSiteMembership()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
+        String userName = "removeMember-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        Assert.assertTrue(userService.removeSiteMembership(admin, admin, userName, siteId));
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
+        Assert.assertTrue(userService.removeSiteMembership(admin, admin, userName, globalSite));
     }
     
     @Test
     public void removeSiteMembershipByUser()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
+        String userName = "userRemove-" + System.currentTimeMillis();
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        Assert.assertTrue(userService.removeSiteMembership(userName, password, userName, siteId));
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
+        Assert.assertTrue(userService.removeSiteMembership(globalUser, password, userName, globalSite));
     }
     
     @Test
     public void removeSiteMembershipNonMemberUser()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
         String nonMemberUser = "nonMember-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
         userService.create(admin, admin, nonMemberUser, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        Assert.assertFalse(userService.removeSiteMembership(nonMemberUser, password, userName, siteId));
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
+        Assert.assertFalse(userService.removeSiteMembership(nonMemberUser, password, userName, globalSite));
     }
     
     @Test
     public void removeSiteMembershiNoExistentUser()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
-        Assert.assertFalse(userService.removeSiteMembership(admin, admin, "fakeUser", siteId));
+        Assert.assertFalse(userService.removeSiteMembership(admin, admin, "fakeUser", globalSite));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeSiteMembFakeSiteManager()
     {
-        String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
-                    "myDomain",
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        userService.removeSiteMembership("fakeSiteManager", "fakePass", userName, siteId);
+        Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
+        userService.removeSiteMembership("fakeSiteManager", "fakePass", userName, globalSite);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeSiteMembershipNoExistentSite()
     {
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        userService.removeSiteMembership(admin, admin, userName, "fakeSite");
+        userService.removeSiteMembership(admin, admin, globalUser, "fakeSite");
     }
-    
-    
-    
+
     @Test
     public void countSiteMembers()
     {
@@ -363,7 +288,7 @@ public class UserTest extends AbstractTest
     public void addDashlets()
     {
         String theUser = "alfrescouser" + System.currentTimeMillis();
-        userService.create(admin, admin, theUser, password, theUser, firstName, lastName);
+        userService.create(admin, admin, theUser, password, theUser + domain, firstName, lastName);
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_MEETING_WORKSPACES, DashletLayout.THREE_COLUMNS, 3, 1));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DISCUSSIONS, DashletLayout.THREE_COLUMNS, 3, 2));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.FOUR_COLUMNS, 4, 1));
@@ -381,103 +306,71 @@ public class UserTest extends AbstractTest
     @Test
     public void changeUserRole()
     {
-        String siteId = "siteInvite-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin, admin, "myDomain", siteId,  "my site description", Visibility.PUBLIC);
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer");
-        Assert.assertTrue(userService.changeUserRole(admin, admin, siteId, userName, "SiteCollaborator"));
+        String userName = "userRole-" + System.currentTimeMillis();
+        userService.create(admin, admin, userName, password, userName + domain, firstName, lastName);
+        userService.inviteUserToSiteAndAccept(globalUser, password, userName, globalSite, "SiteConsumer");
+        Assert.assertTrue(userService.changeUserRole(globalUser, password, globalSite, userName, "SiteCollaborator"));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void changeRoleInvalidMember()
     {
-        String siteId = "siteInvite-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        userService.changeUserRole(admin, admin, siteId, userName, "SiteCollaborator");
+        userService.changeUserRole(admin, admin, globalSite, userName, "SiteCollaborator");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void changeRoleInvalidSite()
     {
-        String siteId = "siteInvite-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer"));
-        userService.changeUserRole(admin, admin, "fakeSite", userName, "SiteCollaborator");
+        userService.changeUserRole(admin, admin, "fakeSite", globalUser, "SiteCollaborator");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void changeRoleInvalidRole()
     {
-        String siteId = "siteInvite-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin, admin, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(admin, admin, userName, siteId, "SiteConsumer"));
-        userService.changeUserRole(admin, admin, siteId, userName, "Role");
+        userService.changeUserRole(admin, admin, globalSite, userName, "InvalidRole");
     }
     
     @Test
     public void addMemberToModeratedSite()
     {
-        String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
-        String siteId = "site" + System.currentTimeMillis();
-        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
-        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
-        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.MODERATED);
-        Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+        userService.create(admin, admin, userToAdd, password, userToAdd + domain, firstName, lastName);
+        Assert.assertTrue(userService.createSiteMember(globalUser, password, userToAdd, globalSite, "SiteContributor"));
     }
     
     @Test
     public void addMemberToPrivateSite()
     { 
-        String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
-        String siteId = "site" + System.currentTimeMillis();
-        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
+        String privateSite = "site" + System.currentTimeMillis();
         userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
-        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
-        Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+        site.create(globalUser, password, "mydomain", privateSite, privateSite, Visibility.PRIVATE);
+        Assert.assertTrue(userService.createSiteMember(globalUser, password, userToAdd, privateSite, "SiteContributor"));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void addMemberToInvalidSite()
     { 
-        String userManager = "siteManager" + System.currentTimeMillis();
-        String userToAdd = "member" + System.currentTimeMillis();
-        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
-        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
-        userService.createSiteMember(userManager, password, userToAdd, "fakeSite", "SiteContributor");
+        userService.createSiteMember(globalUser, password, admin, "fakeSite", "SiteContributor");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void addMemberInvalidRole()
-    { 
-        String userManager = "siteManager" + System.currentTimeMillis();
-        String userToAdd = "member" + System.currentTimeMillis();
-        String siteId = "site" + System.currentTimeMillis();
-        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
-        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
-        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
-        userService.createSiteMember(userManager, password, userToAdd, siteId, "fakeRole");
+    {
+        String user = "userInvalidRole" + System.currentTimeMillis();
+        userService.create(admin, admin, user, password, user, firstName, lastName);
+        userService.createSiteMember(globalUser, password, user, globalSite, "fakeRole");
     }
 
     @Test
     public void addMemberToSiteTwice()
     {
-        String userManager = "siteManager" + System.currentTimeMillis();
         String userToAdd = "member" + System.currentTimeMillis();
-        String siteId = "site" + System.currentTimeMillis();
-        userService.create(admin, admin, userManager, password, userManager, firstName, lastName);
         userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
-        site.create(userManager, password, "mydomain", siteId, siteId, Visibility.PRIVATE);
-        Assert.assertTrue(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
-        Assert.assertFalse(userService.createSiteMember(userManager, password, userToAdd, siteId, "SiteContributor"));
+        Assert.assertTrue(userService.createSiteMember(globalUser, password, userToAdd, globalSite, "SiteContributor"));
+        Assert.assertFalse(userService.createSiteMember(globalUser, password, userToAdd, globalSite, "SiteContributor"));
     }
     
     @Test
@@ -570,9 +463,9 @@ public class UserTest extends AbstractTest
     public void createSubCategory()
     {
         String rootCateg = "rootCateg" + System.currentTimeMillis();
-        String subCateg1 = "sub1";
-        String subCateg2 = "sub2";
-        String subCateg3 = "sub3";
+        String subCateg1 = "sub1" + System.currentTimeMillis();
+        String subCateg2 = "sub2" + System.currentTimeMillis();
+        String subCateg3 = "sub3" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
         Assert.assertTrue(userService.createSubCategory(admin, admin, rootCateg, subCateg1));
         Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg1, subCateg2));
