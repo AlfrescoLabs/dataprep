@@ -175,7 +175,7 @@ public class ContentActionsTests extends AbstractTest
     {
         String siteName = "siteTag-" + System.currentTimeMillis();
         String userName = "tagUser" + System.currentTimeMillis();
-        String tag1 = "tag1";      
+        String tag1 = "tag1";
         userService.create(admin, admin, userName, password, password,"firstname","lastname");
         site.create(userName,
                     password,

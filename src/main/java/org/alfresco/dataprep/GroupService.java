@@ -356,9 +356,9 @@ public class GroupService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children?alf_ticket=" + client.getAlfTicket(adminUser, adminPass);
+        String reqURL = client.getApiUrl() + "groups/" + groupName + "/children";
         HttpGet request = new HttpGet(reqURL);
-        return client.executeRequest(request);
+        return client.execute(adminUser, adminPass, request);
     }
     
     /**

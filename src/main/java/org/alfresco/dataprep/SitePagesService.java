@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -237,10 +236,9 @@ public class SitePagesService
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/events/" + siteName + 
                 "/user?from=" + strFrom + "&to" + strTo + "&repeating=all";
         HttpGet get = new HttpGet(reqURL);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(userName, password, get);
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
@@ -783,10 +781,9 @@ public class SitePagesService
                 break;
         }
         HttpGet get = new HttpGet(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(userName, password, get);
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
@@ -1046,15 +1043,7 @@ public class SitePagesService
             }
         }
         HttpGet get = new HttpGet(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            return clientWithAuth.execute(get);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Unable to execute request " + get);
-        }
+        return client.execute(userName, password, get);
     }
     
     /**

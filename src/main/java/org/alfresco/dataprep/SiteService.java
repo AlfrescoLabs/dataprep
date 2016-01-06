@@ -153,11 +153,11 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         try
         {
-            String ticket = client.getAlfTicket(username, password);
+            //String ticket = client.getAlfTicket(username, password);
             String apiUrl = client.getApiUrl();
-            String url = String.format("%ssites/%s?alf_ticket=%s",apiUrl, siteId, ticket);
+            String url = String.format("%ssites/%s",apiUrl, siteId);
             HttpGet get = new HttpGet(url);
-            HttpResponse response = client.executeRequest(get);
+            HttpResponse response = client.execute(username, password, get);
             if( 200 == response.getStatusLine().getStatusCode())
             {
                 return true;
@@ -202,8 +202,7 @@ public class SiteService
         HttpGet get = new HttpGet(apiUrl);
         try
         {
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(userName, password, get);
             if(200 == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();
@@ -248,19 +247,26 @@ public class SiteService
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         String reqUrl = client.getApiVersionUrl() + "sites/" + siteName;
         HttpGet get = new HttpGet(reqUrl);
         try
         {
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(userName, password, get);
             if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
             {
                 String result = client.readStream(response.getEntity()).toJSONString();
                 if(!StringUtils.isEmpty(result))
                 {
                     JSONParser parser = new JSONParser();
-                    Object obj = parser.parse(result);
+                    Object obj = null;
+                    try
+                    {
+                        obj = parser.parse(result);
+                    }
+                    catch (ParseException e)
+                    {
+                        logger.error("Failed to parse response");
+                    }
                     JSONObject jsonObject = (JSONObject) obj;
                     JSONObject sites = (JSONObject) jsonObject.get("entry");
                     return siteNodeRef = (String) sites.get("guid");
@@ -270,10 +276,6 @@ public class SiteService
             {
                 logger.error("Unable to get node ref of " + siteName + " " + response.getStatusLine());
             }
-        }
-        catch (IOException | ParseException e)
-        {
-            logger.error("Failed to execute request:" + get);
         }
         finally
         {
@@ -301,6 +303,10 @@ public class SiteService
             throw new IllegalArgumentException("Parameter missing");
         }        
         String nodeRef = getSiteNodeRef(userName, password, siteName);
+        if(StringUtils.isEmpty(nodeRef))
+        {
+            throw new RuntimeException("Site doesn't exists " + siteName);
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites";
         HttpPost post  = new HttpPost(reqUrl);

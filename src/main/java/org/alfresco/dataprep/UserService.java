@@ -35,7 +35,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -252,10 +251,9 @@ public class UserService extends CMISUtil
             logger.trace("Invite user: " + userToInvite + " using Url - " + url);
         }    
         HttpGet get = new HttpGet(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(invitingUserName, invitingUserPassword);
         try
         {
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(invitingUserName, invitingUserPassword, get);
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
@@ -280,10 +278,6 @@ public class UserService extends CMISUtil
                     logger.error("Unable to invite user: " + response.toString());
                     break;
             }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to execute request: " + get);
         }
         finally
         {
@@ -312,7 +306,7 @@ public class UserService extends CMISUtil
         HttpPut put = new HttpPut(url);
         try
         {
-            HttpResponse response = client.executeRequest(put);
+            HttpResponse response = client.execute("", "", put);
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
@@ -564,11 +558,11 @@ public class UserService extends CMISUtil
             throw new IllegalArgumentException("Parameter missing");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String reqURL = client.getApiUrl() + "sites/" + siteName + "/memberships?alf_ticket=" + client.getAlfTicket(userName, userPass);
+        String reqURL = client.getApiUrl() + "sites/" + siteName + "/memberships";
         HttpGet request = new HttpGet(reqURL);
         try
         {
-            HttpResponse response = client.executeRequest(request);
+            HttpResponse response = client.execute(userName, userPass, request);
             if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();
@@ -694,7 +688,7 @@ public class UserService extends CMISUtil
         post.setEntity(client.setMessageBody(body));
         try
         {
-            HttpResponse response = client.executeRequest(post);
+            HttpResponse response = client.execute(userName, password, post);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 if(logger.isTraceEnabled())
@@ -862,18 +856,13 @@ public class UserService extends CMISUtil
         HttpGet get = new HttpGet(reqURL);
         try
         {
-            HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(userName, password, get);
             if(200 == response.getStatusLine().getStatusCode())
             {
                 userFollowers = client.getElementsFromJsonArray(response, "people", "userName");
             }
             return userFollowers;
         }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to execute the request: " + get);
-        } 
         finally
         {
             get.releaseConnection();
@@ -992,6 +981,10 @@ public class UserService extends CMISUtil
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String categNodeRef = getCategoryNodeRef(adminPass, adminPass, categoryName);
+        if(StringUtils.isEmpty(categNodeRef))
+        {
+            throw new RuntimeException("Category doesn't exists " + categoryName);
+        }
         String url = client.getApiUrl() + "category/workspace/SpacesStore/" + categNodeRef;
         HttpDelete delete  = new HttpDelete(url);
         HttpResponse response = client.executeRequest(adminUser, adminPass, delete);

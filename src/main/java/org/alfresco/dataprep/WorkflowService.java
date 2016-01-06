@@ -13,6 +13,7 @@ package org.alfresco.dataprep;
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,14 +21,18 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.stereotype.Service;
 /**
  *  Class to create new workflow processes.
@@ -64,7 +69,7 @@ public class WorkflowService extends CMISUtil
     }
 
     @SuppressWarnings("unchecked")
-    private boolean startWorkflow(final String userName,
+    private String startWorkflow(final String userName,
                                   final String password,
                                   final WorkflowType workflowType,
                                   final String message,
@@ -131,9 +136,10 @@ public class WorkflowService extends CMISUtil
         }
         body.put("variables", variables);
         body.put("items", items);
+        post.setEntity(client.setMessageBody(body));
         try
         {
-            HttpResponse response = client.executeRequest(userName, password, body, post);
+            HttpResponse response = client.execute(userName, password, post);
             logger.info("Response code: " + response.getStatusLine().getStatusCode());
             switch (response.getStatusLine().getStatusCode())
             {
@@ -142,7 +148,7 @@ public class WorkflowService extends CMISUtil
                     {
                         logger.trace("Successfuly started workflow: " + message);
                     }
-                    return true;
+                    return client.getParameterFromJSON(response, "entry", "id");
                 default:
                     logger.error("Unable to start workflow " + response.toString());
             }
@@ -152,7 +158,7 @@ public class WorkflowService extends CMISUtil
             client.close();
             post.releaseConnection();
         }
-        return false;
+        return "";
     }
     
     /**
@@ -167,9 +173,9 @@ public class WorkflowService extends CMISUtil
      * @param documentsSite String site containing the items
      * @param documents List<String> documents to add to the task
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startNewTask(final String userName,
+    public String startNewTask(final String userName,
                                 final String password,
                                 final String message,
                                 final Date dueDate,
@@ -196,9 +202,9 @@ public class WorkflowService extends CMISUtil
      * @param priority Priority
      * @param pathsToItems List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startNewTask(final String userName,
+    public String startNewTask(final String userName,
                                 final String password,
                                 final String message,
                                 final Date dueDate,
@@ -226,9 +232,9 @@ public class WorkflowService extends CMISUtil
      * @param documents List<String> documents to add to the task
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startGroupReview(final String userName,
+    public String startGroupReview(final String userName,
                                     final String password,
                                     final String message,
                                     final Date dueDate,
@@ -255,9 +261,9 @@ public class WorkflowService extends CMISUtil
      * @param pathToDocs List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startGroupReview(final String userName,
+    public String startGroupReview(final String userName,
                                     final String password,
                                     final String message,
                                     final Date dueDate,
@@ -284,9 +290,9 @@ public class WorkflowService extends CMISUtil
      * @param documents List<String> documents to add to the task
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startMultipleReviewers(final String userName,
+    public String startMultipleReviewers(final String userName,
                                           final String password,
                                           final String message,
                                           final Date dueDate,
@@ -313,9 +319,9 @@ public class WorkflowService extends CMISUtil
      * @param pathsToDocuments List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param requiredApprovePercent int required percent
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startMultipleReviewers(final String userName,
+    public String startMultipleReviewers(final String userName,
                                           final String password,
                                           final String message,
                                           final Date dueDate,
@@ -341,9 +347,9 @@ public class WorkflowService extends CMISUtil
      * @param documentsSite String site containing the items
      * @param documents List<String> documents to add to the task
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startPooledReview(final String userName,
+    public String startPooledReview(final String userName,
                                      final String password,
                                      final String message,
                                      final Date dueDate,
@@ -368,9 +374,9 @@ public class WorkflowService extends CMISUtil
      * @param priority Priority
      * @param pathToDocs List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startPooledReview(final String userName,
+    public String startPooledReview(final String userName,
                                      final String password,
                                      final String message,
                                      final Date dueDate,
@@ -395,9 +401,9 @@ public class WorkflowService extends CMISUtil
      * @param documentsSite String site containing the items
      * @param documents List<String> documents to add to the task
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startSingleReview(final String userName,
+    public String startSingleReview(final String userName,
                                      final String password,
                                      final String message,
                                      final Date dueDate,
@@ -424,9 +430,9 @@ public class WorkflowService extends CMISUtil
      * @param priority Priority
      * @param pathsToItems List<String> path to items (e.g. Sites/siteId/documentLibrary/doc.txt)
      * @param sendEmail boolean send email
-     * @return true if created 
+     * @return String workflow id
      */
-    public boolean startSingleReview(final String userName,
+    public String startSingleReview(final String userName,
                                      final String password,
                                      final String message,
                                      final Date dueDate,
@@ -439,5 +445,60 @@ public class WorkflowService extends CMISUtil
         assignedUser.add(assignee);
         return startWorkflow(userName, password, WorkflowType.SingleReviewer, message, dueDate, priority,
                 assignedUser, null, true, null, null, pathsToItems, 0, sendEmail);
+    }
+    
+    /**
+     * Get the task id for the user assigned to the task
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @return String task id
+     */
+    public String getTaskId(final String assignedUser,
+                            final String password,
+                            final String workflowId)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes/" + workflowId + "/tasks";
+        HttpGet get = new HttpGet(api);
+        try
+        {
+            HttpResponse response = client.executeRequest(assignedUser, password, get);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                HttpEntity entity = response.getEntity();
+                String responseString = "";
+                try
+                {
+                    responseString = EntityUtils.toString(entity , "UTF-8");
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to read the response", e);
+                }
+                Object obj = JSONValue.parse(responseString);
+                JSONObject jsonObject = (JSONObject) obj;
+                JSONObject list = (JSONObject) jsonObject.get("list");
+                JSONArray jArray = (JSONArray) list.get("entries");
+                for (Object item:jArray)
+                {
+                    JSONObject jobject = (JSONObject) item;
+                    JSONObject entry = (JSONObject) jobject.get("entry");
+                    String assignee = (String) entry.get("assignee");
+                    if(assignee.equals(assignedUser))
+                    {
+                        return (String) entry.get("id");
+                    }
+                }
+            }
+        }
+        finally
+        {
+            client.close();
+            get.releaseConnection();
+        }
+        return "";
     }
 }

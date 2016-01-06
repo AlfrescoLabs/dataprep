@@ -597,9 +597,9 @@ public class UserTest extends AbstractTest
     public void deleteSubCategory()
     {
         String rootCateg = "rootCateg" + System.currentTimeMillis();
-        String subCateg1 = "sub1";
-        String subCateg2 = "sub2";
-        String subCateg3 = "sub3";
+        String subCateg1 = "sub1" + System.currentTimeMillis();
+        String subCateg2 = "sub2" + System.currentTimeMillis();
+        String subCateg3 = "sub3" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
         Assert.assertTrue(userService.createSubCategory(admin, admin, rootCateg, subCateg1));
         Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg1, subCateg2));

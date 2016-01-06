@@ -128,7 +128,7 @@ public class AlfrescoHttpClient
     {
         String url = apiUrl + "server";
         HttpGet get = new HttpGet(url);
-        HttpResponse response = executeRequest(get);
+        HttpResponse response = execute("", "", get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             try
@@ -169,13 +169,21 @@ public class AlfrescoHttpClient
     }
 
     /**
-     * Execute HttpClient request.
+     * Execute HttpClient request without releasing the connection
+     * @param userName user name
+     * @param password password
      * @param request to send 
      * @return {@link HttpResponse} response
      */
-    public HttpResponse executeRequest(HttpRequestBase request)
+    public HttpResponse execute(final String userName,
+                                final String password,
+                                HttpRequestBase request)
     {
         HttpResponse response = null;
+        if(!StringUtils.isEmpty(userName) || !StringUtils.isEmpty(password))
+        {
+            client = getHttpClientWithBasicAuth(userName, password);
+        }
         try
         {
             response = client.execute(request);
@@ -336,6 +344,33 @@ public class AlfrescoHttpClient
     }
     
     /**
+     * Method to get parameters from JSON
+     * 
+     * @param response HttpResponse response
+     * @param jsonObject String json object from response
+     * @param parameter String parameter from json
+     * @return String result
+     */
+    public String getParameterFromJSON(HttpResponse response,
+                                       String jsonObject,
+                                       String parameter)
+    { 
+        String strResponse = "";
+        try
+        {
+            strResponse = EntityUtils.toString(response.getEntity());
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to read the response", e);
+        }
+        Object obj = JSONValue.parse(strResponse);
+        JSONObject jObj = (JSONObject) obj;
+        JSONObject entry = (JSONObject) jObj.get(jsonObject);
+        return (String) entry.get(parameter);
+    }
+    
+    /**
      * Get the elements from a JSONArray
      * 
      * @param response HttpResponse response
@@ -420,7 +455,7 @@ public class AlfrescoHttpClient
      * @param client CloseableHttpClient the client
      * @throws IOException if error
      */
-    public void close(CloseableHttpClient client) 
+    public void close(CloseableHttpClient client)
     {
         try
         {

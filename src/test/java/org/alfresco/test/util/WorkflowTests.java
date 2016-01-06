@@ -1,3 +1,17 @@
+/*
+ * Copyright (C) 2005-2015 Alfresco Software Limited.
+ * This file is part of Alfresco
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.alfresco.test.util;
 
 import java.util.ArrayList;
@@ -17,6 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.annotations.Test;
 
+/**
+ * Test process creation using APIs.
+ * 
+ * @author Bogdan Bocancea
+ */
 public class WorkflowTests extends AbstractTest
 {
     @Autowired WorkflowService workflow;
@@ -41,7 +60,10 @@ public class WorkflowTests extends AbstractTest
         List<String> docs = new ArrayList<String>();
         docs.add(plainDoc);
         docs.add(msWord);
-        Assert.assertTrue(workflow.startNewTask(userName, password, "New Task Message", new Date(), userName, Priority.High, siteName, docs, true));
+        String workflowId = workflow.startNewTask(userName, password, "New Task Message", new Date(), userName, Priority.High, siteName, docs, true);
+        Assert.assertTrue(!workflowId.isEmpty());
+        String taskId = workflow.getTaskId(userName, password, workflowId);
+        Assert.assertTrue(!taskId.isEmpty());
     }
     
     @Test
@@ -61,7 +83,7 @@ public class WorkflowTests extends AbstractTest
         pathToItems.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
         pathToItems.add("Sites/" + siteName + "/documentLibrary/" + msWord);
         pathToItems.add("Sites/" + siteName + "/documentLibrary/" + xls);
-        Assert.assertTrue(workflow.startNewTask(userName, password, "NewTaskByPaths", new Date(), userName, Priority.Low, pathToItems, true));
+        Assert.assertTrue(!workflow.startNewTask(userName, password, "NewTaskByPaths", new Date(), userName, Priority.Low, pathToItems, true).isEmpty());
     }
     
     @Test
@@ -84,8 +106,8 @@ public class WorkflowTests extends AbstractTest
         String groupName = "workGroup" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(ADMIN, ADMIN, groupName));
         Assert.assertTrue(groupService.addUserToGroup(ADMIN, ADMIN, groupName, userName));
-        Assert.assertTrue(workflow.startGroupReview(userName, password, "group message", new Date(), groupName, Priority.Low, siteName, docs, 27, false));
-        Assert.assertTrue(workflow.startGroupReview(userName, password, "itemsByPath", new Date(), groupName, Priority.High, docsByPath, 69, true));
+        Assert.assertTrue(!workflow.startGroupReview(userName, password, "group message", new Date(), groupName, Priority.Low, siteName, docs, 27, false).isEmpty());
+        Assert.assertTrue(!workflow.startGroupReview(userName, password, "itemsByPath", new Date(), groupName, Priority.High, docsByPath, 69, true).isEmpty());
     }
     
     @Test
@@ -112,8 +134,16 @@ public class WorkflowTests extends AbstractTest
         List<String> paths = new ArrayList<String>();
         paths.add("Sites/" + siteName + "/documentLibrary/" + msWord);
         paths.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
-        Assert.assertTrue(workflow.startMultipleReviewers(userName, password, "multipleReviews", new Date(), reviewers, Priority.High, siteName, docs, 98, false));
-        Assert.assertTrue(workflow.startMultipleReviewers(userName, password, "pathMultiple", new Date(), reviewers, Priority.Low, paths, 80, true));
+        String workflowId = workflow.startMultipleReviewers(userName, password, "multipleReviews", new Date(),
+                reviewers, Priority.High, siteName, docs, 98, false);
+        Assert.assertFalse(workflowId.isEmpty());
+        String taskUser1 = workflow.getTaskId(userName2, password, workflowId);
+        Assert.assertFalse(taskUser1.isEmpty());
+        String taskUser2 = workflow.getTaskId(userName3, password, workflowId);
+        Assert.assertFalse(taskUser2.isEmpty());
+        Assert.assertNotSame(taskUser2, taskUser1);
+        Assert.assertTrue(!workflow.startMultipleReviewers(userName, password, "pathMultiple", new Date(), reviewers, 
+                Priority.Low, paths, 80, true).isEmpty());
     }
     
     @Test
@@ -136,8 +166,8 @@ public class WorkflowTests extends AbstractTest
         String groupName = "workGroup" + System.currentTimeMillis();
         Assert.assertTrue(groupService.createGroup(ADMIN, ADMIN, groupName));
         Assert.assertTrue(groupService.addUserToGroup(ADMIN, ADMIN, groupName, userName));
-        Assert.assertTrue(workflow.startPooledReview(userName, password, "pooledPathItems", new Date(), groupName, Priority.High, docsByPath, false));
-        Assert.assertTrue(workflow.startPooledReview(userName, password, "pooledReview", new Date(), groupName, Priority.Normal, siteName, docs, false));
+        Assert.assertTrue(!workflow.startPooledReview(userName, password, "pooledPathItems", new Date(), groupName, Priority.High, docsByPath, false).isEmpty());
+        Assert.assertTrue(!workflow.startPooledReview(userName, password, "pooledReview", new Date(), groupName, Priority.Normal, siteName, docs, false).isEmpty());
     }
     
     @Test
@@ -157,7 +187,7 @@ public class WorkflowTests extends AbstractTest
         List<String> docsByPath = new ArrayList<String>();
         docsByPath.add("Sites/" + siteName + "/documentLibrary/" + plainDoc);
         docsByPath.add("Sites/" + siteName + "/documentLibrary/" + msWord);
-        Assert.assertTrue(workflow.startSingleReview(userName, password, "singleReview Path", new Date(), userName, Priority.High, docsByPath, true));
-        Assert.assertTrue(workflow.startSingleReview(userName, password, "singleReviewer", new Date(), userName, Priority.Low, siteName, docs, false));
+        Assert.assertTrue(!workflow.startSingleReview(userName, password, "singleReview Path", new Date(), userName, Priority.High, docsByPath, true).isEmpty());
+        Assert.assertTrue(!workflow.startSingleReview(userName, password, "singleReviewer", new Date(), userName, Priority.Low, siteName, docs, false).isEmpty());
     }
 }

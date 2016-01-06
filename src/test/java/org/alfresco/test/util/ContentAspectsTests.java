@@ -234,9 +234,9 @@ public class ContentAspectsTests extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());        
+        Assert.assertFalse(doc1.getId().isEmpty());
         contentAspect.addDublinCore(userName, password, siteName, plainDoc, userName, userName, "Plain text", userName, 
-                plainDoc, "90", "Best Rights", plainDoc);     
+                plainDoc, "90", "Best Rights", plainDoc);
         contentAspect.removeAspect(userName, password, siteName, plainDoc, DocumentAspect.DUBLIN_CORE);
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);
         Assert.assertEquals(contentAspect.getPropertyValue(properties, DocumentAspect.DUBLIN_CORE.getProperty()), null);
@@ -255,7 +255,7 @@ public class ContentAspectsTests extends AbstractTest
                     "my site description", 
                     Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
-        Assert.assertFalse(doc1.getId().isEmpty());        
+        Assert.assertFalse(doc1.getId().isEmpty());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 3);
         Date toDate = calendar.getTime();
@@ -427,8 +427,8 @@ public class ContentAspectsTests extends AbstractTest
                     password,
                     "mydomain",
                     siteName, 
-                    "my site description", 
-                    Visibility.PUBLIC);        
+                    "my site description",
+                    Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
         contentAspect.addRestrictable(userName, password, siteName, plainDoc, hours);
@@ -447,7 +447,7 @@ public class ContentAspectsTests extends AbstractTest
                     "mydomain",
                     siteName, 
                     "my site description", 
-                    Visibility.PUBLIC);        
+                    Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
         List<String> categories = new ArrayList<String>();
@@ -543,7 +543,7 @@ public class ContentAspectsTests extends AbstractTest
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, tagDoc, tagDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
         Assert.assertTrue(contentAction.addSingleTag(userName, password, siteName, tagDoc, tag1));
-        List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, tagDoc);       
+        List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, tagDoc);
         Assert.assertTrue(properties.toString().contains(DocumentAspect.TAGGABLE.getProperty()));
         String tagNodeRef = contentAction.getTagNodeRef(userName, password, siteName, tagDoc, tag1);
         List<?> values = contentAspect.getValues(properties, "cm:taggable");
@@ -575,7 +575,7 @@ public class ContentAspectsTests extends AbstractTest
         Assert.assertEquals(basicProperties.get("Author").toString(),"(None)");
         Assert.assertEquals(basicProperties.get("Size").toString(),"25");
         Assert.assertEquals(basicProperties.get("Creator").toString(),userName);
-        Assert.assertEquals(basicProperties.get("Modifier").toString(),userName);  
+        Assert.assertEquals(basicProperties.get("Modifier").toString(),userName);
     }
     
     @Test

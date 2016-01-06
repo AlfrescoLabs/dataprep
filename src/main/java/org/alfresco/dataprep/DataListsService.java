@@ -36,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
@@ -126,20 +125,7 @@ public class DataListsService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/datalists/lists/site/" + siteName + "/dataLists";
         HttpGet get = new HttpGet(url);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
-        try
-        {
-            HttpResponse response = clientWithAuth.execute(get);
-            return response;
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to execute request: " + get);
-        }
-        finally
-        {
-            client.close();
-        }
+        return client.execute(userName, password, get);
     }
     
     @SuppressWarnings("unchecked")

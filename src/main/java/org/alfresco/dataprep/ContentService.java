@@ -44,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
@@ -393,6 +392,7 @@ public class ContentService extends CMISUtil
                 Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
                 d = repository.createDocument(properties, contentStream, VersioningState.MAJOR);
             }
+            d.refresh();
             return d;
         }
         catch(CmisObjectNotFoundException nf)
@@ -930,10 +930,9 @@ public class ContentService extends CMISUtil
         String docNodeRef = getNodeRef(userName, password, siteName, docName);
         String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/atom/content?id=" + docNodeRef;
         HttpGet get = new HttpGet(serviceUrl);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         try
         {
-            HttpResponse response = clientWithAuth.execute(get);
+            HttpResponse response = client.execute(userName, password, get);
             if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
             {
                 HttpEntity entity = response.getEntity();
@@ -982,19 +981,14 @@ public class ContentService extends CMISUtil
         StringEntity se = new StringEntity(newContent.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         request.setEntity(se);
-        HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
         waitInSeconds(1);
         try
         {
-            HttpResponse response = clientWithAuth.execute(request);
+            HttpResponse response = client.executeRequest(userName, password, request);
             if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
             {
                 return true;
             }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Unable to execute request " + request);
         }
         finally
         {

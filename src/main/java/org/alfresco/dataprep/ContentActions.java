@@ -16,6 +16,7 @@ package org.alfresco.dataprep;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +34,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisVersioningException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -100,6 +102,10 @@ public class ContentActions extends CMISUtil
         }        
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        if(StringUtils.isEmpty(nodeRef))
+        {
+            throw new RuntimeException("Content doesn't exists " + contentName);
+        }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + option.name;
         HttpPost post  = new HttpPost(reqUrl);
         JSONObject body = new JSONObject();
@@ -669,6 +675,10 @@ public class ContentActions extends CMISUtil
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        if(StringUtils.isEmpty(nodeRef))
+        {
+            throw new RuntimeException("Content doesn't exists " + contentName);
+        }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites";
         HttpPost post  = new HttpPost(reqUrl);
         String jsonInput;
@@ -893,12 +903,29 @@ public class ContentActions extends CMISUtil
             ObjectId idPwc = docToModify.checkOut();
             pwc = (Document) session.getObject(idPwc);
         }
-        byte[] content = newContent.getBytes();
+        byte[] content = null;
+        try
+        {
+            content = newContent.getBytes("UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Unable to read the new content", e);
+        }
         try
         {
             stream = new ByteArrayInputStream(content);
             contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
-            return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
+            try
+            {
+                return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
+            }
+            catch(CmisStorageException se)
+            {
+                logger.error("Error when trying to checkin: ", se);
+                contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+                return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
+            }
         }
         finally
         {
