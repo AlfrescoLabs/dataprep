@@ -26,6 +26,7 @@ import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -40,20 +41,29 @@ public class SitePagesActionTests extends AbstractTest
     @Autowired private UserService userService;
     @Autowired private SitePagesService pageService;
     @Autowired private ContentService contentService;
-    private String admin = "admin";
-
+    private String user = "theUser" + System.currentTimeMillis();
+    private String theSite = "theSite" + System.currentTimeMillis();
+    List<String>tags = new ArrayList<String>();
+    
+    @BeforeClass(alwaysRun = true)
+    public void setup()
+    {
+        userService.create(ADMIN, ADMIN, user, password, user + domain, "firstName", "lastName");
+        site.create(user, password, "mydomain", theSite, theSite, Visibility.PUBLIC);
+        tags.add("tag1");
+        tags.add("tag2");
+    }
+    
     @Test
     public void addCalendarEvent()
     {
-        String siteId = "calendar-site" + System.currentTimeMillis();
-        site.create(ADMIN, ADMIN, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what1", "where1", "description2", today, today,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what1", "where1", "description2", today, today,
                 "6:00 PM", "8:00 PM", false, "tag1"));
-        Assert.assertTrue(pageService.addCalendarEvent(ADMIN, ADMIN, siteId, "what2", "where2", "description2", today, today,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what2", "where2", "description2", today, today,
                 "12:00", "13:00", false, "tag1"));
-        String name1 = pageService.getEventName(ADMIN, ADMIN, siteId, "what1", "where1", today, today, "6:00 PM", "8:00 PM", false);
-        String name2 = pageService.getEventName(ADMIN, ADMIN, siteId, "what2", "where2", today, today, "12:00", "13:00", false);
+        String name1 = pageService.getEventName(user, password, theSite, "what1", "where1", today, today, "6:00 PM", "8:00 PM", false);
+        String name2 = pageService.getEventName(user, password, theSite, "what2", "where2", today, today, "12:00", "13:00", false);
         Assert.assertNotNull(name1);
         Assert.assertNotNull(name2);
         Assert.assertFalse(name1.equals(name2));
@@ -62,482 +72,328 @@ public class SitePagesActionTests extends AbstractTest
     @Test
     public void addCalendarEvent24h()
     {
-        String siteId = "calendar-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today, 
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what24", "where24", "description", today, today, 
                 "12:00", "13:00", false, "tag1"));
-        String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
+        String nameEvent = pageService.getEventName(user, password, theSite, "what24", "where24", today, today, "12:00", "13:00", false);
         Assert.assertNotNull(nameEvent);
     }
     
     @Test
     public void addCalendarEventNullParams()
     {
-        String siteId = "calendar-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "whatNull", "whereNull", "description", null, null,
                 null, null, false, "tag1"));
     }
     
     @Test
     public void addCalendarEventAllDay()
     {
-        String siteId = "calendar-" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", null, null,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "whatAllDay", "whereAllDay", "description", null, null,
                 null, null, true, null));
         Date today = new Date();
-        String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, null, null, true);
+        String nameEvent = pageService.getEventName(user, password, theSite, "whatAllDay", "whereAllDay", today, today, null, null, true);
         Assert.assertNotNull(nameEvent);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void addCalendarEventFakeSite()
     {
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, "fakeSite", "what", "where", "description", null, null,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, "fakeSite", "what", "where", "description", null, null,
                 null, null, true, null));
     }
     
     @Test
     public void removeEvent()
     {
-        String siteId = "calendar-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today, 
-                "12:00", "13:00", false, "tag1"));
-        String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what", "where", "description", today, today, 
+                "10:00", "11:00", false, "tag1"));
+        String nameEvent = pageService.getEventName(user, password, theSite, "what", "where", today, today, "10:00", "11:00", false);
         Assert.assertNotNull(nameEvent);
-        Assert.assertTrue(pageService.removeEvent(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false));
-        nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
+        Assert.assertTrue(pageService.removeEvent(user, password, theSite, "what", "where", today, today, "10:00", "11:00", false));
+        nameEvent = pageService.getEventName(user, password, theSite, "what", "where", today, today, "10:00", "11:00", false);
         Assert.assertTrue(nameEvent.isEmpty());;
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeEventInvalidCredentials()
     {
-        String siteId = "calendar-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what", "where", "description", today, today,
                 "12:00", "13:00", false, "tag1"));
-        String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
-        Assert.assertNotNull(nameEvent);
-        pageService.removeEvent(userName, "fakePassword", siteId, "what", "where", today, today, "12:00", "13:00", false);
+        pageService.removeEvent(user, "fakePassword", theSite, "what", "where", today, today, "12:00", "13:00", false);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeEventInvalidSite()
     {
-        String siteId = "calendar-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
         Date today = new Date();
-        Assert.assertTrue(pageService.addCalendarEvent(userName, userName, siteId, "what", "where", "description", today, today,
+        Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what", "where", "description", today, today,
                 "12:00", "13:00", false, "tag1"));
-        String nameEvent = pageService.getEventName(userName, userName, siteId, "what", "where", today, today, "12:00", "13:00", false);
-        Assert.assertNotNull(nameEvent);
-        pageService.removeEvent(userName, userName, "fakeSite", "what", "where", today, today, "12:00", "13:00", false);
+        pageService.removeEvent(user, password, "fakeSite", "what", "where", today, today, "12:00", "13:00", false);
     }
     
     @Test
     public void createWikiPage()
     {
-        String siteId = "wiki-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
         String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.WIKI, null);
-        List<String>tags = new ArrayList<String>();
-        tags.add("tag1");
-        tags.add("tag2");
-        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, tags));
-        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle2, wikiTitle2, tags));
-        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle1));
-        Assert.assertTrue(pageService.wikiExists(userName, userName, siteId, wikiTitle2));
-        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, "fakeWiki"));
+        site.addPageToSite(user, password, theSite, Page.WIKI, null);
+        Assert.assertTrue(pageService.createWiki(user, password, theSite, wikiTitle1, wikiTitle1, tags));
+        Assert.assertTrue(pageService.createWiki(user, password, theSite, wikiTitle2, wikiTitle2, tags));
+        Assert.assertTrue(pageService.wikiExists(user, password, theSite, wikiTitle1));
+        Assert.assertTrue(pageService.wikiExists(user, password, theSite, wikiTitle2));
+        Assert.assertFalse(pageService.wikiExists(user, password, theSite, "fakeWiki"));
     }
     
     @Test
     public void removeWikiPage()
     {
-        String siteId = "wiki-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
-        String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, null));
-        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle2, wikiTitle2, null));
-        Assert.assertTrue(pageService.deleteWikiPage(userName, userName, siteId, wikiTitle1));
-        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle1));
-        Assert.assertTrue(pageService.deleteWikiPage(userName, userName, siteId, wikiTitle2));
-        Assert.assertFalse(pageService.wikiExists(userName, userName, siteId, wikiTitle2));
+        String wikiTitle1 = "wikiRemove" + System.currentTimeMillis();
+        String wikiTitle2 = "Wiki Remove" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createWiki(user, password, theSite, wikiTitle1, wikiTitle1, null));
+        Assert.assertTrue(pageService.createWiki(user, password, theSite, wikiTitle2, wikiTitle2, null));
+        Assert.assertTrue(pageService.deleteWikiPage(user, password, theSite, wikiTitle1));
+        Assert.assertFalse(pageService.wikiExists(user, password, theSite, wikiTitle1));
+        Assert.assertTrue(pageService.deleteWikiPage(user, password, theSite, wikiTitle2));
+        Assert.assertFalse(pageService.wikiExists(user, password, theSite, wikiTitle2));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeNonExistentWikiPage()
     {
-        String siteId = "wiki-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        pageService.deleteWikiPage(userName, userName, siteId, "fakeWiki");
+        pageService.deleteWikiPage(user, password, theSite, "fakeWiki");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeWikiNonExistentSite()
     {
-        String siteId = "wiki-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createWiki(userName, userName, siteId, wikiTitle1, wikiTitle1, null));
-        pageService.deleteWikiPage(userName, userName, "fakeSite", wikiTitle1);
+        String wikiTitle1 = "wikiNoSite" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createWiki(user, password, theSite, wikiTitle1, wikiTitle1, null));
+        pageService.deleteWikiPage(user, password, "fakeSite", wikiTitle1);
     }
     
     @Test
     public void createBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        String publishBlog = "publish" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
-        List<String>tags = new ArrayList<String>();
-        tags.add("tag1");
-        tags.add("tag2");
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, publishBlog, publishBlog, false, tags));
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, tags));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, publishBlog, false));
+        String draftBlog = "draftCreate" + System.currentTimeMillis(); 
+        String publishBlog = "publishCreate" + System.currentTimeMillis();
+        site.addPageToSite(user, password, theSite, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, publishBlog, publishBlog, false, tags));
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, tags));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, true));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, publishBlog, false));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void createBlogInvalidSite()
     {
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        pageService.createBlogPost(userName, userName, "fakeSite", draftBlog, draftBlog, false, null);
+        String draftBlog = "draft" + System.currentTimeMillis();
+        pageService.createBlogPost(user, password, "fakeSite", draftBlog, draftBlog, false, null);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void createBlogInvalidUser()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        pageService.createBlogPost("fakeUser", "fakePass", siteId, draftBlog, draftBlog, false, null);
+        pageService.createBlogPost("fakeUser", "fakePass", theSite, draftBlog, draftBlog, false, null);
     }
     
     @Test
     public void deleteBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
-        Assert.assertTrue(pageService.deleteBlogPost(userName, userName, siteId, draftBlog, true));
-        Assert.assertFalse(pageService.blogExists(userName, userName, siteId, draftBlog, true));
+        String draftBlog = "draftDelete" + System.currentTimeMillis();
+        site.addPageToSite(user, password, theSite, Page.BLOG, null);
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, true));
+        Assert.assertTrue(pageService.deleteBlogPost(user, password, theSite, draftBlog, true));
+        Assert.assertFalse(pageService.blogExists(user, password, theSite, draftBlog, true));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteBlogInvalidBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
-        pageService.deleteBlogPost(userName, userName, siteId, "invalidblog", true);
+        pageService.deleteBlogPost(user, user, theSite, "invalidblog", true);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteBlogInvalidSite()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
-        pageService.deleteBlogPost(userName, userName, "invalidBlog", draftBlog, true);
+        String draftBlog = "draftSite" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, null));
+        pageService.deleteBlogPost(user, password, "invalidBlog", draftBlog, true);
     }
     
     @Test
     public void createLink()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
-        List<String>tags = new ArrayList<String>();
-        tags.add("tag1");
-        tags.add("tag2");
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, tags));
-        Assert.assertTrue(pageService.linkExists(userName, userName, siteId, linkTitle));
+        String linkTitle = "linkCreate" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createLink(user, password, theSite, linkTitle, linkTitle, linkTitle, true, tags));
+        Assert.assertTrue(pageService.linkExists(user, password, theSite, linkTitle));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void createLinkInvalidSite()
     {
-        String userName = "userm-" + System.currentTimeMillis();
         String linkTitle = "link" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        pageService.createLink(userName, userName, "fakeSite", linkTitle, linkTitle, linkTitle, true, null);
+        pageService.createLink(user, password, "fakeSite", linkTitle, linkTitle, linkTitle, true, null);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void createLinkInvalidUser()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String linkTitle = "link" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        pageService.createLink("fakeUser", "fakePass", siteId, linkTitle, linkTitle, linkTitle, true, null);
+        pageService.createLink("fakeUser", "fakePass", theSite, linkTitle, linkTitle, linkTitle, true, null);
     }
     
     @Test
     public void deleteLink()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link-" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, null));
-        Assert.assertTrue(pageService.linkExists(userName, userName, siteId, linkTitle));
-        Assert.assertTrue(pageService.deleteLink(userName, userName, siteId, linkTitle));
-        Assert.assertFalse(pageService.linkExists(userName, userName, siteId, linkTitle));
+        String linkTitle = "link-delete" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createLink(user, password, theSite, linkTitle, linkTitle, linkTitle, true, null));
+        Assert.assertTrue(pageService.linkExists(user, password, theSite, linkTitle));
+        Assert.assertTrue(pageService.deleteLink(user, password, theSite, linkTitle));
+        Assert.assertFalse(pageService.linkExists(user, password, theSite, linkTitle));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteLinkInvalidLink()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String link = "link" + + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));
-        pageService.deleteLink(userName, userName, siteId, "fakeLink");
+        String link = "linkSiteDelete" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createLink(user, password, theSite, link, link, link, true, null));
+        pageService.deleteLink(user, password, theSite, "fakeLink");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteLinkInvalidSite()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String link = "link" + + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, link, link, link, true, null));
-        pageService.deleteLink(userName, userName, "fakeSite", link);
+        String link = "linkInvalidSIte" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createLink(user, password, theSite, link, link, link, true, null));
+        pageService.deleteLink(user, password, "fakeSite", link);
     }
     
     @Test
     public void createDiscussionTopic()
     {
-        String siteId = "topic-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String topicTitle = "topic-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
-        List<String>tags = new ArrayList<String>();
-        tags.add("tag1");
-        tags.add("tag2");
-        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, tags));
-        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
+        site.addPageToSite(user, password, theSite, Page.DISCUSSIONS, null);
+        Assert.assertTrue(pageService.createDiscussion(user, password, theSite, topicTitle, topicTitle, tags));
+        Assert.assertTrue(pageService.discussionExists(user, password, theSite, topicTitle));
     }
     
     @Test
     public void deleteDiscussionTopic()
     {
-        String siteId = "topic-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String topicTitle = "topic-" + System.currentTimeMillis();
-        String topic2 = "second topic";
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
-        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
-        pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "firstReplay");
-        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
-        Assert.assertTrue(pageService.deleteDiscussion(userName, userName, siteId, topicTitle));
-        Assert.assertFalse(pageService.discussionExists(userName, userName, siteId, topicTitle));
-        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topic2, topic2, null));
-        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topic2));
-        Assert.assertTrue(pageService.deleteDiscussion(userName, userName, siteId, topic2));
-        Assert.assertFalse(pageService.discussionExists(userName, userName, siteId, topic2));
+        String topicTitle = "topicDelete-" + System.currentTimeMillis();
+        String topic2 = "topicDelete-2" + System.currentTimeMillis();
+        site.addPageToSite(user, password, theSite, Page.DISCUSSIONS, null);
+        Assert.assertTrue(pageService.createDiscussion(user, password, theSite, topicTitle, topicTitle, null));
+        pageService.replyToDiscussion(user, password, theSite, topicTitle, "firstReplay");
+        Assert.assertTrue(pageService.discussionExists(user, password, theSite, topicTitle));
+        Assert.assertTrue(pageService.deleteDiscussion(user, password, theSite, topicTitle));
+        Assert.assertFalse(pageService.discussionExists(user, password, theSite, topicTitle));
+        Assert.assertTrue(pageService.createDiscussion(user, password, theSite, topic2, topic2, null));
+        Assert.assertTrue(pageService.discussionExists(user, password, theSite, topic2));
+        Assert.assertTrue(pageService.deleteDiscussion(user, password, theSite, topic2));
+        Assert.assertFalse(pageService.discussionExists(user, password, theSite, topic2));
     }
     
     @Test
     public void replyToTopic()
     {
-        String siteId = "topic-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String topicTitle = "topic-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.DISCUSSIONS, null);
-        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
-        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "firstReply"));
-        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "secondReply"));
-        Assert.assertTrue(pageService.replyToDiscussion(userName, userName, siteId, topicTitle, "thirdReply"));
-        List<String> replies = pageService.getDiscussionReplies(userName, userName, siteId, topicTitle);
+        String topicTitle = "topic-reply" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createDiscussion(user, password, theSite, topicTitle, topicTitle, null));
+        Assert.assertTrue(pageService.replyToDiscussion(user, password, theSite, topicTitle, "firstReply"));
+        Assert.assertTrue(pageService.replyToDiscussion(user, password, theSite, topicTitle, "secondReply"));
+        Assert.assertTrue(pageService.replyToDiscussion(user, password, theSite, topicTitle, "thirdReply"));
+        List<String> replies = pageService.getDiscussionReplies(user, password, theSite, topicTitle);
         Assert.assertTrue(replies.contains("firstReply") && replies.contains("secondReply") && replies.contains("thirdReply"));
     }
     
     @Test
     public void commentBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment1"));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment2"));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment3"));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment4"));
-        List<String> comments = pageService.getBlogComments(userName, userName, siteId, draftBlog);
+        String draftBlog = "draftComment" + System.currentTimeMillis(); 
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, true));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment1"));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment2"));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment3"));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment4"));
+        List<String> comments = pageService.getBlogComments(user, password, theSite, draftBlog);
         Assert.assertTrue(comments.contains("comment1") && comments.contains("comment2") 
                 && comments.contains("comment3") && comments.contains("comment4"));
-        Assert.assertNotNull(pageService.getCommentNodeRef(userName, userName, siteId, Page.BLOG, draftBlog, "comment1"));
+        Assert.assertNotNull(pageService.getCommentNodeRef(user, password, theSite, Page.BLOG, draftBlog, "comment1"));
     }
     
     @Test
     public void commentLink()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, null));
-        Assert.assertTrue(pageService.linkExists(userName, userName, siteId, linkTitle));
-        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 1"));
-        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 2"));
-        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 3"));
-        Assert.assertTrue(pageService.commentLink(userName, userName, siteId, linkTitle, "link comment 4"));
-        List<String> comments = pageService.getLinkComments(userName, userName, siteId, linkTitle);
+        String linkTitle = "link-comment" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createLink(user, password, theSite, linkTitle, linkTitle, linkTitle, true, null));
+        Assert.assertTrue(pageService.linkExists(user, password, theSite, linkTitle));
+        Assert.assertTrue(pageService.commentLink(user, password, theSite, linkTitle, "link comment 1"));
+        Assert.assertTrue(pageService.commentLink(user, password, theSite, linkTitle, "link comment 2"));
+        Assert.assertTrue(pageService.commentLink(user, password, theSite, linkTitle, "link comment 3"));
+        Assert.assertTrue(pageService.commentLink(user, password, theSite, linkTitle, "link comment 4"));
+        List<String> comments = pageService.getLinkComments(user, password, theSite, linkTitle);
         Assert.assertTrue(comments.contains("link comment 1") && comments.contains("link comment 2") 
                 && comments.contains("link comment 3") && comments.contains("link comment 4"));
-        Assert.assertTrue(pageService.deleteLinkComment(userName, userName, siteId, linkTitle, "link comment 1"));
-        Assert.assertTrue(pageService.getCommentNodeRef(userName, userName, siteId, Page.LINKS, linkTitle, "link comment 1").isEmpty());
-        comments = pageService.getLinkComments(userName, userName, siteId, linkTitle);
+        Assert.assertTrue(pageService.deleteLinkComment(user, password, theSite, linkTitle, "link comment 1"));
+        Assert.assertTrue(pageService.getCommentNodeRef(user, password, theSite, Page.LINKS, linkTitle, "link comment 1").isEmpty());
+        comments = pageService.getLinkComments(user, password, theSite, linkTitle);
         Assert.assertFalse(comments.contains("link comment 1"));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void commentNonExistentBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        pageService.commentBlog(userName, userName, siteId, "fakeBlog", true, "comment1");
-        pageService.commentBlog(userName, userName, siteId, "fakeBlog", true, "comment1");
+        pageService.commentBlog(user, password, theSite, "fakeBlog", true, "comment1");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void commentLinkNonExistentSite()
     {
-        String siteId = "link-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String linkTitle = "link-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.LINKS, null);
-        Assert.assertTrue(pageService.createLink(userName, userName, siteId, linkTitle, linkTitle, linkTitle, true, null));
-        pageService.commentLink(userName, userName, "fakeSite", linkTitle, "link comment 1");
+        String linkTitle = "link-CommNoSite" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createLink(user, password, theSite, linkTitle, linkTitle, linkTitle, true, null));
+        pageService.commentLink(user, password, "fakeSite", linkTitle, "link comment 1");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void getCommentsFakeBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        pageService.getBlogComments(userName, userName, siteId, draftBlog);
+        pageService.getBlogComments(user, password, theSite, "fake-blog");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void getCommentsBlogsFakeSite()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        pageService.getBlogComments(userName, userName, "fakeSite", draftBlog);
+        String draftBlog = "draftFakeSiteComm" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, null));
+        pageService.getBlogComments(user, password, "fakeSite", draftBlog);
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void getTopicDiscussionFakeSite()
     {
-        String siteId = "topic-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String topicTitle = "topic-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(pageService.createDiscussion(userName, userName, siteId, topicTitle, topicTitle, null));
-        Assert.assertTrue(pageService.discussionExists(userName, userName, siteId, topicTitle));
-        pageService.getDiscussionReplies(userName, userName, "fakeSite", topicTitle);
+        String topicTitle = "topicFakeSiteComm" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createDiscussion(user, password, theSite, topicTitle, topicTitle, null));
+        Assert.assertTrue(pageService.discussionExists(user, password, theSite, topicTitle));
+        pageService.getDiscussionReplies(user, password, "fakeSite", topicTitle);
     }
     
     @Test
     public void deleteCommentBlog()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName, userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        site.addPageToSite(userName, userName, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, true, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, true));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment1"));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment2"));
-        Assert.assertNotNull(pageService.getCommentNodeRef(userName, userName, siteId, Page.BLOG, draftBlog, "comment1"));
-        Assert.assertTrue(pageService.deleteBlogComment(userName, userName, siteId, draftBlog, "comment1"));
-        List<String> comments = pageService.getBlogComments(userName, userName, siteId, draftBlog);
+        String draftBlog = "draftDeleteComm" + System.currentTimeMillis();
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, true));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment1"));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment2"));
+        Assert.assertNotNull(pageService.getCommentNodeRef(user, password, theSite, Page.BLOG, draftBlog, "comment1"));
+        Assert.assertTrue(pageService.deleteBlogComment(user, password, theSite, draftBlog, "comment1"));
+        List<String> comments = pageService.getBlogComments(user, password, theSite, draftBlog);
         Assert.assertTrue(comments.contains("comment2"));
         Assert.assertFalse(comments.contains("comment1"));
     }
@@ -545,69 +401,49 @@ public class SitePagesActionTests extends AbstractTest
     @Test
     public void commentBlogConsumer()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String userConsumer = "userCons-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
-        userService.create(admin, admin, userConsumer, userConsumer, userConsumer + "@test", userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userConsumer, siteId, "SiteConsumer"));
-        site.addPageToSite(userConsumer, userConsumer, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
-        Assert.assertFalse(pageService.commentBlog(userConsumer, userConsumer, siteId, draftBlog, true, "comment1"));
+        String draftBlog = "draftConsumer" + System.currentTimeMillis(); 
+        userService.create(ADMIN, ADMIN, userConsumer, userConsumer, userConsumer + domain, "fistN", "lastN");
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userConsumer, theSite, "SiteConsumer"));
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
+        Assert.assertFalse(pageService.commentBlog(userConsumer, userConsumer, theSite, draftBlog, true, "comment1"));
     }
     
     @Test
     public void commentBlogContributor()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String userContributor = "userContrib-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
-        userService.create(admin, admin, userContributor, userContributor, userContributor + "@test", userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userContributor, siteId, "SiteContributor"));
-        site.addPageToSite(userContributor, userContributor, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
-        Assert.assertTrue(pageService.commentBlog(userContributor, userContributor, siteId, draftBlog, true, "comment1"));
+        String draftBlog = "draftContrib" + System.currentTimeMillis(); 
+        userService.create(ADMIN, ADMIN, userContributor, userContributor, userContributor + "@test", "first", "last");
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userContributor, theSite, "SiteContributor"));
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
+        Assert.assertTrue(pageService.commentBlog(userContributor, userContributor, theSite, draftBlog, true, "comment1"));
     }
     
     @Test
     public void commentBlogCollaborator()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String userCollaborator = "userCollab" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
-        userService.create(admin, admin, userCollaborator, userCollaborator, userCollaborator + "@test", userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userCollaborator, siteId, "SiteCollaborator"));
-        site.addPageToSite(userCollaborator, userCollaborator, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
-        Assert.assertTrue(pageService.commentBlog(userCollaborator, userCollaborator, siteId, draftBlog, true, "comment1"));
+        String draftBlog = "draftCollab" + System.currentTimeMillis(); 
+        userService.create(ADMIN, ADMIN, userCollaborator, userCollaborator, userCollaborator + "@test", "ff", "ll");
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userCollaborator, theSite, "SiteCollaborator"));
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
+        Assert.assertTrue(pageService.commentBlog(userCollaborator, userCollaborator, theSite, draftBlog, true, "comment1"));
     }
     
     @Test
     public void deleteCommentContributor()
     {
-        String siteId = "blog-site" + System.currentTimeMillis();
-        String userName = "userm-" + System.currentTimeMillis();
         String userContributor = "userContrib-" + System.currentTimeMillis();
-        String draftBlog = "draft" + System.currentTimeMillis(); 
-        userService.create(admin, admin, userName, userName, userName + "@test", userName, userName);
-        userService.create(admin, admin, userContributor, userContributor, userContributor + "@test", userName, userName);
-        site.create(userName, userName, "myDomain", siteId, "my site description", Visibility.PUBLIC);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, userName, userContributor, siteId, "SiteContributor"));
-        site.addPageToSite(userContributor, userContributor, siteId, Page.BLOG, null);
-        Assert.assertTrue(pageService.createBlogPost(userName, userName, siteId, draftBlog, draftBlog, false, null));
-        Assert.assertTrue(pageService.blogExists(userName, userName, siteId, draftBlog, false));
-        Assert.assertTrue(pageService.commentBlog(userName, userName, siteId, draftBlog, true, "comment1"));
-        Assert.assertFalse(pageService.deleteBlogComment(userContributor, userContributor, siteId, draftBlog, "comment1"));
+        String draftBlog = "draftContrib" + System.currentTimeMillis(); 
+        userService.create(ADMIN, ADMIN, userContributor, userContributor, userContributor + "@test", "fff", "lll");
+        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userContributor, theSite, "SiteContributor"));
+        Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
+        Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
+        Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment1"));
+        Assert.assertFalse(pageService.deleteBlogComment(userContributor, userContributor, theSite, draftBlog, "comment1"));
     }
 }

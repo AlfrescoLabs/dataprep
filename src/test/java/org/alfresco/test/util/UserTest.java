@@ -39,47 +39,46 @@ public class UserTest extends AbstractTest
     String firstName = "fname-" + System.currentTimeMillis();
     String lastName = "lname-" + System.currentTimeMillis();
     String email = userName;
-    String admin = "admin";
     String globalUser = "global" + System.currentTimeMillis();
     String globalSite = "gSite" + System.currentTimeMillis();
 
     @BeforeClass(alwaysRun = true)
     public void userSetup()
     {
-        userService.create(admin, admin, globalUser, password, globalUser + domain, firstName, lastName);
+        userService.create(ADMIN, ADMIN, globalUser, password, globalUser + domain, firstName, lastName);
         site.create(globalUser, password, "mydomain", globalSite, globalSite, Visibility.PUBLIC);
     }
     
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidUserName()
     {
-        userService.create(admin, admin, null, password, email, firstName, lastName);
+        userService.create(ADMIN, ADMIN, null, password, email, firstName, lastName);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void createUserInvalidPassword()
     {
-        userService.create(admin, admin, userName, null, email, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, null, email, firstName, lastName);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void createUserNullAdmin()
+    public void createUserNullADMIN()
     {
-        userService.create(null, admin, userName, password, email, firstName, lastName);
+        userService.create(null, ADMIN, userName, password, email, firstName, lastName);
     }
 
     @Test
     public void creatEnterpriseUser()
     {
-        boolean result = userService.create(admin, admin, userName, password, email, firstName, lastName);
+        boolean result = userService.create(ADMIN, ADMIN, userName, password, email, firstName, lastName);
         Assert.assertTrue(result);
-        Assert.assertTrue(userService.userExists(admin, admin, userName));
+        Assert.assertTrue(userService.userExists(ADMIN, ADMIN, userName));
     }
 
     @Test
     public void checkUserExistsWhenHeDoesnt()
     {
-        Assert.assertFalse(userService.userExists(admin, admin, "booo"));
+        Assert.assertFalse(userService.userExists(ADMIN, ADMIN, "booo"));
     }
 
     @Test
@@ -87,8 +86,8 @@ public class UserTest extends AbstractTest
     {
         String userName = "sameUserR1";
         String password = "password";
-        userService.create(admin, admin, userName, password, email, firstName, lastName);
-        boolean result = userService.create(admin, admin, userName, password, email, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, email, firstName, lastName);
+        boolean result = userService.create(ADMIN, ADMIN, userName, password, email, firstName, lastName);
         Assert.assertFalse(result);
     }
 
@@ -96,25 +95,25 @@ public class UserTest extends AbstractTest
     public void deleteUser()
     {
         String userName = "deleteUser";
-        userService.create(admin, admin, userName, password, email, firstName, lastName);
-        Assert.assertTrue(userService.delete(admin, admin, userName));
-        Assert.assertFalse(userService.userExists(admin, admin, userName));
+        userService.create(ADMIN, ADMIN, userName, password, email, firstName, lastName);
+        Assert.assertTrue(userService.delete(ADMIN, ADMIN, userName));
+        Assert.assertFalse(userService.userExists(ADMIN, ADMIN, userName));
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteNonExistent()
     {
         String userName = "booo";
-        userService.delete(admin, admin, userName);
+        userService.delete(ADMIN, ADMIN, userName);
     }
 
     @Test
     public void deleteUserContainingSpecialCharacters()
     {
         String userNameWithSpecialCharacters = "delete \"#user;<=>with?[]^special`{|}characters";
-        userService.create(admin, admin, userNameWithSpecialCharacters, password, email, firstName, lastName);
-        Assert.assertTrue(userService.delete(admin, admin, userNameWithSpecialCharacters));
-        Assert.assertFalse(userService.userExists(admin, admin, userNameWithSpecialCharacters));
+        userService.create(ADMIN, ADMIN, userNameWithSpecialCharacters, password, email, firstName, lastName);
+        Assert.assertTrue(userService.delete(ADMIN, ADMIN, userNameWithSpecialCharacters));
+        Assert.assertFalse(userService.userExists(ADMIN, ADMIN, userNameWithSpecialCharacters));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -140,7 +139,7 @@ public class UserTest extends AbstractTest
     {
         String userToInvite = "inviteUser" + System.currentTimeMillis();
         String emailUserInvited = userToInvite + "@test.com";
-        userService.create(admin, admin, userToInvite, password, emailUserInvited, "z" + firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToInvite, password, emailUserInvited, "z" + firstName, lastName);
         Assert.assertTrue(userService.inviteUserToSiteAndAccept(globalUser, password, userToInvite, globalSite, "SiteConsumer"));
     }
     
@@ -154,19 +153,19 @@ public class UserTest extends AbstractTest
     @Test
     public void requestSiteMembership()
     {
-        Assert.assertTrue(userService.requestSiteMembership(admin, admin, globalSite));
+        Assert.assertTrue(userService.requestSiteMembership(ADMIN, ADMIN, globalSite));
     }
     
     @Test(dependsOnMethods="requestSiteMembership")
     public void requestSiteMembershipTwice()
     {
-        Assert.assertFalse(userService.requestSiteMembership(admin, admin, globalSite));
+        Assert.assertFalse(userService.requestSiteMembership(ADMIN, ADMIN, globalSite));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void requestSiteMembershipNoExistentSite()
     {
-        userService.requestSiteMembership(admin, admin, "fakeSite");
+        userService.requestSiteMembership(ADMIN, ADMIN, "fakeSite");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -180,22 +179,22 @@ public class UserTest extends AbstractTest
     {
         String siteId = "siteMembership-" + System.currentTimeMillis();
         String userName = "userm-" + System.currentTimeMillis();
-        site.create(admin,
-                    admin,
+        site.create(ADMIN,
+                    ADMIN,
                     "myDomain",
                     siteId, 
                     "my site description", 
                     Visibility.MODERATED);
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, siteId));
-        Assert.assertTrue(userService.removePendingSiteRequest(admin, admin, userName, siteId));
+        Assert.assertTrue(userService.removePendingSiteRequest(ADMIN, ADMIN, userName, siteId));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removePendingRequestPublicSite()
     {
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
         Assert.assertFalse(userService.removePendingSiteRequest(globalUser, password, userName, globalSite));
     }
@@ -203,23 +202,23 @@ public class UserTest extends AbstractTest
     @Test(expectedExceptions = RuntimeException.class)
     public void removePendingReqNonExistentSite()
     {
-        userService.removePendingSiteRequest(admin, admin, userName, "fakeSite");
+        userService.removePendingSiteRequest(ADMIN, ADMIN, userName, "fakeSite");
     }
     
     @Test
     public void removeSiteMembership()
     {
         String userName = "removeMember-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
-        Assert.assertTrue(userService.removeSiteMembership(admin, admin, userName, globalSite));
+        Assert.assertTrue(userService.removeSiteMembership(ADMIN, ADMIN, userName, globalSite));
     }
     
     @Test
     public void removeSiteMembershipByUser()
     {
         String userName = "userRemove-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
         Assert.assertTrue(userService.removeSiteMembership(globalUser, password, userName, globalSite));
     }
@@ -229,8 +228,8 @@ public class UserTest extends AbstractTest
     {
         String userName = "userm-" + System.currentTimeMillis();
         String nonMemberUser = "nonMember-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        userService.create(admin, admin, nonMemberUser, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, nonMemberUser, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
         Assert.assertFalse(userService.removeSiteMembership(nonMemberUser, password, userName, globalSite));
     }
@@ -238,14 +237,14 @@ public class UserTest extends AbstractTest
     @Test
     public void removeSiteMembershiNoExistentUser()
     {
-        Assert.assertFalse(userService.removeSiteMembership(admin, admin, "fakeUser", globalSite));
+        Assert.assertFalse(userService.removeSiteMembership(ADMIN, ADMIN, "fakeUser", globalSite));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void removeSiteMembFakeSiteManager()
     {
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
         Assert.assertTrue(userService.requestSiteMembership(userName, password, globalSite));
         userService.removeSiteMembership("fakeSiteManager", "fakePass", userName, globalSite);
     }
@@ -253,7 +252,7 @@ public class UserTest extends AbstractTest
     @Test(expectedExceptions = RuntimeException.class)
     public void removeSiteMembershipNoExistentSite()
     {
-        userService.removeSiteMembership(admin, admin, globalUser, "fakeSite");
+        userService.removeSiteMembership(ADMIN, ADMIN, globalUser, "fakeSite");
     }
 
     @Test
@@ -264,8 +263,8 @@ public class UserTest extends AbstractTest
         String siteName = "site-" + System.currentTimeMillis();
         String emailUserManager = userManager + "@test.com";
         String emailUserToInvite = userToInvite + "@test.com";
-        userService.create(admin, admin, userManager, password, emailUserManager, firstName, lastName);
-        userService.create(admin, admin, userToInvite, password, emailUserToInvite, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userManager, password, emailUserManager, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToInvite, password, emailUserToInvite, firstName, lastName);
         site.create(userManager, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
         userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, siteName, "SiteConsumer");
         int noOfSiteMembers=userService.countSiteMembers(userManager, password, siteName);
@@ -278,7 +277,7 @@ public class UserTest extends AbstractTest
         String userName = "user-" + System.currentTimeMillis();
         String siteName = "site-" + System.currentTimeMillis();
         String userEmail = userName + "@test.com";
-        userService.create(admin, admin, userName, password, userEmail, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userEmail, firstName, lastName);
         site.create(userName, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
         int noOfSiteMembers=userService.countSiteMembers(userName, password, siteName);
         Assert.assertEquals(noOfSiteMembers,1);
@@ -288,7 +287,7 @@ public class UserTest extends AbstractTest
     public void addDashlets()
     {
         String theUser = "alfrescouser" + System.currentTimeMillis();
-        userService.create(admin, admin, theUser, password, theUser + domain, firstName, lastName);
+        userService.create(ADMIN, ADMIN, theUser, password, theUser + domain, firstName, lastName);
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_MEETING_WORKSPACES, DashletLayout.THREE_COLUMNS, 3, 1));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DISCUSSIONS, DashletLayout.THREE_COLUMNS, 3, 2));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.FOUR_COLUMNS, 4, 1));
@@ -307,7 +306,7 @@ public class UserTest extends AbstractTest
     public void changeUserRole()
     {
         String userName = "userRole-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName + domain, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userName, password, userName + domain, firstName, lastName);
         userService.inviteUserToSiteAndAccept(globalUser, password, userName, globalSite, "SiteConsumer");
         Assert.assertTrue(userService.changeUserRole(globalUser, password, globalSite, userName, "SiteCollaborator"));
     }
@@ -316,27 +315,27 @@ public class UserTest extends AbstractTest
     public void changeRoleInvalidMember()
     {
         String userName = "userm-" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, userName, firstName, lastName);
-        userService.changeUserRole(admin, admin, globalSite, userName, "SiteCollaborator");
+        userService.create(ADMIN, ADMIN, userName, password, userName, firstName, lastName);
+        userService.changeUserRole(ADMIN, ADMIN, globalSite, userName, "SiteCollaborator");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void changeRoleInvalidSite()
     {
-        userService.changeUserRole(admin, admin, "fakeSite", globalUser, "SiteCollaborator");
+        userService.changeUserRole(ADMIN, ADMIN, "fakeSite", globalUser, "SiteCollaborator");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void changeRoleInvalidRole()
     {
-        userService.changeUserRole(admin, admin, globalSite, userName, "InvalidRole");
+        userService.changeUserRole(ADMIN, ADMIN, globalSite, userName, "InvalidRole");
     }
     
     @Test
     public void addMemberToModeratedSite()
     {
         String userToAdd = "member" + System.currentTimeMillis();
-        userService.create(admin, admin, userToAdd, password, userToAdd + domain, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToAdd, password, userToAdd + domain, firstName, lastName);
         Assert.assertTrue(userService.createSiteMember(globalUser, password, userToAdd, globalSite, "SiteContributor"));
     }
     
@@ -345,7 +344,7 @@ public class UserTest extends AbstractTest
     { 
         String userToAdd = "member" + System.currentTimeMillis();
         String privateSite = "site" + System.currentTimeMillis();
-        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToAdd, password, userToAdd, firstName, lastName);
         site.create(globalUser, password, "mydomain", privateSite, privateSite, Visibility.PRIVATE);
         Assert.assertTrue(userService.createSiteMember(globalUser, password, userToAdd, privateSite, "SiteContributor"));
     }
@@ -353,14 +352,14 @@ public class UserTest extends AbstractTest
     @Test(expectedExceptions = RuntimeException.class)
     public void addMemberToInvalidSite()
     { 
-        userService.createSiteMember(globalUser, password, admin, "fakeSite", "SiteContributor");
+        userService.createSiteMember(globalUser, password, ADMIN, "fakeSite", "SiteContributor");
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void addMemberInvalidRole()
     {
         String user = "userInvalidRole" + System.currentTimeMillis();
-        userService.create(admin, admin, user, password, user, firstName, lastName);
+        userService.create(ADMIN, ADMIN, user, password, user, firstName, lastName);
         userService.createSiteMember(globalUser, password, user, globalSite, "fakeRole");
     }
 
@@ -368,7 +367,7 @@ public class UserTest extends AbstractTest
     public void addMemberToSiteTwice()
     {
         String userToAdd = "member" + System.currentTimeMillis();
-        userService.create(admin, admin, userToAdd, password, userToAdd, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToAdd, password, userToAdd, firstName, lastName);
         Assert.assertTrue(userService.createSiteMember(globalUser, password, userToAdd, globalSite, "SiteContributor"));
         Assert.assertFalse(userService.createSiteMember(globalUser, password, userToAdd, globalSite, "SiteContributor"));
     }
@@ -380,10 +379,10 @@ public class UserTest extends AbstractTest
         String userToFollow1 = "userFollow-1" + System.currentTimeMillis();
         String userToFollow2 = "userFollow-2" + System.currentTimeMillis();
         String userToFollow3 = "userFollow-3" + System.currentTimeMillis();
-        userService.create(admin, admin, user, password, user, firstName, lastName);
-        userService.create(admin, admin, userToFollow1, password, userToFollow1, firstName, lastName);
-        userService.create(admin, admin, userToFollow2, password, userToFollow2, firstName, lastName);
-        userService.create(admin, admin, userToFollow3, password, userToFollow3, firstName, lastName);
+        userService.create(ADMIN, ADMIN, user, password, user, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow1, password, userToFollow1, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow2, password, userToFollow2, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow3, password, userToFollow3, firstName, lastName);
         Assert.assertTrue(userService.followUser(user, password, userToFollow1));
         Assert.assertTrue(userService.followUser(user, password, userToFollow2));
         Assert.assertTrue(userService.followUser(user, password, userToFollow3));
@@ -407,10 +406,10 @@ public class UserTest extends AbstractTest
         String user1 = "userFollow-1" + System.currentTimeMillis();
         String user2 = "userFollow-2" + System.currentTimeMillis();
         String user3 = "userFollow-3" + System.currentTimeMillis();
-        userService.create(admin, admin, userToFollow, password, userToFollow, firstName, lastName);
-        userService.create(admin, admin, user1, password, user1, firstName, lastName);
-        userService.create(admin, admin, user2, password, user2, firstName, lastName);
-        userService.create(admin, admin, user3, password, user3, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow, password, userToFollow, firstName, lastName);
+        userService.create(ADMIN, ADMIN, user1, password, user1, firstName, lastName);
+        userService.create(ADMIN, ADMIN, user2, password, user2, firstName, lastName);
+        userService.create(ADMIN, ADMIN, user3, password, user3, firstName, lastName);
         Assert.assertTrue(userService.followUser(user1, password, userToFollow));
         Assert.assertTrue(userService.followUser(user2, password, userToFollow));
         Assert.assertTrue(userService.followUser(user3, password, userToFollow));
@@ -428,10 +427,10 @@ public class UserTest extends AbstractTest
         String userToFollow1 = "userFollow-1" + System.currentTimeMillis();
         String userToFollow2 = "userFollow-2" + System.currentTimeMillis();
         String userToFollow3 = "userFollow-3" + System.currentTimeMillis();
-        userService.create(admin, admin, user, password, user, firstName, lastName);
-        userService.create(admin, admin, userToFollow1, password, userToFollow1, firstName, lastName);
-        userService.create(admin, admin, userToFollow2, password, userToFollow2, firstName, lastName);
-        userService.create(admin, admin, userToFollow3, password, userToFollow3, firstName, lastName);
+        userService.create(ADMIN, ADMIN, user, password, user, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow1, password, userToFollow1, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow2, password, userToFollow2, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userToFollow3, password, userToFollow3, firstName, lastName);
         Assert.assertTrue(userService.followUser(user, password, userToFollow1));
         Assert.assertTrue(userService.followUser(user, password, userToFollow2));
         Assert.assertTrue(userService.followUser(user, password, userToFollow3));
@@ -448,7 +447,7 @@ public class UserTest extends AbstractTest
     {
         String rootCateg = "firstCateg" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
-        Assert.assertTrue(userService.categoryExists(admin, admin, rootCateg));
+        Assert.assertTrue(userService.categoryExists(ADMIN, ADMIN, rootCateg));
     }
     
     @Test
@@ -467,9 +466,9 @@ public class UserTest extends AbstractTest
         String subCateg2 = "sub2" + System.currentTimeMillis();
         String subCateg3 = "sub3" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
-        Assert.assertTrue(userService.createSubCategory(admin, admin, rootCateg, subCateg1));
-        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg1, subCateg2));
-        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg2, subCateg3));
+        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, rootCateg, subCateg1));
+        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, subCateg1, subCateg2));
+        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, subCateg2, subCateg3));
     }
     
     @Test
@@ -477,13 +476,13 @@ public class UserTest extends AbstractTest
     {
         String rootCateg = "firstCateg" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
-        Assert.assertTrue(userService.deleteCategory(admin, admin, rootCateg));
+        Assert.assertTrue(userService.deleteCategory(ADMIN, ADMIN, rootCateg));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteInvalidCategory()
     {
-        userService.deleteCategory(admin, admin, "fakeCategory");
+        userService.deleteCategory(ADMIN, ADMIN, "fakeCategory");
     }
     
     @Test
@@ -494,12 +493,12 @@ public class UserTest extends AbstractTest
         String subCateg2 = "sub2" + System.currentTimeMillis();
         String subCateg3 = "sub3" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
-        Assert.assertTrue(userService.createSubCategory(admin, admin, rootCateg, subCateg1));
-        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg1, subCateg2));
-        Assert.assertTrue(userService.createSubCategory(admin, admin, subCateg2, subCateg3));
-        Assert.assertTrue(userService.categoryExists(admin, admin, rootCateg));
-        Assert.assertTrue(userService.deleteCategory(admin, admin, subCateg3));
-        Assert.assertTrue(userService.deleteCategory(admin, admin, rootCateg));
-        Assert.assertFalse(userService.categoryExists(admin, admin, rootCateg));
+        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, rootCateg, subCateg1));
+        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, subCateg1, subCateg2));
+        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, subCateg2, subCateg3));
+        Assert.assertTrue(userService.categoryExists(ADMIN, ADMIN, rootCateg));
+        Assert.assertTrue(userService.deleteCategory(ADMIN, ADMIN, subCateg3));
+        Assert.assertTrue(userService.deleteCategory(ADMIN, ADMIN, rootCateg));
+        Assert.assertFalse(userService.categoryExists(ADMIN, ADMIN, rootCateg));
     }
 }

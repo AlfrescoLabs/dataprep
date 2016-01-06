@@ -27,13 +27,27 @@ public class DataListsTests extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private ContentService content;
     @Autowired private UserService userService;
-    String siteId;
+    private String siteId;
+    private String doc1 = "doc1" + System.currentTimeMillis();
+    private String doc2 = "doc2" + System.currentTimeMillis();
+    private List<String> docs = new ArrayList<String>();
+    private String userToAssign1 = "assignUser-1" + System.currentTimeMillis();
+    private String userToAssign2 = "assignUser-2" + System.currentTimeMillis();
+    private List<String> users = new ArrayList<String>();
     
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setup() throws IOException
     {
         siteId = "list" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "myDomain", siteId, "description", Visibility.PUBLIC);
+        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
+        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc2, " doc 2 for event agenda");
+        docs.add(doc1);
+        docs.add(doc2);
+        userService.create(ADMIN, ADMIN, userToAssign1, userToAssign1, userToAssign1 + domain, "fName", "lastName");
+        userService.create(ADMIN, ADMIN, userToAssign2, userToAssign2, userToAssign2 + domain, "user2", "lastUsr2");
+        users.add(userToAssign1);
+        users.add(userToAssign2);
     }
     
     @Test
@@ -54,15 +68,8 @@ public class DataListsTests extends AbstractTest
     public void addEventAgenda()
     {
         String eventAgenda = "eventAgenda";
-        String doc1 = "doc1" + System.currentTimeMillis();;
-        String doc2 = "doc2" + System.currentTimeMillis();;
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.EVENT_AGENDA, eventAgenda, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc2, " doc 2 for event agenda");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
         ObjectId itemEventId = dataLists.addEventAgendaItem(ADMIN, ADMIN, siteId, eventAgenda, "reference", "startTime", "endTime", "sessionName", 
                 "presenter", "audience", "notes", docs);
         Assert.assertFalse(itemEventId.getId().isEmpty());
@@ -72,12 +79,8 @@ public class DataListsTests extends AbstractTest
     public void addEventAgendaFakeSite()
     {
         String eventAgenda = "eventAgenda" + System.currentTimeMillis();
-        String doc1 = "doc1" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.EVENT_AGENDA, eventAgenda, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
         dataLists.addEventAgendaItem(ADMIN, ADMIN, "fakeSite", eventAgenda, "reference", "startTime", "endTime", "sessionName", 
                 "presenter", "audience", "notes", docs);
     }
@@ -98,15 +101,8 @@ public class DataListsTests extends AbstractTest
     public void addEventList()
     {
         String eventAgenda = "eventList";
-        String doc1 = "doc1" + System.currentTimeMillis();
-        String doc2 = "doc2" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.EVENT_LIST, eventAgenda, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSEXCEL, doc2, " doc 2 for event agenda");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
         Date date = new Date();
         ObjectId itemEventId = dataLists.addEventListItem(ADMIN, ADMIN, siteId, eventAgenda, "title", "description", "location",
                     date, date, "registration", "notes", docs);
@@ -117,28 +113,10 @@ public class DataListsTests extends AbstractTest
     public void addIssueList()
     {
         String issueList = "issueList";
-        String userToAssign = "assignUser" + System.currentTimeMillis();
-        String userToAssign2 = "assignUser-2" + System.currentTimeMillis();
-        String userName = "user-" + System.currentTimeMillis();
-        String doc1 = "doc1" + System.currentTimeMillis();
-        String doc2 = "doc2" + System.currentTimeMillis();
-        String siteId = "issue-" + System.currentTimeMillis();
-        userService.create(ADMIN, ADMIN, userToAssign, userToAssign, userToAssign, "fName", "lastName");
-        userService.create(ADMIN, ADMIN, userToAssign2, userToAssign2, userToAssign2, "user2", "lastUsr2");
-        userService.create(ADMIN, ADMIN, userName, userName, userName, "issueUser", "issue");
-        site.create(userName, userName, "myDomain", siteId, "description", Visibility.PUBLIC);
-        ObjectId id = dataLists.createDataList(userName, userName, siteId, DataList.ISSUE_LIST, issueList, "event description");
+        ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.ISSUE_LIST, issueList, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(userName, userName, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSEXCEL, doc2, " doc 2 for event agenda");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
-        List<String> users = new ArrayList<String>();
-        users.add(userToAssign);
-        users.add(userToAssign2);
         Date date = new Date();
-        ObjectId itemEventId = dataLists.addIssueListItem(userName, userName, siteId, issueList, "issueID", "issueTitle", users, 
+        ObjectId itemEventId = dataLists.addIssueListItem(ADMIN, ADMIN, siteId, issueList, "issueID", "issueTitle", users, 
                 Status.NOT_STARTED, Priority.Low, "desc", date, "comments", docs);
         Assert.assertFalse(itemEventId.getId().isEmpty());
     }
@@ -147,15 +125,8 @@ public class DataListsTests extends AbstractTest
     public void addLocationList()
     {
         String locationList = "LocationList";
-        String doc1 = "doc1" + System.currentTimeMillis();
-        String doc2 = "doc2" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.LOCATION_LIST, locationList, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for location list");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSEXCEL, doc2, " doc 2 for location");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
         ObjectId itemLocationId = dataLists.addLocationItem(ADMIN, ADMIN, siteId, locationList, "title", "addressLine1", "addressLine2", "addressLine3",
                 "zipCode", "state", "country", "description", docs);
         Assert.assertFalse(itemLocationId.getId().isEmpty());
@@ -165,15 +136,8 @@ public class DataListsTests extends AbstractTest
     public void addMeetingListItem()
     {
         String meetingList = "meetingList";
-        String doc1 = "doc1" + System.currentTimeMillis();
-        String doc2 = "doc2" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.MEETING_AGENDA, meetingList, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for location list");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSEXCEL, doc2, " doc 2 for location");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
         ObjectId itemLocationId = dataLists.addMeetingItem(ADMIN, ADMIN, siteId, meetingList, "reference", "item title", "description", "43", "owner", docs);
         Assert.assertFalse(itemLocationId.getId().isEmpty());
     }
@@ -182,28 +146,10 @@ public class DataListsTests extends AbstractTest
     public void addTaskAdvListItem()
     {
         String taskAdv = "taskAdvList";
-        String userToAssign = "assignUser" + System.currentTimeMillis();
-        String userToAssign2 = "assignUser-2" + System.currentTimeMillis();
-        String userName = "user-" + System.currentTimeMillis();
-        String doc1 = "doc1" + System.currentTimeMillis();
-        String doc2 = "doc2" + System.currentTimeMillis();
-        String siteId = "taskAdv-" + System.currentTimeMillis();
-        userService.create(ADMIN, ADMIN, userToAssign, userToAssign, userToAssign, "fName", "lastName");
-        userService.create(ADMIN, ADMIN, userToAssign2, userToAssign2, userToAssign2, "user2", "lastUsr2");
-        userService.create(ADMIN, ADMIN, userName, userName, userName, "issueUser", "issue");
-        site.create(userName, userName, "myDomain", siteId, "description", Visibility.PUBLIC);
-        ObjectId id = dataLists.createDataList(userName, userName, siteId, DataList.TASKS_ADVANCED, taskAdv, "event description");
+        ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.TASKS_ADVANCED, taskAdv, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(userName, userName, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSEXCEL, doc2, " doc 2 for event agenda");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
-        List<String> users = new ArrayList<String>();
-        users.add(userToAssign);
-        users.add(userToAssign2);
         Date date = new Date();
-        ObjectId itemEventId = dataLists.addTaskAdvancedItem(userName, userName, siteId, taskAdv, "itemTitle", "description", date, date, 
+        ObjectId itemEventId = dataLists.addTaskAdvancedItem(ADMIN, ADMIN, siteId, taskAdv, "itemTitle", "description", date, date, 
                 users, Priority.Low, Status.ON_HOLD, 21, "comments", docs);
         Assert.assertFalse(itemEventId.getId().isEmpty());
     }
@@ -215,7 +161,8 @@ public class DataListsTests extends AbstractTest
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.TASKS_SIMPLE, taskSimple, "event description");
         Assert.assertFalse(id.getId().isEmpty());
         Date date = new Date();
-        ObjectId itemSimpleTask = dataLists.addTaskSimpleItem(ADMIN, ADMIN, siteId, taskSimple, "item title", "description", date, Priority.Low, Status.IN_PROGRESS, "comments");
+        ObjectId itemSimpleTask = dataLists.addTaskSimpleItem(ADMIN, ADMIN, siteId, taskSimple, "item title", "description", date,
+                Priority.Low, Status.IN_PROGRESS, "comments");
         Assert.assertFalse(itemSimpleTask.getId().isEmpty());
     }
     
@@ -223,23 +170,10 @@ public class DataListsTests extends AbstractTest
     public void addToDoItem()
     {
         String toDo = "toDoList";
-        String userToAssign = "assignUser" + System.currentTimeMillis();
-        String userName = "user-" + System.currentTimeMillis();
-        String doc1 = "doc1" + System.currentTimeMillis();
-        String doc2 = "doc2" + System.currentTimeMillis();
-        String siteId = "toDo-" + System.currentTimeMillis();
-        userService.create(ADMIN, ADMIN, userToAssign, userToAssign, userToAssign, "fName", "lastName");
-        userService.create(ADMIN, ADMIN, userName, userName, userName, "issueUser", "issue");
-        site.create(userName, userName, "myDomain", siteId, "description", Visibility.PUBLIC);
-        ObjectId id = dataLists.createDataList(userName, userName, siteId, DataList.TODO_LIST, toDo, "event description");
+        ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.TODO_LIST, toDo, "event description");
         Assert.assertFalse(id.getId().isEmpty());
-        content.createDocument(userName, userName, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
-        content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSEXCEL, doc2, " doc 2 for event agenda");
-        List<String> docs = new ArrayList<String>();
-        docs.add(doc1);
-        docs.add(doc2);
         Date date = new Date();
-        ObjectId itemEventId = dataLists.addToDoItem(userName, userName, siteId, toDo, "itemTitle", date, 1, Status.IN_PROGRESS, "notes", userToAssign, docs);
+        ObjectId itemEventId = dataLists.addToDoItem(ADMIN, ADMIN, siteId, toDo, "itemTitle", date, 1, Status.IN_PROGRESS, "notes", userToAssign1, docs);
         Assert.assertFalse(itemEventId.getId().isEmpty());
     }
 }
