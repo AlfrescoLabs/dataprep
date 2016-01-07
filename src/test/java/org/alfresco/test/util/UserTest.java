@@ -463,12 +463,8 @@ public class UserTest extends AbstractTest
     {
         String rootCateg = "rootCateg" + System.currentTimeMillis();
         String subCateg1 = "sub1" + System.currentTimeMillis();
-        String subCateg2 = "sub2" + System.currentTimeMillis();
-        String subCateg3 = "sub3" + System.currentTimeMillis();
         Assert.assertTrue(userService.createRootCategory(ADMIN, ADMIN, rootCateg));
         Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, rootCateg, subCateg1));
-        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, subCateg1, subCateg2));
-        Assert.assertTrue(userService.createSubCategory(ADMIN, ADMIN, subCateg2, subCateg3));
     }
     
     @Test

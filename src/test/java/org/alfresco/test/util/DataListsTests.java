@@ -27,7 +27,7 @@ public class DataListsTests extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private ContentService content;
     @Autowired private UserService userService;
-    private String siteId;
+    private String siteId = "list" + System.currentTimeMillis();;
     private String doc1 = "doc1" + System.currentTimeMillis();
     private String doc2 = "doc2" + System.currentTimeMillis();
     private List<String> docs = new ArrayList<String>();
@@ -38,7 +38,6 @@ public class DataListsTests extends AbstractTest
     @BeforeClass(alwaysRun = true)
     public void setup() throws IOException
     {
-        siteId = "list" + System.currentTimeMillis();
         site.create(ADMIN, ADMIN, "myDomain", siteId, "description", Visibility.PUBLIC);
         content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc1, " doc 1 for event agenda");
         content.createDocument(ADMIN, ADMIN, siteId, DocumentType.MSPOWERPOINT, doc2, " doc 2 for event agenda");

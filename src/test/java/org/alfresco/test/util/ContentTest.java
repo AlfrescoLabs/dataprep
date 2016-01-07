@@ -30,6 +30,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -43,18 +44,23 @@ public class ContentTest extends AbstractTest
     @Autowired private UserService userService;
     @Autowired private SiteService site;
     @Autowired private ContentService content;
-    String admin = "admin";
     String password = "password";
     String folder = "cmisFolder";
     String plainDoc = "plainDoc";
+    private String userName = "contentUser" + System.currentTimeMillis();
+    private String siteName = "contentSite" + System.currentTimeMillis();
+    
+    @BeforeClass(alwaysRun = true)
+    public void userSetup()
+    {
+        userService.create(ADMIN, ADMIN, userName, password, userName + domain, userName, userName);
+        site.create(userName, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
+    }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testCreateFolderTwice()
     {
-        String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
+        String folder = "twiceFolder" + System.currentTimeMillis();
         content.createFolder(userName, password, folder, siteName);
         content.createFolder(userName, password, folder, siteName);
     }
@@ -62,10 +68,7 @@ public class ContentTest extends AbstractTest
     @Test
     public void testCreateFolder()
     {
-        String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
+        String folder = "createFold" + System.currentTimeMillis();
         Folder newFolder = content.createFolder(userName, password, folder, siteName);
         Assert.assertFalse(newFolder.getId().isEmpty());
         Folder parent = newFolder.getFolderParent();
@@ -75,41 +78,27 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testCreateFolderInvalidSimbols()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String symbolFolder = "*/.:?|\\`\"";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createFolder(userName, password, symbolFolder, siteName);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInvalidUser()
     {
-        String siteName = "siteCMIS-" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createFolder("fakeUser", "fakePass", folder, siteName);
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void createFolderInvalidSite()
     {
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         content.createFolder(userName, password, folder, "fakeSite");
     }
 
     @Test
     public void testDeleteFolders()
     {
-        String siteName = "siteCMISDelete" + System.currentTimeMillis();
-        String userName = "cmisUserDelete" + System.currentTimeMillis();
         String rootFolder = "cmisFolderDelete";
         String secondFolder = "cmisSecondFolder";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         Folder rootFld = content.createFolder(userName, password, rootFolder, siteName);
         Assert.assertFalse(rootFld.getId().isEmpty());
         Map<String, String> properties = new HashMap<String, String>();
@@ -126,25 +115,17 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void deleteNonExistentFolder()
     {
-        String userName = "cmisUserDelete" + System.currentTimeMillis();
-        String siteName = "siteCMISDelete" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.deleteFolder(userName, password, siteName, "fakeFolder");
     }
 
     @Test
     public void testCreateDocument()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain";
         String msWord = "msWord";
         String msExcel = "msExcel";
         String html = "html";
         String xml = "xml";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
         Document doc2 = content.createDocument(userName, password, siteName, DocumentType.MSWORD, msWord, msWord);
@@ -160,29 +141,20 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testCreateDocInvalidSimbols()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String symbolDoc = "*/.:?|\\`\"";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, symbolDoc, symbolDoc);
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void createDocFakeSite()
     {
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         content.createDocument(userName, password, "fakeSite", DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void createDuplicatedDoc()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
+        String plainDoc = "duplicateDoc";
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
     }
@@ -190,10 +162,7 @@ public class ContentTest extends AbstractTest
     @Test
     public void createDocumentInFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
+        String folder = "inceptionFolder";
         content.createFolder(userName, password, folder, siteName);
         Document doc = content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertFalse(doc.getId().isEmpty());
@@ -202,12 +171,8 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void createDocInFolderInvalidSymbols()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String symbolDoc = "*/.:?|\\`\"";
         String folder = "cmisFolder";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createFolder(userName, password, folder, siteName);
         content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, symbolDoc, symbolDoc);
     }
@@ -215,21 +180,14 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void createDocInNonExistentFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocumentInFolder(userName, password, siteName, "fakeFolder", DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
     }
 
     @Test
     public void createDocumentInSubFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
+        String folder = "subFolder";
         String subFolderDoc = "cmisDoc" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         Folder folderRoot = content.createFolder(userName, password, folder, siteName);
         content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Map<String, String> properties = new HashMap<String, String>();
@@ -243,10 +201,7 @@ public class ContentTest extends AbstractTest
     @Test
     public void deleteDocumentFromRoot()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
+        String plainDoc = "deleteDoc";
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.deleteDocument(userName, password, siteName, plainDoc);
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainDoc).isEmpty());
@@ -255,10 +210,9 @@ public class ContentTest extends AbstractTest
     @Test
     public void deleteDocumentFromFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
+        String folder = "deleteFolder1";
+        String siteName = "deleteSite" + System.currentTimeMillis();
+        site.create(userName, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
         content.createFolder(userName, password, folder, siteName);
         content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.deleteDocument(userName, password, siteName, plainDoc);
@@ -268,12 +222,6 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void deleteDocumentInvalidSite()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        content.createFolder(userName, password, folder, siteName);
-        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.deleteDocument(userName, password, "fakeSite", plainDoc);
     }
 
@@ -281,9 +229,7 @@ public class ContentTest extends AbstractTest
     public void deleteTree()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String folder1 = "cmisFolder1" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.XML, "xmlDoc", "contentXmlDoc");
         Folder f = content.createFolder(userName, password, folder, siteName);
@@ -301,8 +247,6 @@ public class ContentTest extends AbstractTest
     public void testUploadDocsInDocumentLibrary()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         List<Document> uploadedDocs = content.uploadFiles(DATA_FOLDER, userName, password, siteName);
         Assert.assertNotNull(uploadedDocs);
@@ -315,12 +259,8 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testUploadDocsFromFileInsteadFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String fileName = "cmisFile" + System.currentTimeMillis();
         String fileFromPath = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, fileName, "file node");
         content.uploadFiles(fileFromPath, userName, password, siteName);
     }
@@ -328,11 +268,7 @@ public class ContentTest extends AbstractTest
     @Test
     public void testUploadDocsInFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String folderName = "cmisFolder" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createFolder(userName, password, folderName, siteName);
         List<Document> uploadedDocs = content.uploadFilesInFolder(DATA_FOLDER, userName, password, siteName, folderName);
         Assert.assertNotNull(uploadedDocs);
@@ -345,21 +281,13 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testUploadDocsInNonExistentFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.uploadFilesInFolder(DATA_FOLDER, userName, password, siteName, "NotExistFld");
     }
 
     @Test(expectedExceptions = CmisRuntimeException.class)
     public void testUploadDocsInFileInsteadFolder()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String fileName = "cmisFile" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, fileName, "file node");
         content.uploadFilesInFolder(DATA_FOLDER, userName, password, siteName, fileName);
     }
@@ -367,11 +295,7 @@ public class ContentTest extends AbstractTest
     @Test
     public void testCreateDocumentFile()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         File file = new File(plainDoc);
         Document doc1 = content.createDocument(userName, password, siteName, DocumentType.MSWORD, file, plainDoc);
         Assert.assertFalse(doc1.getId().isEmpty());
@@ -380,13 +304,9 @@ public class ContentTest extends AbstractTest
     @Test
     public void testDeleteFiles()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String plainFile = "UploadFile-plaintext.txt";
         String xmlFile = "UploadFile-xml.xml";
         String htmlFile = "UploadFile-html.html";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.uploadFiles(DATA_FOLDER, userName, password, siteName);
         content.deleteFiles(userName, password, siteName, plainFile, xmlFile, htmlFile);
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainFile).isEmpty());
@@ -397,11 +317,7 @@ public class ContentTest extends AbstractTest
     @Test
     public void testDeleteNoFiles()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String plainFile = "UploadFile-plaintext.txt";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.uploadFiles(DATA_FOLDER, userName, password, siteName);
         content.deleteFiles(userName, password, siteName);
         Assert.assertFalse(content.getNodeRef(userName, password, siteName, plainFile).isEmpty());
@@ -411,13 +327,11 @@ public class ContentTest extends AbstractTest
     public void testDeleteFilesFromFolders()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String folderName = "cmisFolder" + System.currentTimeMillis();
         String plainFile = "UploadFile-plaintext.txt";
         String xmlFile = "UploadFile-xml.xml";
         String htmlFile = "UploadFile-html.html";
         String xlxsFile = "UploadFile-xlsx.xlsx";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.HTML, htmlFile, "content html");
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainFile, "content plain text");
@@ -435,14 +349,12 @@ public class ContentTest extends AbstractTest
     public void updateContent()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain" + System.currentTimeMillis();
         String xml = "xml" + System.currentTimeMillis();
         String docx  = "doc" + System.currentTimeMillis();
         String newContentPlain = "new plain content";
         String newContentXml = "new xml content";
         String newDocContent = "new doc content";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.createDocument(userName, password, siteName, DocumentType.XML, xml, xml);
@@ -461,9 +373,7 @@ public class ContentTest extends AbstractTest
     public void updateContentEmpty()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String plainDoc = "plain";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Assert.assertTrue(content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, ""));
@@ -473,10 +383,6 @@ public class ContentTest extends AbstractTest
     @Test(expectedExceptions = RuntimeException.class)
     public void updateContentInvalidDoc()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         content.updateDocumentContent(userName, password, siteName, DocumentType.TEXT_PLAIN, "fakeDoc", "new content");
     }
 
@@ -484,24 +390,24 @@ public class ContentTest extends AbstractTest
     public void createFolderInRepository()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(admin, admin, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
         Assert.assertEquals(newFolder.getFolderParent().getName(), "Company Home");
-        Assert.assertFalse(content.getNodeRefByPath(admin, admin, folder).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, folder).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInRepositoryTwice()
     {
-        content.createFolderInRepository(admin, admin, folder, null);
-        content.createFolderInRepository(admin, admin, folder, null);
+        content.createFolderInRepository(ADMIN, ADMIN, folder, null);
+        content.createFolderInRepository(ADMIN, ADMIN, folder, null);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInRepositoryUnauthorized()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
+        userService.create(ADMIN, ADMIN, userName, password, password, "firstname", "lastname");
         String folder = "newFolder" + System.currentTimeMillis();
         content.createFolderInRepository(userName, password, folder, null);
     }
@@ -510,26 +416,26 @@ public class ContentTest extends AbstractTest
     public void createFolderInRepositoryByPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(admin, admin, folder, "Guest Home");
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "Guest Home");
         Assert.assertFalse(newFolder.getId().isEmpty());
         Assert.assertEquals(newFolder.getFolderParent().getName(), "Guest Home");
-        Assert.assertFalse(content.getNodeRefByPath(admin, admin, "Guest Home/" + folder).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "Guest Home/" + folder).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInRepositoryInvalidPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(admin, admin, folder, "Shared/InvalidPath");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared/InvalidPath");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteFolderFromRepoUnauthorized()
     {
         String userName = "cmisUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
+        userService.create(ADMIN, ADMIN, userName, password, password, "firstname", "lastname");
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(admin, admin, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
         content.deleteContentByPath(userName, password, folder);
     }
@@ -538,26 +444,26 @@ public class ContentTest extends AbstractTest
     public void deleteFolderFromRepo()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(admin, admin, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
-        content.deleteContentByPath(admin, admin, folder);
-        Assert.assertTrue(content.getNodeRefByPath(admin, admin, folder).isEmpty());
+        content.deleteContentByPath(ADMIN, ADMIN, folder);
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, folder).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteFolderFromRepoInvalidPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(admin, admin, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
-        content.deleteContentByPath(admin, admin, "Shared/Invalid");
+        content.deleteContentByPath(ADMIN, ADMIN, "Shared/Invalid");
     }
 
     @Test
     public void createDocInRepository()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        Document theDoc = content.createDocumentInRepository(admin, admin, null, DocumentType.TEXT_PLAIN, doc, "doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, null, DocumentType.TEXT_PLAIN, doc, "doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -565,8 +471,8 @@ public class ContentTest extends AbstractTest
     public void createDocInRepositoryTwice()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        content.createDocumentInRepository(admin, admin, null, DocumentType.TEXT_PLAIN, doc, "doc content");
-        content.createDocumentInRepository(admin, admin, null, DocumentType.TEXT_PLAIN, doc, "doc content");
+        content.createDocumentInRepository(ADMIN, ADMIN, null, DocumentType.TEXT_PLAIN, doc, "doc content");
+        content.createDocumentInRepository(ADMIN, ADMIN, null, DocumentType.TEXT_PLAIN, doc, "doc content");
     }
 
     @Test
@@ -574,8 +480,8 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "shareFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(admin, admin, folder, "Shared");
-        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -583,7 +489,7 @@ public class ContentTest extends AbstractTest
     public void createDocInRepositoryInvalidPath()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        Document theDoc = content.createDocumentInRepository(admin, admin, "invalidPath", DocumentType.TEXT_PLAIN, doc, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "invalidPath", DocumentType.TEXT_PLAIN, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -592,7 +498,7 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
-        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -601,28 +507,28 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
-        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
-        content.deleteContentByPath(admin, admin, "Shared/" + file.getName());
-        Assert.assertTrue(content.getNodeRefByPath(admin, admin,  "Shared/" + file.getName()).isEmpty());
+        content.deleteContentByPath(ADMIN, ADMIN, "Shared/" + file.getName());
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN,  "Shared/" + file.getName()).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteFileFromRepoInvalidUser()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared", DocumentType.TEXT_PLAIN, doc, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared", DocumentType.TEXT_PLAIN, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
         String userName = "deleteUser" + System.currentTimeMillis();
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
+        userService.create(ADMIN, ADMIN, userName, password, password, "firstname", "lastname");
         content.deleteContentByPath(userName, password, "Shared/" + doc);
-        Assert.assertTrue(content.getNodeRefByPath(admin, admin, "Shared/" + doc).isEmpty());
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + doc).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteFakeFileFromRepo()
     {
-        content.deleteContentByPath(admin, admin, "fakeDoc");
+        content.deleteContentByPath(ADMIN, ADMIN, "fakeDoc");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -631,10 +537,10 @@ public class ContentTest extends AbstractTest
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
         String folder = "shareFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(admin, admin, folder, "Shared");
-        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared/" + folder, DocumentType.MSWORD, file, "shared doc content");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared/" + folder, DocumentType.MSWORD, file, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
-        content.deleteContentByPath(admin, admin, "Shared/" + folder);
+        content.deleteContentByPath(ADMIN, ADMIN, "Shared/" + folder);
     }
 
     @Test
@@ -642,20 +548,18 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "sharedFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(admin, admin, folder, "Shared");
-        Document theDoc = content.createDocumentInRepository(admin, admin, "Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
-        content.deleteTreeByPath(admin, admin, "Shared/" + folder);
-        Assert.assertTrue(content.getNodeRefByPath(admin, admin, "Shared/" + folder).isEmpty());
+        content.deleteTreeByPath(ADMIN, ADMIN, "Shared/" + folder);
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + folder).isEmpty());
     }
 
     @Test
     public void uploadDocInSite()
     {
         String siteName = "siteDocNew" + System.currentTimeMillis();
-        String userName = "cmisUser" + System.currentTimeMillis();
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
-        userService.create(admin, admin, userName, password, password, "firstname", "lastname");
         site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
         Document d = content.uploadFileInSite(userName, password, siteName, pathToFile);
         Assert.assertFalse(d.getId().isEmpty());
@@ -665,26 +569,26 @@ public class ContentTest extends AbstractTest
     public void uploadDocInRepository()
     {
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
-        Document d = content.uploadFileInRepository(admin, admin, "Shared", pathToFile);
+        Document d = content.uploadFileInRepository(ADMIN, ADMIN, "Shared", pathToFile);
         Assert.assertFalse(d.getId().isEmpty());
-        content.deleteContentByPath(admin, admin, "Shared/UploadFile-xml.xml");
-        Assert.assertTrue(content.getNodeRefByPath(admin, admin, "Shared/UploadFile-xml.xml").isEmpty());
+        content.deleteContentByPath(ADMIN, ADMIN, "Shared/UploadFile-xml.xml");
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/UploadFile-xml.xml").isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void uploadDocTwice()
     {
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-plaintext.txt";
-        Document d = content.uploadFileInRepository(admin, admin, "Shared", pathToFile);
+        Document d = content.uploadFileInRepository(ADMIN, ADMIN, "Shared", pathToFile);
         Assert.assertFalse(d.getId().isEmpty());
-        content.uploadFileInRepository(admin, admin, "Shared", pathToFile);
+        content.uploadFileInRepository(ADMIN, ADMIN, "Shared", pathToFile);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void uploadDocFakePath()
     {
         String pathToFile = DATA_FOLDER + SLASH + "fakeFile.txt";
-        content.uploadFileInRepository(admin, admin, null, pathToFile);
+        content.uploadFileInRepository(ADMIN, ADMIN, null, pathToFile);
     }
     
     @Test
@@ -695,7 +599,7 @@ public class ContentTest extends AbstractTest
         String folder = "shareFolder" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, user, user, user + "@test", "firstName", "lastName");
         content.createFolderInRepository(user, user, folder, "User Homes/" + user);
-        Document theDoc = content.createDocumentInRepository(admin, admin, "User Homes/" + user + "/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "User Homes/" + user + "/" + folder, DocumentType.MSWORD, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 }
