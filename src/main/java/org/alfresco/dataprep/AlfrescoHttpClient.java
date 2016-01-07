@@ -88,7 +88,6 @@ public class AlfrescoHttpClient
     
     /**
      * Generates an Alfresco Authentication Ticket based on the user name and password passed in.
-     * 
      * @param username user identifier
      * @param password user password
      * @return String authentication ticket
@@ -149,7 +148,6 @@ public class AlfrescoHttpClient
 
     /**
      * Populate HTTP message call with given content.
-     * 
      * @param json {@link JSONObject} content
      * @return {@link StringEntity} content.
      */
@@ -168,6 +166,31 @@ public class AlfrescoHttpClient
         return se;
     }
 
+    /**
+    * Execute HttpClient request.
+    * @param request to send 
+    * @return {@link HttpResponse} response
+    */
+    @Deprecated
+    public HttpResponse executeRequest(HttpRequestBase request)
+    {
+        HttpResponse response = null;
+        try
+        {
+            response = client.execute(request);
+            if(logger.isTraceEnabled())
+            {
+                logger.trace("Status Received:" + response.getStatusLine());
+            }
+            return response;
+        }
+        catch (IOException e)
+        {
+            logger.error(response);
+            throw new RuntimeException("Error while executing request", e);
+        }
+    }
+    
     /**
      * Execute HttpClient request without releasing the connection
      * @param userName user name
@@ -236,7 +259,6 @@ public class AlfrescoHttpClient
     
     /**
      * Execute HttpClient POST OR PUT
-     * 
      * @param userName String user name 
      * @param password String password
      * @param body JSONObject body of the request
@@ -289,7 +311,6 @@ public class AlfrescoHttpClient
     
     /**
      * Parses http response stream into a {@link JSONObject}.
-     * 
      * @param entity Http response entity
      * @return {@link JSONObject} response
      */
@@ -322,7 +343,6 @@ public class AlfrescoHttpClient
     
     /**
      * Method to get parameters from JSON
-     * 
      * @param result json message
      * @param param key identifier
      * @return String value of key
@@ -345,7 +365,6 @@ public class AlfrescoHttpClient
     
     /**
      * Method to get parameters from JSON
-     * 
      * @param response HttpResponse response
      * @param jsonObject String json object from response
      * @param parameter String parameter from json
@@ -372,7 +391,6 @@ public class AlfrescoHttpClient
     
     /**
      * Get the elements from a JSONArray
-     * 
      * @param response HttpResponse response
      * @param array String the name of the array
      * @param elementFromArray element from array
