@@ -128,9 +128,9 @@ public class SiteService
        {
            publicApi.createSite(domain,
                                 siteId,
-                                "site-dashboard", 
+                                "site-dashboard",
                                 title,
-                                description, 
+                                description,
                                 visibility);
        }
        catch (IOException e)
@@ -151,12 +151,11 @@ public class SiteService
                           final String password)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String apiUrl = client.getApiUrl();
+        String url = String.format("%ssites/%s",apiUrl, siteId);
+        HttpGet get = new HttpGet(url);
         try
         {
-            //String ticket = client.getAlfTicket(username, password);
-            String apiUrl = client.getApiUrl();
-            String url = String.format("%ssites/%s",apiUrl, siteId);
-            HttpGet get = new HttpGet(url);
             HttpResponse response = client.execute(username, password, get);
             if( 200 == response.getStatusLine().getStatusCode())
             {
@@ -166,6 +165,7 @@ public class SiteService
         } 
         finally
         {
+            get.releaseConnection();
             client.close();
         }
     }
@@ -301,7 +301,7 @@ public class SiteService
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
             throw new IllegalArgumentException("Parameter missing");
-        }        
+        }
         String nodeRef = getSiteNodeRef(userName, password, siteName);
         if(StringUtils.isEmpty(nodeRef))
         {
@@ -442,12 +442,12 @@ public class SiteService
                     array.add(new org.json.JSONObject().put("pageId", pages.get(i).pageId));
                 }
             }
-        }       
+        }
         // add the new page
         if(!multiplePages)
         {
             array.add(new org.json.JSONObject().put("pageId", page.pageId));
-        }       
+        }
         body.put("pages", array);
         body.put("themeId", "");
         HttpPost post  = new HttpPost(url);

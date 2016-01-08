@@ -514,6 +514,7 @@ public class ContentActionsTests extends AbstractTest
     //@Test
     public void addCommentContributor()
     {
+        String commentDoc = "contribDoc" + System.currentTimeMillis();
         String inviteUser = "invite" + System.currentTimeMillis();
         String commentContributor = "comment contributor";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");

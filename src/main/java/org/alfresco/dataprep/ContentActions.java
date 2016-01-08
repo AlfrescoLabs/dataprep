@@ -162,7 +162,7 @@ public class ContentActions extends CMISUtil
         String nodeRef = getNodeRef(userName, password, siteName, contentName);
         String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + optType.name;
         HttpPost post  = new HttpPost(reqUrl);
-        jsonInput =  ( "[{" + "\"" + optType.bodyParam + "\"" + ": \"" + values.get(0) + "\"" );
+        jsonInput =  ("[{" + "\"" + optType.bodyParam + "\"" + ": \"" + values.get(0) + "\"" );
         for( int i = 1; i < values.size(); i++ )
         {
             jsonInput = ( jsonInput + "},{" + "\"" + optType.bodyParam  + "\"" + ": \"" + values.get(i) + "\"" );

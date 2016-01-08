@@ -167,11 +167,11 @@ public class AlfrescoHttpClient
     }
 
     /**
+    * @deprecated
     * Execute HttpClient request.
     * @param request to send 
     * @return {@link HttpResponse} response
     */
-    @Deprecated
     public HttpResponse executeRequest(HttpRequestBase request)
     {
         HttpResponse response = null;
