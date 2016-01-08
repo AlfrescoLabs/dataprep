@@ -1,4 +1,3 @@
-package org.alfresco.dataprep;
 /*
  * Copyright (C) 2005-2015 Alfresco Software Limited.
  * This file is part of Alfresco
@@ -13,12 +12,15 @@ package org.alfresco.dataprep;
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
+package org.alfresco.dataprep;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -26,6 +28,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -43,7 +49,7 @@ import org.springframework.stereotype.Service;
 public class WorkflowService extends CMISUtil
 {
     private static Log logger = LogFactory.getLog(WorkflowService.class);
-    
+    private String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
     public enum WorkflowType
     {
         NewTask("New Task","activitiAdhoc:1:4"),
@@ -67,6 +73,25 @@ public class WorkflowService extends CMISUtil
             return this.id;
         }
     }
+    
+    public enum TaskStatus
+    {
+        NOT_STARTED("Not Yet Started"),
+        IN_PROGRESS("In Progress"),
+        ON_HOLD("On Hold"),
+        CANCELLED("Cancelled"),
+        COMPLETED("Completed");
+        private String status;
+        private TaskStatus(String status)
+        {
+            this.status = status;
+        }
+        public String getStatus()
+        {
+            return this.status;
+        }
+        
+    }
 
     @SuppressWarnings("unchecked")
     private String startWorkflow(final String userName,
@@ -85,7 +110,6 @@ public class WorkflowService extends CMISUtil
                                  final boolean sendEmail)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
         String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes";
         logger.info("Create process using url: " + api);
         DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'Z");
@@ -460,7 +484,6 @@ public class WorkflowService extends CMISUtil
                             final String workflowId)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
         String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes/" + workflowId + "/tasks";
         HttpGet get = new HttpGet(api);
         try
@@ -500,5 +523,90 @@ public class WorkflowService extends CMISUtil
             get.releaseConnection();
         }
         return "";
+    }
+    
+    /**
+     * Update the status of a task
+     * 
+     * @param assignedUser String user assigned to the task
+     * @param password String password
+     * @param workflowId String workflow Id
+     * @param status TaskStatus the status
+     * @return true if 201 code is returned
+     */
+    public boolean updateTaskStatus(final String assignedUser,
+                                    final String password,
+                                    final String workflowId,
+                                    final TaskStatus status)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String taskId = getTaskId(assignedUser, password, workflowId);
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "/variables";
+        HttpPost post = new HttpPost(api); 
+        String jsonInput =  "[{" + "\"name\": \"bpm_status\",\"value\": \"" + status.getStatus() + "\", \"scope\": \"local\"";
+        jsonInput = ( jsonInput + "}]");
+        StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        HttpResponse response = client.executeRequest(assignedUser, password, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_CREATED:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly updated the task status");
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + workflowId);
+            default:
+                logger.error("Unable to change the task status " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Reassign the task to another user
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @param reassignTo String user to reassign task
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public boolean reassignTask(final String assignedUser,
+                                final String password,
+                                final String workflowId,
+                                final String reassignTo)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String taskId = getTaskId(assignedUser, password, workflowId);
+        if(StringUtils.isEmpty(taskId))
+        {
+            throw new RuntimeException("Invalid process id: " + workflowId);
+        }
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "?select=state,assignee";
+        HttpPut put = new HttpPut(api);
+        JSONObject body = new JSONObject();
+        body.put("state", "delegated");
+        body.put("assignee", reassignTo);
+        HttpResponse response = client.executeRequest(assignedUser, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly reassigned the task to " + reassignTo);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + workflowId);
+            default:
+                logger.error("Unable to reassign the task to " + reassignTo + " " + response.toString());
+                break;
+        }
+        return false;
     }
 }

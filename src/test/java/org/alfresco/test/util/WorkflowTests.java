@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.alfresco.dataprep.CMISUtil.Priority;
+import org.alfresco.dataprep.WorkflowService.TaskStatus;
 import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.GroupService;
 import org.alfresco.dataprep.SitePagesService;
@@ -132,5 +133,43 @@ public class WorkflowTests extends AbstractTest
                 Priority.High, pathToItems, true).isEmpty());
         Assert.assertTrue(!workflow.startSingleReview(workflowUser, password, "singleReviewer", new Date(), workflowUser, 
                 Priority.Low, workflowSite, docs, false).isEmpty());
+    }
+    
+    @Test
+    public void updateTaskStatus()
+    {
+        String workflowId = workflow.startNewTask(workflowUser, password, "update task status", new Date(), workflowUser,
+                Priority.High, workflowSite, docs, true);
+        Assert.assertTrue(workflow.updateTaskStatus(workflowUser, password, workflowId, TaskStatus.ON_HOLD));
+        Assert.assertTrue(workflow.updateTaskStatus(workflowUser, password, workflowId, TaskStatus.COMPLETED));
+        Assert.assertTrue(workflow.updateTaskStatus(workflowUser, password, workflowId, TaskStatus.CANCELLED));
+        Assert.assertTrue(workflow.updateTaskStatus(workflowUser, password, workflowId, TaskStatus.NOT_STARTED));
+        Assert.assertTrue(workflow.updateTaskStatus(workflowUser, password, workflowId, TaskStatus.IN_PROGRESS));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void updateTaskStatusInvalidProcess()
+    {
+        workflow.updateTaskStatus(workflowUser, password, "99999", TaskStatus.ON_HOLD);
+    }
+    
+    @Test
+    public void reassignTask()
+    {
+        String reassignUser = "tagYourIt" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, reassignUser, password, workflowUser + domain, "reassign", "toMe");
+        String workflowId = workflow.startNewTask(workflowUser, password, "reassignTo", new Date(), workflowUser,
+                Priority.High, workflowSite, docs, true);
+        Assert.assertTrue(workflow.reassignTask(workflowUser, password, workflowId, reassignUser));
+        Assert.assertFalse(workflow.getTaskId(reassignUser, password, workflowId).isEmpty());
+        Assert.assertTrue(workflow.getTaskId(workflowUser, password, workflowId).isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void reassignTaskFakeProcess()
+    {
+        String reassignUser = "tagYourIt-2" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, reassignUser, password, workflowUser + domain, "reassign", "toMe");
+        workflow.reassignTask(workflowUser, password, "99999", reassignUser);
     }
 }
