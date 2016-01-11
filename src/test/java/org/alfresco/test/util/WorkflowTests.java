@@ -250,7 +250,6 @@ public class WorkflowTests extends AbstractTest
         Assert.assertTrue(workflow.claimTask(workflowUser, password, workflowId));
         Assert.assertTrue(workflow.releaseToPool(workflowUser, password, workflowId));
         Assert.assertTrue(workflow.claimTask(user1, password, workflowId));
-        Assert.assertTrue(workflow.approveTask(user1, password, workflowId, true, TaskStatus.COMPLETED, "it's done"));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
