@@ -510,7 +510,14 @@ public class WorkflowService extends CMISUtil
                     JSONObject jobject = (JSONObject) item;
                     JSONObject entry = (JSONObject) jobject.get("entry");
                     String assignee = (String) entry.get("assignee");
-                    if(assignee.equals(assignedUser))
+                    if(!StringUtils.isEmpty(assignee))
+                    {
+                        if(assignee.equals(assignedUser))
+                        {
+                            return (String) entry.get("id");
+                        }
+                    }
+                    if(entry.get("state").equals("unclaimed"))
                     {
                         return (String) entry.get("id");
                     }
@@ -523,6 +530,18 @@ public class WorkflowService extends CMISUtil
             get.releaseConnection();
         }
         return "";
+    }
+    
+    private String checkTaskId(final String assignedUser,
+                               final String password,
+                               final String workflowId)
+    {
+        String taskId = getTaskId(assignedUser, password, workflowId);
+        if(StringUtils.isEmpty(taskId))
+        {
+            throw new RuntimeException("Invalid process id (" + workflowId +") or wrong assigned user ->" + assignedUser);
+        }
+        return taskId;
     }
     
     /**
@@ -540,7 +559,7 @@ public class WorkflowService extends CMISUtil
                                     final TaskStatus status)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String taskId = getTaskId(assignedUser, password, workflowId);
+        String taskId = checkTaskId(assignedUser, password, workflowId);
         String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "/variables";
         HttpPost post = new HttpPost(api); 
         String jsonInput =  "[{" + "\"name\": \"bpm_status\",\"value\": \"" + status.getStatus() + "\", \"scope\": \"local\"";
@@ -567,7 +586,7 @@ public class WorkflowService extends CMISUtil
     }
     
     /**
-     * Reassign the task to another user
+     * Reassign a task to another user
      * 
      * @param assignedUser String assigned user
      * @param password String password
@@ -582,11 +601,7 @@ public class WorkflowService extends CMISUtil
                                 final String reassignTo)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String taskId = getTaskId(assignedUser, password, workflowId);
-        if(StringUtils.isEmpty(taskId))
-        {
-            throw new RuntimeException("Invalid process id: " + workflowId);
-        }
+        String taskId = checkTaskId(assignedUser, password, workflowId);
         String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "?select=state,assignee";
         HttpPut put = new HttpPut(api);
         JSONObject body = new JSONObject();
@@ -609,4 +624,128 @@ public class WorkflowService extends CMISUtil
         }
         return false;
     }
+    
+    /**
+     * Complete a task
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @param status TaskStatus status
+     * @param comment String comment
+     * @return true if task is completed
+     */
+    @SuppressWarnings("unchecked")
+    public boolean completeTask(final String assignedUser,
+                                final String password,
+                                final String workflowId,
+                                final TaskStatus status,
+                                final String comment)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String taskId = checkTaskId(assignedUser, password, workflowId);
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "?select=state,variables";
+        HttpPut put = new HttpPut(api);
+        JSONObject body = new JSONObject();
+        body.put("state", "completed");
+        JSONArray variables = new JSONArray();
+        JSONObject jStatus = new JSONObject();
+        jStatus.put("name", "bpm_status");
+        jStatus.put("value", status.getStatus());
+        jStatus.put("scope", "global");
+        variables.add(jStatus);
+        if(!StringUtils.isEmpty(comment))
+        {
+            JSONObject jComment = new JSONObject();
+            jComment.put("name", "bpm_comment");
+            jComment.put("value", comment);
+            jComment.put("scope", "global");
+            variables.add(jComment);
+        }
+        body.put("variables", variables);
+        HttpResponse response = client.executeRequest(assignedUser, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly completed task " + taskId);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + workflowId);
+            default:
+                logger.error("Unable to complete the task " + taskId + " " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private boolean claimTask(final String assignedUser,
+                              final String password,
+                              final String workflowId,
+                              final boolean claim)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String taskId = checkTaskId(assignedUser, password, workflowId);
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "?select=state";
+        HttpPut put = new HttpPut(api);
+        JSONObject body = new JSONObject();
+        if(claim)
+        {
+            body.put("state", "claimed");
+        }
+        else
+        {
+            body.put("state", "unclaimed");
+        }
+        HttpResponse response = client.executeRequest(assignedUser, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly executed " + put);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + workflowId);
+            default:
+                logger.error("Unable to execute request " + taskId + " " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Claim a task
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @return true if task is claimed
+     */
+    public boolean claimTask(final String assignedUser,
+                             final String password,
+                             final String workflowId)
+    {
+        return claimTask(assignedUser, password, workflowId, true);
+    }
+    
+    /**
+     * Realese a task to pool
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @return true if task is released
+     */
+    public boolean releaseToPool(final String assignedUser,
+                                 final String password,
+                                 final String workflowId)
+    {
+        return claimTask(assignedUser, password, workflowId, false);
+    }
 }
+
