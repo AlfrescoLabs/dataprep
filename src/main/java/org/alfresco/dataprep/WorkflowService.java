@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -636,11 +637,11 @@ public class WorkflowService extends CMISUtil
      * @return true if task is completed
      */
     @SuppressWarnings("unchecked")
-    public boolean completeTask(final String assignedUser,
-                                final String password,
-                                final String workflowId,
-                                final TaskStatus status,
-                                final String comment)
+    public boolean taskDone(final String assignedUser,
+                            final String password,
+                            final String workflowId,
+                            final TaskStatus status,
+                            final String comment)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String taskId = checkTaskId(assignedUser, password, workflowId);
@@ -747,5 +748,124 @@ public class WorkflowService extends CMISUtil
     {
         return claimTask(assignedUser, password, workflowId, false);
     }
+    
+    /**
+     * Approve or reject a task
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @param approve boolean approve or reject
+     * @param status TaskStatus task status
+     * @param comment String comment
+     * @return 200 OK if successful
+     */
+    @SuppressWarnings("unchecked")
+    public boolean approveTask(final String assignedUser,
+                               final String password,
+                               final String workflowId,
+                               final boolean approve,
+                               final TaskStatus status,
+                               final String comment)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String taskId = checkTaskId(assignedUser, password, workflowId);
+        String api = client.getAlfrescoUrl() + "alfresco/s/api/task/activiti%24" + taskId + "/formprocessor";
+        HttpPost post = new HttpPost(api);
+        JSONObject data = new JSONObject();
+        if(approve)
+        {
+            data.put("prop_wf_reviewOutcome", "Approve");
+        }
+        else
+        {
+            data.put("prop_wf_reviewOutcome", "Reject");
+        }
+        data.put("prop_transitions", "Next");
+        data.put("prop_bpm_status", status.getStatus());
+        data.put("prop_bpm_comment", comment);
+        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly executed " + post);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + workflowId);
+            default:
+                logger.error("Unable to execute request " + taskId + " " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Cancel workflow process
+     * 
+     * @param owner String workflow owner
+     * @param password String password
+     * @param workflowID String workflowId
+     * @return true if canceled
+     */
+    public boolean cancelWorkflow(final String owner,
+                                  final String password,
+                                  final String workflowID)
+     {
+         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+         String api = client.getApiUrl() + "workflow-instances/activiti$" + workflowID;
+         HttpDelete delete = new HttpDelete(api);
+         HttpResponse response = client.executeRequest(owner, password, delete);
+         switch (response.getStatusLine().getStatusCode())
+         {
+             case HttpStatus.SC_OK:
+                 if (logger.isTraceEnabled())
+                 {
+                     logger.trace("Successfuly canceled workflow " + workflowID);
+                 }
+                 return true;
+             case HttpStatus.SC_NOT_FOUND:
+                 throw new RuntimeException("Invalid process id: " + workflowID);
+             default:
+                 logger.error("Unable to cancel workflow. Try to delete it. -> " + workflowID + " " + response.toString());
+                 break;
+         }
+         return false;
+     }
+    
+    /**
+     * Delete workflow process
+     * 
+     * @param owner String workflow owner
+     * @param password String password
+     * @param workflowID String workflowId
+     * @return true if deleted
+     */
+    public boolean deleteWorkflow(final String owner,
+                                  final String password,
+                                  final String workflowID)
+     {
+         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+         String api = client.getApiUrl() + "workflow-instances/activiti$" + workflowID + "?forced=true";
+         HttpDelete delete = new HttpDelete(api);
+         HttpResponse response = client.executeRequest(owner, password, delete);
+         switch (response.getStatusLine().getStatusCode())
+         {
+             case HttpStatus.SC_OK:
+                 if (logger.isTraceEnabled())
+                 {
+                     logger.trace("Successfuly deleted workflow " + workflowID);
+                 }
+                 return true;
+             case HttpStatus.SC_NOT_FOUND:
+                 throw new RuntimeException("Invalid process id: " + workflowID);
+             default:
+                 logger.error("Unable to delete workflow " + workflowID + " " + response.toString());
+                 break;
+         }
+         return false;
+     }
 }
 
