@@ -230,13 +230,13 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startNewTask(final String userName,
-                                final String password,
-                                final String message,
-                                final Date dueDate,
-                                final String assignee,
-                                final Priority priority,
-                                final List<String> pathsToItems,
-                                final boolean sendEmail)
+                               final String password,
+                               final String message,
+                               final Date dueDate,
+                               final String assignee,
+                               final Priority priority,
+                               final List<String> pathsToItems,
+                               final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -289,14 +289,14 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startGroupReview(final String userName,
-                                    final String password,
-                                    final String message,
-                                    final Date dueDate,
-                                    final String assignedGroup,
-                                    final Priority priority,
-                                    final List<String> pathToDocs,
-                                    final int requiredApprovePercent,
-                                    final boolean sendEmail)
+                                   final String password,
+                                   final String message,
+                                   final Date dueDate,
+                                   final String assignedGroup,
+                                   final Priority priority,
+                                   final List<String> pathToDocs,
+                                   final int requiredApprovePercent,
+                                   final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.GroupReview, message, dueDate, priority,
                 null, assignedGroup, true, null, null, pathToDocs, requiredApprovePercent, sendEmail);
@@ -318,15 +318,15 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startMultipleReviewers(final String userName,
-                                          final String password,
-                                          final String message,
-                                          final Date dueDate,
-                                          final List<String> reviewers,
-                                          final Priority priority,
-                                          final String documentsSite,
-                                          final List<String> documents,
-                                          final int requiredApprovePercent,
-                                          final boolean sendEmail)
+                                         final String password,
+                                         final String message,
+                                         final Date dueDate,
+                                         final List<String> reviewers,
+                                         final Priority priority,
+                                         final String documentsSite,
+                                         final List<String> documents,
+                                         final int requiredApprovePercent,
+                                         final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.MultipleReviewers, message, dueDate, priority, reviewers,
                 null, false, documentsSite, documents, null, requiredApprovePercent, sendEmail);
@@ -347,14 +347,14 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startMultipleReviewers(final String userName,
-                                          final String password,
-                                          final String message,
-                                          final Date dueDate,
-                                          final List<String> reviewers,
-                                          final Priority priority,
-                                          final List<String> pathsToDocuments,
-                                          final int requiredApprovePercent,
-                                          final boolean sendEmail)
+                                         final String password,
+                                         final String message,
+                                         final Date dueDate,
+                                         final List<String> reviewers,
+                                         final Priority priority,
+                                         final List<String> pathsToDocuments,
+                                         final int requiredApprovePercent,
+                                         final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.MultipleReviewers, message, dueDate, priority, reviewers,
                 null, true, null, null, pathsToDocuments, requiredApprovePercent, sendEmail);
@@ -375,14 +375,14 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startPooledReview(final String userName,
-                                     final String password,
-                                     final String message,
-                                     final Date dueDate,
-                                     final String assignedGroup,
-                                     final Priority priority,
-                                     final String documentsSite,
-                                     final List<String> documents,
-                                     final boolean sendEmail)
+                                    final String password,
+                                    final String message,
+                                    final Date dueDate,
+                                    final String assignedGroup,
+                                    final Priority priority,
+                                    final String documentsSite,
+                                    final List<String> documents,
+                                    final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.PooledReview, message, dueDate, priority,
                 null, assignedGroup, false, documentsSite, documents, null, 0, sendEmail);
@@ -402,13 +402,13 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startPooledReview(final String userName,
-                                     final String password,
-                                     final String message,
-                                     final Date dueDate,
-                                     final String assignedGroup,
-                                     final Priority priority,
-                                     final List<String> pathToDocs,
-                                     final boolean sendEmail)
+                                    final String password,
+                                    final String message,
+                                    final Date dueDate,
+                                    final String assignedGroup,
+                                    final Priority priority,
+                                    final List<String> pathToDocs,
+                                    final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.PooledReview, message, dueDate, priority,
                 null, assignedGroup, true, null, null, pathToDocs, 0, sendEmail);
@@ -429,14 +429,14 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startSingleReview(final String userName,
-                                     final String password,
-                                     final String message,
-                                     final Date dueDate,
-                                     final String assignee,
-                                     final Priority priority,
-                                     final String documentsSite,
-                                     final List<String> documents,
-                                     final boolean sendEmail)
+                                    final String password,
+                                    final String message,
+                                    final Date dueDate,
+                                    final String assignee,
+                                    final Priority priority,
+                                    final String documentsSite,
+                                    final List<String> documents,
+                                    final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -458,13 +458,13 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startSingleReview(final String userName,
-                                     final String password,
-                                     final String message,
-                                     final Date dueDate,
-                                     final String assignee,
-                                     final Priority priority,
-                                     final List<String> pathsToItems,
-                                     final boolean sendEmail)
+                                    final String password,
+                                    final String message,
+                                    final Date dueDate,
+                                    final String assignee,
+                                    final Priority priority,
+                                    final List<String> pathsToItems,
+                                    final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -812,10 +812,10 @@ public class WorkflowService extends CMISUtil
      */
     public boolean cancelWorkflow(final String owner,
                                   final String password,
-                                  final String workflowID)
+                                  final String workflowId)
      {
          AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-         String api = client.getApiUrl() + "workflow-instances/activiti$" + workflowID;
+         String api = client.getApiUrl() + "workflow-instances/activiti$" + workflowId;
          HttpDelete delete = new HttpDelete(api);
          HttpResponse response = client.executeRequest(owner, password, delete);
          switch (response.getStatusLine().getStatusCode())
@@ -823,13 +823,13 @@ public class WorkflowService extends CMISUtil
              case HttpStatus.SC_OK:
                  if (logger.isTraceEnabled())
                  {
-                     logger.trace("Successfuly canceled workflow " + workflowID);
+                     logger.trace("Successfuly canceled workflow " + workflowId);
                  }
                  return true;
              case HttpStatus.SC_NOT_FOUND:
-                 throw new RuntimeException("Invalid process id: " + workflowID);
+                 throw new RuntimeException("Invalid process id: " + workflowId);
              default:
-                 logger.error("Unable to cancel workflow. Try to delete it. -> " + workflowID + " " + response.toString());
+                 logger.error("Unable to cancel workflow. Try to delete it. -> " + workflowId + " " + response.toString());
                  break;
          }
          return false;
@@ -867,5 +867,81 @@ public class WorkflowService extends CMISUtil
          }
          return false;
      }
+   
+    @SuppressWarnings("unchecked")
+    private boolean addItemToTask(final String assignedUser,
+                                  final String password,
+                                  final String workflowId,
+                                  final boolean byPath,
+                                  final String itemsSite,
+                                  final String itemName,
+                                  final String pathToItem)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String taskId = checkTaskId(assignedUser, password, workflowId);
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "tasks/" + taskId + "/items";
+        HttpPost post = new HttpPost(api);
+        JSONObject data = new JSONObject();
+        if(!byPath)
+        {
+            data.put("id", getNodeRef(assignedUser, password, itemsSite, itemName));
+        }
+        else
+        {
+            data.put("id", getNodeRefByPath(assignedUser, password, pathToItem));
+        }
+        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_CREATED:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly added item to task: " + taskId);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid task id: " + workflowId);
+            default:
+                logger.error("Unable to add items to " + taskId + " " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Add an item to a task from site
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @param itemSite String site name
+     * @param itemName String item
+     * @return true(status 201) if item is added
+     */
+    public boolean addItemToTask(final String assignedUser,
+                                 final String password,
+                                 final String workflowId,
+                                 final String itemSite,
+                                 final String itemName)
+    {
+        return addItemToTask(assignedUser, password, workflowId, false, itemSite, itemName, null);
+    }
+    
+    /**
+     * Add an item to a task by path
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param workflowId String workflow id
+     * @param pathToItem String pathToItem
+     * @return true(status 201) if item is added
+     */
+    public boolean addItemToTask(final String assignedUser,
+                                 final String password,
+                                 final String workflowId,
+                                 final String pathToItem)
+    {
+        return addItemToTask(assignedUser, password, workflowId, true, null, null, pathToItem);
+    }
 }
 

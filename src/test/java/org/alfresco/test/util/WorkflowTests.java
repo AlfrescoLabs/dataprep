@@ -284,8 +284,8 @@ public class WorkflowTests extends AbstractTest
         String user1 = "user-1" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, user1, password, workflowUser + domain, "1", "usr");
         groupService.addUserToGroup(ADMIN, ADMIN, groupName, user1);
-        String workflowId = workflow.startGroupReview(workflowUser, password, "taskDoneNotFinishedWorkflow", new Date(), groupName, Priority.Low, workflowSite,
-                docs, 27, false);
+        String workflowId = workflow.startGroupReview(workflowUser, password, "taskDoneNotFinishedWorkflow", new Date(), 
+                groupName, Priority.Low, workflowSite, docs, 27, false);
         Assert.assertTrue(workflow.taskDone(user1, password, workflowId, TaskStatus.COMPLETED, "completed by " + workflowUser));
     }
     
@@ -324,5 +324,58 @@ public class WorkflowTests extends AbstractTest
                 new Date(), workflowUser, Priority.High, workflowSite, docs, true);
         Assert.assertTrue(workflow.taskDone(workflowUser, password, workflowId, TaskStatus.COMPLETED, "completed task " + workflowUser));
         Assert.assertTrue(workflow.deleteWorkflow(workflowUser, password, workflowId));
+    }
+    
+    @Test
+    public void addItemsToTask()
+    {
+        String docToAdd1 = "addTask-1-" + System.currentTimeMillis();
+        String docToAdd2 = "addTask-2-" + System.currentTimeMillis();
+        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTask", 
+                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, docToAdd1, docToAdd1);
+        contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, docToAdd2, docToAdd2);
+        Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, workflowSite, docToAdd1));
+        Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, workflowSite, docToAdd2));
+    }
+    
+    @Test
+    public void addItemsToTaskPooledReview()
+    {
+        String docToAdd1 = "pooled-1-" + System.currentTimeMillis();
+        String docToAdd2 = "pooled-2-" + System.currentTimeMillis();
+        String user1 = "userPooled" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, user1, password, workflowUser + domain, "1", "usr");
+        groupService.addUserToGroup(ADMIN, ADMIN, groupName, user1);
+        String workflowId = workflow.startPooledReview(workflowUser, password, "pooledAddItem", new Date(), groupName, Priority.High, pathToItems, false);
+        contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, docToAdd1, docToAdd1);
+        contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, docToAdd2, docToAdd2);
+        Assert.assertTrue(workflow.claimTask(user1, password, workflowId));
+        Assert.assertTrue(workflow.addItemToTask(user1, password, workflowId, workflowSite, docToAdd1));
+        Assert.assertTrue(workflow.addItemToTask(user1, password, workflowId, workflowSite, docToAdd2));
+    }
+    
+    @Test
+    public void addItemsToTaskFakeDoc()
+    {
+        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTask", 
+                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        Assert.assertFalse(workflow.addItemToTask(workflowUser, password, workflowId, workflowSite, "fakeDoc"));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addItemsToTaskFakeWorkflow()
+    {
+        workflow.addItemToTask(workflowUser, password, "fakeProcess", workflowSite, plainDoc);
+    }
+    
+    @Test
+    public void addItemsToTaskByPath()
+    {
+        String docToAdd1 = "pathDoc-1-" + System.currentTimeMillis();
+        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTaskByPath", 
+                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        contentService.createDocumentInRepository(workflowUser, password, "Shared", DocumentType.MSPOWERPOINT, docToAdd1, docToAdd1);
+        Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, "Shared/" + docToAdd1));
     }
 }
