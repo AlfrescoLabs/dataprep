@@ -345,6 +345,8 @@ public class WorkflowTests extends AbstractTest
         String docToAdd1 = "pooled-1-" + System.currentTimeMillis();
         String docToAdd2 = "pooled-2-" + System.currentTimeMillis();
         String user1 = "userPooled" + System.currentTimeMillis();
+        String groupName = "addItemGroup" + System.currentTimeMillis();
+        groupService.createGroup(ADMIN, ADMIN, groupName);
         userService.create(ADMIN, ADMIN, user1, password, workflowUser + domain, "1", "usr");
         groupService.addUserToGroup(ADMIN, ADMIN, groupName, user1);
         String workflowId = workflow.startPooledReview(workflowUser, password, "pooledAddItem", new Date(), groupName, Priority.High, pathToItems, false);
