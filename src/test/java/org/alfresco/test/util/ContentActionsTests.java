@@ -23,6 +23,7 @@ import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.alfresco.dataprep.ContentActions;
 import org.alfresco.dataprep.ContentAspects;
 import org.alfresco.dataprep.ContentService;
+import org.alfresco.dataprep.GroupService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
 import org.apache.chemistry.opencmis.client.api.Folder;
@@ -47,23 +48,31 @@ public class ContentActionsTests extends AbstractTest
     @Autowired private ContentService content;
     @Autowired private ContentActions contentAction;
     @Autowired private ContentAspects contentAspect;
+    @Autowired private GroupService groupService;
     private String document = "actionDoc";
     private String folder = "testFolder";
     private String commentDoc = "commentDoc";
     private String userName = "actionMan" + System.currentTimeMillis();
     private String siteName = "actionSite" + System.currentTimeMillis();
     private String userToInvite = "inviteUser" + System.currentTimeMillis();
+    String permissionUser = "permission" + System.currentTimeMillis();
+    String group = "group" + System.currentTimeMillis();
+    String permissionDoc = "permissionDoc" + System.currentTimeMillis();
     
     @BeforeClass(alwaysRun = true)
     public void userSetup()
     {
-        userService.create(ADMIN, ADMIN, userName, password, userName + domain,"firstname","lastname");
+        userService.create(ADMIN, ADMIN, userName, password, userName + domain,"the","boss");
         site.create(userName, password, "mydomain", siteName,  "my site description", Visibility.PUBLIC);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, document, document);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, permissionDoc, permissionDoc);
         content.createFolder(userName, password, folder, siteName);
         userToInvite = "inviteUser" + System.currentTimeMillis();
-        userService.create(ADMIN, ADMIN, userToInvite, password, userToInvite, "fname", "lname");
+        userService.create(ADMIN, ADMIN, userToInvite, password, userToInvite, "invited", "user");
+        userService.create(ADMIN, ADMIN, permissionUser, password, permissionUser + "@test.com","permission","man");
+        groupService.createGroup(ADMIN, ADMIN, group);
+        userService.inviteUserToSiteAndAccept(userName, password, userToInvite, siteName, "SiteConsumer");
     }
     
     @Test
@@ -246,7 +255,6 @@ public class ContentActionsTests extends AbstractTest
     @Test
     public void likeDocument()
     {
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, userToInvite, siteName, "SiteConsumer"));
         Assert.assertTrue(contentAction.likeContent(userName, password, siteName, document));
         Assert.assertTrue(contentAction.likeContent(userToInvite, password, siteName, document));
         int likes = contentAction.countLikes(userName, password, siteName, document);
@@ -568,5 +576,41 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteManager"));
         Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentManager));
         Assert.assertTrue(contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentManager));
+    }
+    
+    @Test
+    public void setPermissionForDocument()
+    {
+        Assert.assertTrue(contentAction.setPermissionForUser(userName, password, siteName, permissionDoc, permissionUser, "SiteConsumer", false));
+    }
+    
+    @Test
+    public void setPermissionForFolder()
+    {
+        Assert.assertTrue(contentAction.setPermissionForUser(userName, password, siteName, folder, permissionUser, "SiteManager", true));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void setPermissionFakeContent()
+    {
+        contentAction.setPermissionForUser(userName, password, siteName, "fakeContent", permissionUser, "SiteManager", true);
+    }
+    
+    @Test
+    public void setPermissionForGroup()
+    {
+        Assert.assertTrue(contentAction.setPermissionForGroup(userName, password, siteName, permissionDoc, group, "SiteConsumer", false));
+    }
+    
+    @Test(dependsOnMethods="setPermissionForGroup")
+    public void removePermissionForGroup()
+    {
+        Assert.assertTrue(contentAction.removePermissionForGroup(userName, password, siteName, permissionDoc, group, "SiteConsumer", true));
+    }
+    
+    @Test(dependsOnMethods="setPermissionForDocument")
+    public void removePermissionForUser()
+    {
+        Assert.assertTrue(contentAction.removePermissionForUser(userName, password, siteName, permissionDoc, permissionUser, "SiteConsumer", false));
     }
 }
