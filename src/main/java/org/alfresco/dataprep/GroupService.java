@@ -414,7 +414,7 @@ public class GroupService
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-            List<String> users = client.getElementsFromJsonArray(response, "data", "shortName");
+            List<String> users = client.getElementsFromJsonArray(response, null, "data", "shortName");
             for(String user: users)
             {
                 if(userName.toString().equalsIgnoreCase(user))

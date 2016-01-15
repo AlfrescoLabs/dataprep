@@ -859,7 +859,7 @@ public class UserService extends CMISUtil
             HttpResponse response = client.execute(userName, password, get);
             if(200 == response.getStatusLine().getStatusCode())
             {
-                userFollowers = client.getElementsFromJsonArray(response, "people", "userName");
+                userFollowers = client.getElementsFromJsonArray(response, null, "people", "userName");
             }
             return userFollowers;
         }
@@ -1019,6 +1019,127 @@ public class UserService extends CMISUtil
         else
         {
             return false;
+        }
+    }
+    
+    private boolean manageTrashcan(final String userName,
+                                   final String password,
+                                   final boolean isItem,
+                                   final boolean recover,
+                                   final String nodeRef)
+    {
+        String url = "";
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        if(isItem)
+        {
+            // delete or recover a specific item
+            url = client.getApiUrl() + "archive/archive/SpacesStore/" + nodeRef;
+        }
+        else
+        {
+            // delete all items
+            url = client.getApiUrl() + "archive/workspace/SpacesStore";
+        }
+        HttpResponse response;
+        if(isItem && recover)
+        {
+            // recover item
+            HttpPut put = new HttpPut(url);
+            response = client.executeRequest(userName, password, put);
+        }
+        else
+        {
+            HttpDelete delete  = new HttpDelete(url);
+            response = client.executeRequest(userName, password, delete);
+        }
+        if(200 == response.getStatusLine().getStatusCode())
+        {
+            if (logger.isTraceEnabled())
+            {
+                if(recover)
+                {
+                    logger.trace("Successfully recovered the item from trashcan");
+                }
+                else
+                {
+                    logger.trace("Successfully deleted items from trashcan");
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Delete all items from trashcan
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @return true (200 OK) if successful
+     */
+    public boolean emptyTrashcan(final String userName,
+                                 final String password)
+    {
+        return manageTrashcan(userName, password, false, false, null);
+    }
+    
+    /**
+     * Delete specific item from trashcan
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param nodeRef String node ref of content
+     * @return true (200 OK) if successful
+     */
+    public boolean deleteItemFromTranshcan(final String userName,
+                                           final String password,
+                                           final String nodeRef)
+    {
+        return manageTrashcan(userName, password, true, false, nodeRef);
+    }
+    
+    /**
+     * Recover specific item from trashcan
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param nodeRef String node ref
+     * @return true (200 OK) if successful
+     */
+    public boolean recoverItemFromTranshcan(final String userName,
+                                            final String password,
+                                            final String nodeRef)
+    {
+        return manageTrashcan(userName, password, true, true, nodeRef);
+    }
+    
+    /**
+     * Get the deleted items from trashcan
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @return List<String> items from trashcan
+     */
+    public List<String> getItemsFromTrashcan(final String userName,
+                                             final String password)
+    {
+        List<String> items = new ArrayList<String>();
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getApiUrl() + "archive/workspace/SpacesStore";
+        HttpGet get = new HttpGet(reqURL);
+        try
+        {
+            HttpResponse response = client.execute(userName, password, get);
+            if(200 == response.getStatusLine().getStatusCode())
+            {
+                items = client.getElementsFromJsonArray(response, "data", "deletedNodes", "name");
+            }
+            return items;
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
         }
     }
 }

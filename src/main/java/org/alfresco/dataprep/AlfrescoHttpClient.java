@@ -397,6 +397,7 @@ public class AlfrescoHttpClient
      * @return List<String> elements found in the array
      */
     public List<String> getElementsFromJsonArray(HttpResponse response,
+                                                 String objAbove,
                                                  String array,
                                                  String elementFromArray)
     {
@@ -412,7 +413,16 @@ public class AlfrescoHttpClient
             throw new RuntimeException("Failed to read the response", e);
         }
         Object obj = JSONValue.parse(responseString);
-        JSONObject jsonObject = (JSONObject) obj;
+        JSONObject jsonObject;
+        if(StringUtils.isEmpty(objAbove))
+        {
+            jsonObject = (JSONObject) obj;
+        }
+        else
+        {
+            jsonObject = (JSONObject) obj;
+            jsonObject = (JSONObject) jsonObject.get(objAbove);
+        }
         JSONArray jArray = (JSONArray) jsonObject.get(array);
         for (Object item:jArray)
         {

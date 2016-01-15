@@ -16,6 +16,8 @@ package org.alfresco.test.util;
 
 import java.util.List;
 
+import org.alfresco.dataprep.CMISUtil.DocumentType;
+import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.alfresco.dataprep.SiteService;
@@ -35,6 +37,7 @@ public class UserTest extends AbstractTest
 {
     @Autowired private SiteService site;
     @Autowired private UserService userService;
+    @Autowired private ContentService contentService;
     String userName = "userm-" + System.currentTimeMillis();
     String firstName = "fname-" + System.currentTimeMillis();
     String lastName = "lname-" + System.currentTimeMillis();
@@ -496,5 +499,52 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.deleteCategory(ADMIN, ADMIN, subCateg3));
         Assert.assertTrue(userService.deleteCategory(ADMIN, ADMIN, rootCateg));
         Assert.assertFalse(userService.categoryExists(ADMIN, ADMIN, rootCateg));
+    }
+    
+    @Test
+    public void emptyTrashcan()
+    {
+        String folder = "deleteFold" + System.currentTimeMillis();
+        String doc = "deleteDoc" + System.currentTimeMillis();
+        contentService.createFolder(globalUser, password, folder, globalSite);
+        contentService.createDocument(globalUser, password, globalSite, DocumentType.MSPOWERPOINT, doc, doc);
+        contentService.deleteFolder(globalUser, password, globalSite, folder);
+        contentService.deleteDocument(globalUser, password, globalSite, doc);
+        Assert.assertTrue(userService.emptyTrashcan(globalUser, password));
+        Assert.assertTrue(userService.getItemsFromTrashcan(globalUser, password).isEmpty());
+    }
+    
+    @Test
+    public void deleteTrashcanItem()
+    {
+        String folder = "deleteFold" + System.currentTimeMillis();
+        String doc = "deleteDoc" + System.currentTimeMillis();
+        contentService.createFolder(globalUser, password, folder, globalSite);
+        contentService.createDocument(globalUser, password, globalSite, DocumentType.MSPOWERPOINT, doc, doc);
+        String nodeRef = contentService.getNodeRef(globalUser, password, globalSite, doc);
+        String nodeRefFolder = contentService.getNodeRef(globalUser, password, globalSite, folder);
+        contentService.deleteFolder(globalUser, password, globalSite, folder);
+        contentService.deleteDocument(globalUser, password, globalSite, doc);
+        Assert.assertTrue(userService.deleteItemFromTranshcan(globalUser, password, nodeRef));
+        Assert.assertTrue(userService.getItemsFromTrashcan(globalUser, password).get(0).equalsIgnoreCase(folder));
+        Assert.assertTrue(userService.deleteItemFromTranshcan(globalUser, password, nodeRefFolder));
+        Assert.assertTrue(userService.getItemsFromTrashcan(globalUser, password).isEmpty());
+    }
+    
+    @Test
+    public void recoverTrashcanItem()
+    {
+        String doc = "recoverDoc" + System.currentTimeMillis();
+        contentService.createDocument(globalUser, password, globalSite, DocumentType.MSPOWERPOINT, doc, doc);
+        String nodeRef = contentService.getNodeRef(globalUser, password, globalSite, doc);
+        contentService.deleteDocument(globalUser, password, globalSite, doc);
+        Assert.assertTrue(userService.recoverItemFromTranshcan(globalUser, password, nodeRef));
+        Assert.assertFalse(contentService.getNodeRef(globalUser, password, globalSite, doc).isEmpty());
+    }
+    
+    @Test
+    public void deleteTrashcanFakeItem()
+    {
+        Assert.assertFalse(userService.deleteItemFromTranshcan(globalUser, password, "34242-3242wed-3652"));
     }
 }

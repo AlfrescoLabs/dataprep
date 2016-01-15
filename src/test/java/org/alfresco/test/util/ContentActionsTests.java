@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
  * @author Bogdan Bocancea
  */
 public class ContentActionsTests extends AbstractTest
-{   
+{
     @Autowired private UserService userService;
     @Autowired private SiteService site;
     @Autowired private ContentService content;

@@ -1058,7 +1058,7 @@ public class SitePagesService
         List<String> replies = new ArrayList<String>();
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            replies = client.getElementsFromJsonArray(response, "items", "content");
+            replies = client.getElementsFromJsonArray(response, null, "items", "content");
         }
         return replies;
     }
