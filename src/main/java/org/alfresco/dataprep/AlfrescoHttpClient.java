@@ -464,6 +464,33 @@ public class AlfrescoHttpClient
     }
     
     /**
+     * Get JSONArray from HttpResponse
+     * @param response HttpResponse the request response
+     * @param firstParam String parameter that has the array
+     * @param arrayName String array name
+     * @return JSONArray the array
+     */
+    public JSONArray getJSONArray(HttpResponse response,
+                                  String firstParam,
+                                  String arrayName)
+    {
+        HttpEntity entity = response.getEntity();
+        String responseString = "";
+        try
+        {
+            responseString = EntityUtils.toString(entity , "UTF-8");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to read the response", e);
+        }
+        Object obj = JSONValue.parse(responseString);
+        JSONObject jsonObject = (JSONObject) obj;
+        JSONObject list = (JSONObject) jsonObject.get(firstParam);
+        return (JSONArray) list.get(arrayName);
+    }
+    
+    /**
      * Closes the HttpClient. 
      * @throws IOException if error
      */

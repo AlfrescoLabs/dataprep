@@ -14,7 +14,6 @@
  */
 package org.alfresco.dataprep;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +22,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
@@ -33,13 +31,11 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.springframework.stereotype.Service;
 /**
  *  Class to create new workflow processes.
@@ -132,7 +128,7 @@ public class WorkflowService extends CMISUtil
             }
             else
             {
-                for(int i = 0; i<pathsToDocs.size(); i++)
+                for(int i=0; i<pathsToDocs.size(); i++)
                 {
                     items.add(getNodeRefByPath(userName, password, pathsToDocs.get(i)));
                 }
@@ -201,14 +197,14 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startNewTask(final String userName,
-                                final String password,
-                                final String message,
-                                final Date dueDate,
-                                final String assignee,
-                                final Priority priority,
-                                final String documentsSite,
-                                final List<String> documents,
-                                final boolean sendEmail)
+                               final String password,
+                               final String message,
+                               final Date dueDate,
+                               final String assignee,
+                               final Priority priority,
+                               final String documentsSite,
+                               final List<String> documents,
+                               final boolean sendEmail)
     {
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
@@ -492,20 +488,7 @@ public class WorkflowService extends CMISUtil
             HttpResponse response = client.executeRequest(assignedUser, password, get);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
-                HttpEntity entity = response.getEntity();
-                String responseString = "";
-                try
-                {
-                    responseString = EntityUtils.toString(entity , "UTF-8");
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException("Failed to read the response", e);
-                }
-                Object obj = JSONValue.parse(responseString);
-                JSONObject jsonObject = (JSONObject) obj;
-                JSONObject list = (JSONObject) jsonObject.get("list");
-                JSONArray jArray = (JSONArray) list.get("entries");
+                JSONArray jArray = client.getJSONArray(response, "list", "entries");
                 for (Object item:jArray)
                 {
                     JSONObject jobject = (JSONObject) item;

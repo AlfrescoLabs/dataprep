@@ -47,8 +47,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.Alfresco;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
@@ -254,27 +252,7 @@ public class SiteService
             HttpResponse response = client.execute(userName, password, get);
             if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
             {
-                String result = client.readStream(response.getEntity()).toJSONString();
-                if(!StringUtils.isEmpty(result))
-                {
-                    JSONParser parser = new JSONParser();
-                    Object obj = null;
-                    try
-                    {
-                        obj = parser.parse(result);
-                    }
-                    catch (ParseException e)
-                    {
-                        logger.error("Failed to parse response");
-                    }
-                    JSONObject jsonObject = (JSONObject) obj;
-                    JSONObject sites = (JSONObject) jsonObject.get("entry");
-                    return siteNodeRef = (String) sites.get("guid");
-                }
-            }
-            else
-            {
-                logger.error("Unable to get node ref of " + siteName + " " + response.getStatusLine());
+                return client.getParameterFromJSON(response, "entry", "guid");
             }
         }
         finally
@@ -362,6 +340,33 @@ public class SiteService
         {
             return false;
         }
+    }
+    
+    /**
+     * Get a list of favorite sites for a user
+     * @param userName String user name
+     * @param password String password
+     * @return List<String> of favorite sites
+     */
+    public List<String> getFavoriteSites(final String userName,
+                                         final String password)
+    {
+        List<String> favorites = new ArrayList<String>();
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorite-sites/";
+        HttpGet get = new HttpGet(reqUrl);
+        HttpResponse response = client.execute(userName, password, get);
+        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+        {
+            JSONArray jArray = client.getJSONArray(response, "list", "entries");
+            for (Object item:jArray)
+            {
+                JSONObject jobject = (JSONObject) item;
+                JSONObject entry = (JSONObject) jobject.get("entry");
+                favorites.add((String) entry.get("id"));
+            }
+        }
+        return favorites;
     }
     
     /**

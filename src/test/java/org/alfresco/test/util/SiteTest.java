@@ -21,6 +21,7 @@ import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
 import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.social.alfresco.connect.exception.AlfrescoException;
@@ -37,14 +38,17 @@ public class SiteTest extends AbstractTest
 {
     private static final String MY_DOMAIN = "mydomain";
     @Autowired private SiteService site;
+    @Autowired private UserService user;
     private String siteId;
     private String secondSite;
+    private String theUser = "siteUser" + System.currentTimeMillis();
     
     @BeforeClass
     public void setup()
     {
         siteId = "michael" + System.currentTimeMillis();
         secondSite = "second" + System.currentTimeMillis();
+        user.create(ADMIN, ADMIN, theUser, password, theUser + domain, theUser, theUser);
     }
     
     @Test
@@ -56,6 +60,12 @@ public class SiteTest extends AbstractTest
                     siteId, 
                     "my site description",
                     Visibility.PUBLIC);
+    }
+    
+    @Test(dependsOnMethods="create")
+    public void getSiteNodeRef()
+    {
+        Assert.assertFalse(site.getSiteNodeRef(ADMIN, ADMIN, siteId).isEmpty());
     }
     
     @Test(dependsOnMethods="create")
@@ -205,5 +215,25 @@ public class SiteTest extends AbstractTest
         Assert.assertFalse(exists);
         sites= site.getSites(ADMIN, ADMIN);
         Assert.assertFalse(sites.contains(siteId));
+    }
+    
+    @Test
+    public void getFavSiteEmpty()
+    {
+        Assert.assertTrue(site.getFavoriteSites(theUser, password).isEmpty());
+    }
+    
+    @Test(dependsOnMethods="getFavSiteEmpty")
+    public void getFavSite()
+    {
+        String site1 = "site-1" + System.currentTimeMillis();
+        String site2 = "site-2" + System.currentTimeMillis();
+        site.create(theUser, password, MY_DOMAIN, site1, "site-1", Visibility.PUBLIC);
+        site.create(theUser, password, MY_DOMAIN, site2, "site-2", Visibility.PUBLIC);
+        Assert.assertTrue(site.setFavorite(theUser, password, site1));
+        Assert.assertTrue(site.setFavorite(theUser, password, site2));
+        List<String> favorites = site.getFavoriteSites(theUser, password);
+        Assert.assertTrue(favorites.get(0).equals(site1));
+        Assert.assertTrue(favorites.get(1).equals(site2));
     }
 }

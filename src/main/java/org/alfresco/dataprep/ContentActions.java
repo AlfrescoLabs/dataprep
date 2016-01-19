@@ -1075,7 +1075,6 @@ public class ContentActions extends CMISUtil
         }
     }
     
-    
     private CmisObject moveTo(final String userName,
                               final String password,
                               final String sourceSite,
@@ -1107,8 +1106,6 @@ public class ContentActions extends CMISUtil
             objFrom = getCmisObject(session, pathFrom);
             objTarget = getCmisObject(session, pathTo);
         }
-        
-        
         if(objFrom instanceof Document)
         {
             Document d = (Document)objFrom;
