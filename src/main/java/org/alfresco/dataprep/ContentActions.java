@@ -32,7 +32,6 @@ import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.Tree;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
-import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisVersioningException;
@@ -685,17 +684,17 @@ public class ContentActions extends CMISUtil
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-            HttpResponse response = client.executeRequest(userName, password, post);
-            switch (response.getStatusLine().getStatusCode())
-            {
-                case HttpStatus.SC_CREATED:
-                    return true;
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new RuntimeException("Content doesn't exists " + contentName);
-                default:
-                    logger.error("Unable to mark as favorite: " + response.toString());
-                    break;
-            }
+        HttpResponse response = client.executeRequest(userName, password, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_CREATED:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Content doesn't exists " + contentName);
+            default:
+                logger.error("Unable to mark as favorite: " + response.toString());
+                break;
+        }
         return false;
     }
 
@@ -724,7 +723,7 @@ public class ContentActions extends CMISUtil
      * @param siteName site name
      * @param folderName folder name
      * @return true if marked as favorite
-     */ 
+     */
     public boolean setFolderAsFavorite(final String userName,
                                        final String password,
                                        final String siteName,
@@ -950,6 +949,51 @@ public class ContentActions extends CMISUtil
         return getDocumentObject(session, siteId, fileName).getVersionLabel();
     }
     
+    private CmisObject copyTo(final String userName,
+                              final String password,
+                              final String sourceSite,
+                              final String contentName,
+                              final String targetSite,
+                              final String targetFolder,
+                              final boolean byPath,
+                              final String pathFrom,
+                              final String pathTo)
+    {
+        CmisObject objTarget = null;
+        CmisObject copiedContent = null;
+        Session session = getCMISSession(userName, password);
+        CmisObject objFrom = null;
+        if(!byPath)
+        {
+            objFrom = getCmisObject(session, sourceSite, contentName);
+            if(!StringUtils.isEmpty(targetFolder))
+            {
+                objTarget = getCmisObject(session, targetSite, targetFolder);
+            }
+            else
+            {
+                objTarget = getCmisObject(session, "/Sites/" + targetSite + "/documentLibrary");
+            }
+        }
+        else
+        {
+            objFrom = getCmisObject(session, pathFrom);
+            objTarget = getCmisObject(session, pathTo);
+        }
+        if(objFrom instanceof Document)
+        {
+            Document d = (Document)objFrom;
+            copiedContent = d.copy(objTarget);
+        }
+        else if(objFrom instanceof Folder)
+        {
+            Folder fFrom = (Folder)objFrom;
+            Folder toFolder = (Folder)objTarget;
+            copiedContent = copyFolder(fFrom, toFolder);
+        }
+        return copiedContent;
+}
+    
     /**
      * Copy file or folder
      *
@@ -968,39 +1012,26 @@ public class ContentActions extends CMISUtil
                              final String targetSite,
                              final String targetFolder)
     {
-        CmisObject objTarget = null;
-        CmisObject copiedContent = null;
-        Session session = getCMISSession(userName, password);
-        CmisObject objFrom = getCmisObject(session, sourceSite, contentName);
-        try
-        {
-            if(!StringUtils.isEmpty(targetFolder))
-            {
-                objTarget = getCmisObject(session, targetSite, targetFolder);
-            }
-            else
-            {
-                objTarget = session.getObjectByPath("/Sites/" + targetSite + "/documentLibrary");
-            }
-        }
-        catch(CmisObjectNotFoundException nf)
-        {
-            throw new CmisRuntimeException("Target doesnt exists: " + targetSite + " or " + targetFolder, nf);
-        }
-        
-        if(objFrom instanceof Document)
-        {
-            Document d = (Document)objFrom;
-            copiedContent = d.copy(objTarget);
-        }
-        else if(objFrom instanceof Folder)
-        {
-            Folder fFrom = (Folder)objFrom;
-            Folder toFolder = (Folder)objTarget;
-            copiedContent = copyFolder(fFrom, toFolder);
-        }
-        return copiedContent;
+        return copyTo(userName, password, sourceSite, contentName, targetSite, targetFolder, false, null, null);
     }
+    
+    /**
+     * Copy item by path
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param pathFrom String path from
+     * @param pathTo String path to
+     * @return
+     */
+    public CmisObject copyTo(final String userName,
+                             final String password,
+                             final String pathFrom,
+                             final String pathTo)
+    {
+        return copyTo(userName, password, null, null, null, null, true, pathFrom, pathTo);
+    }
+
     
     /**
      * Copy folder with all childs 
@@ -1044,43 +1075,40 @@ public class ContentActions extends CMISUtil
         }
     }
     
-    /**
-     * Move file or folder
-     * 
-     * @param userName user name
-     * @param password password
-     * @param siteName source site
-     * @param contentName content to be copied
-     * @param targetSite tartget site
-     * @param targetFolder target folder. If null document library is set
-     * @return CmisObject of new created object
-     */
-    public CmisObject moveTo(final String userName,
-                             final String password,
-                             final String sourceSite,
-                             final String contentName,
-                             final String targetSite,
-                             final String targetFolder)
+    
+    private CmisObject moveTo(final String userName,
+                              final String password,
+                              final String sourceSite,
+                              final String contentName,
+                              final String targetSite,
+                              final String targetFolder,
+                              final boolean byPath,
+                              final String pathFrom,
+                              final String pathTo)
     {
         CmisObject objTarget = null;
         CmisObject movedContent = null;
         Session session = getCMISSession(userName, password);
-        CmisObject objFrom = getCmisObject(session, sourceSite, contentName);
-        try
+        CmisObject objFrom = null;
+        if(!byPath)
         {
+            objFrom = getCmisObject(session, sourceSite, contentName);
             if(!StringUtils.isEmpty(targetFolder))
             {
                 objTarget = getCmisObject(session, targetSite, targetFolder);
             }
             else
             {
-                objTarget = session.getObjectByPath("/Sites/" + targetSite + "/documentLibrary");
+                objTarget = getCmisObject(session, "/Sites/" + targetSite + "/documentLibrary");
             }
         }
-        catch(CmisObjectNotFoundException nf)
+        else
         {
-            throw new CmisRuntimeException("Target doesnt exists: " + targetSite + " or " + targetFolder, nf);
+            objFrom = getCmisObject(session, pathFrom);
+            objTarget = getCmisObject(session, pathTo);
         }
+        
+        
         if(objFrom instanceof Document)
         {
             Document d = (Document)objFrom;
@@ -1096,6 +1124,44 @@ public class ContentActions extends CMISUtil
             movedContent = f.move(parent, objTarget);
         }
         return movedContent;
+    }
+    
+    /**
+     * Move file or folder in site
+     * 
+     * @param userName user name
+     * @param password password
+     * @param siteName source site
+     * @param contentName content to be moved
+     * @param targetSite tartget site
+     * @param targetFolder target folder. If null document library is set
+     * @return CmisObject of new created object
+     */
+    public CmisObject moveTo(final String userName,
+                             final String password,
+                             final String sourceSite,
+                             final String contentName,
+                             final String targetSite,
+                             final String targetFolder)
+    {
+        return moveTo(userName, password, sourceSite, contentName, targetSite, targetFolder, false, null, null);
+    }
+    
+    /**
+     * Move file or folder by path
+     * 
+     * @param userName user name
+     * @param password password
+     * @param pathFrom path to source
+     * @param pathTo path to content
+     * @return CmisObject of new created object
+     */
+    public CmisObject moveTo(final String userName,
+                             final String password,
+                             final String pathFrom,
+                             final String pathTo)
+    {
+        return moveTo(userName, password, null, null, null, null, true, pathFrom, pathTo);
     }
 
     @SuppressWarnings("unchecked")

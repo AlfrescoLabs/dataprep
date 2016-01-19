@@ -52,7 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * @author Bogdan Bocancea
  */
-
 public class CMISUtil
 {
     public enum DocumentType
@@ -281,6 +280,30 @@ public class CMISUtil
                                    final String pathToContent)
     {
         Session session = getCMISSession(userName, password);
+        if(StringUtils.isEmpty(pathToContent))
+        {
+            throw new CmisRuntimeException("Path to content is missing");
+        }
+        try
+        {
+            CmisObject content = session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathToContent);
+            return content.getId().split(";")[0];
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            return "";
+        }
+    }
+    
+    /**
+     * Get the node ref for a item by path
+     * @param session the session
+     * @param pathToContent String path to item (e.g. Sites/siteId/documentLibrary/doc.txt)
+     * @return String node ref of the item
+     */
+    public String getNodeRefByPath(Session session,
+                                   final String pathToContent)
+    {
         if(StringUtils.isEmpty(pathToContent))
         {
             throw new CmisRuntimeException("Path to content is missing");
@@ -552,6 +575,26 @@ public class CMISUtil
         }
         CmisObject object = session.getObject(nodeRef);
         return object;
+    }
+    
+    /**
+     * Get cmis object by path
+     * 
+     * @param session the session
+     * @param pathToItem String path to item
+     * @return CmisObject cmis object
+     */
+    public CmisObject getCmisObject(final Session session,
+                                    final String pathToItem)
+    {
+        try
+        {
+            return session.getObjectByPath(pathToItem);
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Path doesn't exist " + pathToItem);
+        }
     }
     
     /**

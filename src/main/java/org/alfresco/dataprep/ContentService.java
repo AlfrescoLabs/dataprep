@@ -263,7 +263,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param siteName site name
-     * @param fileType DocumentType file type
+     * @param docType DocumentType file type
      * @param docName file name
      * @param docContent file content
      * @return {@link Document} CMIS document object
@@ -271,11 +271,11 @@ public class ContentService extends CMISUtil
     public Document createDocument(final String userName,
                                    final String password,
                                    final String siteName,
-                                   final DocumentType fileType,
+                                   final DocumentType docType,
                                    final String docName,
                                    final String docContent)
     {
-        return createDoc(userName, password, siteName, fileType, false, docName, null, docContent, false, null);
+        return createDoc(userName, password, siteName, docType, false, docName, null, docContent, false, null);
     }
 
     /**
@@ -285,7 +285,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
-     * @param fileType DocumentType file type
+     * @param docType DocumentType file type
      * @param docName file name
      * @param docContent file content
      * @return {@link Document} CMIS document object
@@ -293,11 +293,11 @@ public class ContentService extends CMISUtil
     public Document createDocumentInRepository(final String userName,
                                                final String password,
                                                final String path,
-                                               final DocumentType fileType,
+                                               final DocumentType docType,
                                                final String docName,
                                                final String docContent)
     {
-        return createDoc(userName, password, null, fileType, false, docName, null, docContent, true, path);
+        return createDoc(userName, password, null, docType, false, docName, null, docContent, true, path);
     }
 
     /**
@@ -307,7 +307,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
-     * @param fileType DocumentType file type
+     * @param docType DocumentType file type
      * @param docName File file name
      * @param docContent file content
      * @return Document CMIS document object
@@ -315,11 +315,11 @@ public class ContentService extends CMISUtil
     public Document createDocumentInRepository(final String userName,
                                                final String password,
                                                final String path,
-                                               final DocumentType fileType,
+                                               final DocumentType docType,
                                                final File docName,
                                                final String docContent)
     {
-        return createDoc(userName, password, null, fileType, true, null, docName, docContent, true, path);
+        return createDoc(userName, password, null, docType, true, null, docName, docContent, true, path);
     }
 
     /**
@@ -328,7 +328,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param siteName site name
-     * @param fileType DocumentType file type
+     * @param docType DocumentType file type
      * @param isFile boolean true if type File
      * @param docName file name
      * @param docFile file doc
@@ -340,7 +340,7 @@ public class ContentService extends CMISUtil
     private Document createDoc(final String userName,
                                final String password,
                                final String siteName,
-                               final DocumentType fileType,
+                               final DocumentType docType,
                                final boolean isFile,
                                final String docName,
                                final File docFile,
@@ -371,11 +371,11 @@ public class ContentService extends CMISUtil
         { 
             if(!isFile)
             {
-                contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+                contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), docType.type, stream);
             }
             else
             {
-                contentStream = session.getObjectFactory().createContentStream(docFile.getName(), Long.valueOf(content.length), fileType.type, stream);
+                contentStream = session.getObjectFactory().createContentStream(docFile.getName(), Long.valueOf(content.length), docType.type, stream);
             }
             if(!inRepository)
             {
@@ -441,7 +441,7 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param folderName folder name
-     * @param fileType DocumentType file type
+     * @param docType DocumentType file type
      * @param docName file name
      * @param docContent file content
      * @return {@link Document} CMIS document object
@@ -450,7 +450,7 @@ public class ContentService extends CMISUtil
                                            final String password,
                                            final String siteName,
                                            final String folderName,
-                                           final DocumentType fileType,
+                                           final DocumentType docType,
                                            final String docName,
                                            final String docContent)
     {
@@ -469,7 +469,7 @@ public class ContentService extends CMISUtil
         InputStream stream = new ByteArrayInputStream(content);
         try
         {
-            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), docType.type, stream);
             String folderId = getNodeRef(session, siteName, folderName);
             CmisObject folderObj = session.getObject(folderId);
             if(folderObj instanceof Folder)

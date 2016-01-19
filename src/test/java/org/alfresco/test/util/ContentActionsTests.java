@@ -26,6 +26,7 @@ import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.GroupService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
@@ -612,5 +613,37 @@ public class ContentActionsTests extends AbstractTest
     public void removePermissionForUser()
     {
         Assert.assertTrue(contentAction.removePermissionForUser(userName, password, siteName, permissionDoc, permissionUser, "SiteConsumer", false));
+    }
+    
+    @Test
+    public void copyToByPath()
+    {
+        String docToCopy = "copyDoc" + System.currentTimeMillis();
+        content.createDocument(userName, password, siteName, DocumentType.HTML, docToCopy, docToCopy);
+        CmisObject copiedObj = contentAction.copyTo(userName, password, "Sites/" + siteName + "/documentLibrary/" + docToCopy, "Shared");
+        Assert.assertFalse(copiedObj.getId().isEmpty());
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void copyToBPathFakeFrom()
+    {
+        contentAction.copyTo(userName, password, "fakepath", "Shared");
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void copyToBPathFakeTo()
+    {
+        contentAction.copyTo(userName, password, "Shared", "fakePath");
+    }
+    
+    @Test
+    public void moveToByPath()
+    {
+        String docToMove = "moveIt" + System.currentTimeMillis();
+        content.createDocument(userName, password, siteName, DocumentType.HTML, docToMove, docToMove);
+        CmisObject newObj = contentAction.moveTo(userName, password, "Sites/" + siteName + "/documentLibrary/" + docToMove, "Shared");
+        Assert.assertFalse(newObj.getId().isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, docToMove).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(userName, password, "Shared/" + docToMove).isEmpty());
     }
 }

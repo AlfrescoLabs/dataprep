@@ -300,7 +300,8 @@ public class AlfrescoHttpClient
      * @param password String password
      * @return {@link CloseableHttpClient} client
      */
-    public CloseableHttpClient getHttpClientWithBasicAuth(String username, String password)
+    public CloseableHttpClient getHttpClientWithBasicAuth(String username,
+                                                          String password)
     {
         CredentialsProvider provider = new BasicCredentialsProvider();
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
