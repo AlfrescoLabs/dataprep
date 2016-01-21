@@ -342,52 +342,68 @@ public class AlfrescoHttpClient
         }
     }
     
-    /**
-     * Method to get parameters from JSON
-     * @param result json message
-     * @param param key identifier
-     * @return String value of key
-     */
-    public String getParameterFromJSON(String result,
-                                       String param)
+    private String getParameterFromJSON(boolean httpResp,
+                                        String stringResponse,
+                                        HttpResponse response,
+                                        String parameter,
+                                        String... jsonObjs)
     {
-        JSONParser parser = new JSONParser();
-        JSONObject obj;
-        try
+        String strResponse = "";
+        Object obj = null;
+        if(httpResp)
         {
-            obj = (JSONObject) parser.parse(result);
+            strResponse = readStream(response.getEntity()).toJSONString();
+            obj = JSONValue.parse(strResponse);
         }
-        catch (ParseException e)
+        else
         {
-            throw new RuntimeException("Failed to parse the result: " + result, e);
+            obj = JSONValue.parse(stringResponse);
         }
-        return (String) obj.get(param);
+        JSONObject jObj = (JSONObject) obj;
+        if(!StringUtils.isEmpty(jsonObjs[0]))
+        {
+            //JSONObject entry = null;
+            for(int i=0; i<jsonObjs.length;i++)
+            {
+                jObj = (JSONObject) jObj.get(jsonObjs[i]);
+            }
+            return (String) jObj.get(parameter).toString();
+        }
+        else
+        {
+            return (String) jObj.get(parameter);
+        }
+        
     }
     
     /**
-     * Method to get parameters from JSON
-     * @param response HttpResponse response
-     * @param jsonObject String json object from response
-     * @param parameter String parameter from json
-     * @return String result
+     * Get an element from HttpResponse
+     * 
+     * @param response response
+     * @param parameter wanted parameter
+     * @param jsonObjs json objects to reach the parameter
+     * @return
      */
     public String getParameterFromJSON(HttpResponse response,
-                                       String jsonObject,
-                                       String parameter)
-    { 
-        String strResponse = "";
-        try
-        {
-            strResponse = EntityUtils.toString(response.getEntity());
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to read the response", e);
-        }
-        Object obj = JSONValue.parse(strResponse);
-        JSONObject jObj = (JSONObject) obj;
-        JSONObject entry = (JSONObject) jObj.get(jsonObject);
-        return (String) entry.get(parameter);
+                                       String parameter,
+                                       String... jsonObjs)
+    {
+        return getParameterFromJSON(true, null, response, parameter, jsonObjs);
+    }
+    
+    /**
+     * Get an element from a string HttpResponse
+     * 
+     * @param response String response 
+     * @param parameter String wanted parameter
+     * @param jsonObjs String json objects to reach the parameter
+     * @return
+     */
+    public String getParameterFromJSON(String response,
+                                       String parameter,
+                                       String... jsonObjs)
+    {
+        return getParameterFromJSON(false, response, null, parameter, jsonObjs);
     }
     
     /**
@@ -434,24 +450,13 @@ public class AlfrescoHttpClient
     }
     
     public String getSpecificElementFromJArray(HttpResponse response,
+                                               String firstParam,
                                                String array,
                                                String itemName,
                                                String itemParameter,
                                                String requiredElement)
     {
-        HttpEntity entity = response.getEntity();
-        String responseString = "";
-        try
-        {
-            responseString = EntityUtils.toString(entity , "UTF-8");
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to read the response", e);
-        }
-        Object obj = JSONValue.parse(responseString);
-        JSONObject jsonObject = (JSONObject) obj;
-        JSONArray jArray = (JSONArray) jsonObject.get(array);
+        JSONArray jArray = getJSONArray(response, firstParam, array);
         for (Object item:jArray)
         {
             JSONObject jobject = (JSONObject) item;
@@ -486,15 +491,18 @@ public class AlfrescoHttpClient
         }
         Object obj = JSONValue.parse(responseString);
         JSONObject jsonObject = (JSONObject) obj;
-        JSONObject list = (JSONObject) jsonObject.get(firstParam);
-        return (JSONArray) list.get(arrayName);
+        if(!StringUtils.isEmpty(firstParam))
+        {
+            jsonObject = (JSONObject) jsonObject.get(firstParam);
+        }
+        return (JSONArray) jsonObject.get(arrayName);
     }
     
     /**
      * Closes the HttpClient. 
      * @throws IOException if error
      */
-    public void close() 
+    public void close()
     {
         try
         {

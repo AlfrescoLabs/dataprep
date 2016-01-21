@@ -270,8 +270,8 @@ public class UserService extends CMISUtil
                     else
                     {
                         String result = client.readStream(response.getEntity()).toJSONString();
-                        String inviteId = client.getParameterFromJSON(result, "inviteId");
-                        String inviteTicket = client.getParameterFromJSON(result, "inviteTicket");
+                        String inviteId = client.getParameterFromJSON(result, "inviteId", "");
+                        String inviteTicket = client.getParameterFromJSON(result, "inviteTicket", "");
                         return acceptSiteInvitation(inviteId, inviteTicket);
                     }
                 default:
@@ -1000,7 +1000,7 @@ public class UserService extends CMISUtil
         }
         return false;
     }
-    
+
     /**
      * Check if a category exists
      * 

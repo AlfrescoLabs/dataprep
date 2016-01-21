@@ -75,6 +75,7 @@ public class ContentAspectsTests extends AbstractTest
     @Test
     public void addDocAspect()
     {
+        Assert.assertTrue(site.exists(siteName, userName, password));
         Assert.assertFalse(doc.getId().isEmpty());
         contentAspect.addAspect(userName, password, siteName, plainDoc, DocumentAspect.DUBLIN_CORE);
         List<Property<?>> properties = contentAspect.getProperties(userName, password, siteName, plainDoc);

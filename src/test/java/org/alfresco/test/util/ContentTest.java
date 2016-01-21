@@ -307,6 +307,8 @@ public class ContentTest extends AbstractTest
         String plainFile = "UploadFile-plaintext.txt";
         String xmlFile = "UploadFile-xml.xml";
         String htmlFile = "UploadFile-html.html";
+        String siteName = "deleteFileSite" + System.currentTimeMillis();
+        site.create(userName, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
         content.uploadFiles(DATA_FOLDER, userName, password, siteName);
         content.deleteFiles(userName, password, siteName, plainFile, xmlFile, htmlFile);
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainFile).isEmpty());

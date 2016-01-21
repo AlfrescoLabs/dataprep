@@ -169,7 +169,7 @@ public class WorkflowService extends CMISUtil
                     {
                         logger.trace("Successfuly started workflow: " + message);
                     }
-                    return client.getParameterFromJSON(response, "entry", "id");
+                    return client.getParameterFromJSON(response, "id", "entry");
                 default:
                     logger.error("Unable to start workflow " + response.toString());
             }

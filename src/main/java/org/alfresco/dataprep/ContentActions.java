@@ -48,8 +48,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 @Service
 /**
@@ -290,11 +288,11 @@ public class ContentActions extends CMISUtil
      * @param actionType content actions (e.g. tag, comments, likes)
      * @return String Json response
      */
-    private String getOptionResponse(final String userName,
-                                     final String password, 
-                                     final String siteName,
-                                     final String contentName,
-                                     final ActionType actionType)
+    private HttpResponse getOptionResponse(final String userName,
+                                           final String password, 
+                                           final String siteName,
+                                           final String contentName,
+                                           final ActionType actionType)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
                 || StringUtils.isEmpty(contentName))
@@ -309,12 +307,7 @@ public class ContentActions extends CMISUtil
             reqUrl = reqUrl + "/likes";
         }
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(userName, password, get);
-        if(HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
-        {
-            return client.readStream(response.getEntity()).toJSONString(); 
-        }
-        return "";
+        return client.executeRequest(userName, password, get);
     }
 
     /**
@@ -324,38 +317,20 @@ public class ContentActions extends CMISUtil
      * @param optType content actions (e.g. tag, comments, likes)
      */
     @SuppressWarnings("unchecked")
-    private List<String> getOptionValues(final String response,
+    private List<String> getOptionValues(final HttpResponse response,
                                          final ActionType optType)
     {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        JSONArray jArray = client.getJSONArray(response, "list", "entries");
         List<String> values = new ArrayList<String>();
-        if(!StringUtils.isEmpty(response))
+        Iterator<JSONObject> iterator = jArray.iterator();
+        while (iterator.hasNext())
         {
-            JSONParser parser = new JSONParser();
-            Object obj;
-            try
-            {
-                obj = parser.parse(response);
-            }
-            catch (ParseException e)
-            {
-                throw new RuntimeException("Unable to parse response " + response);
-            }
-            JSONObject jsonObject = (JSONObject) obj;
-            JSONObject list = (JSONObject) jsonObject.get("list");
-            JSONArray jArray = (JSONArray) list.get("entries");
-            Iterator<JSONObject> iterator = jArray.iterator();
-            while (iterator.hasNext())
-            {
-                JSONObject factObj = (JSONObject) iterator.next();
-                JSONObject entry = (JSONObject) factObj.get("entry");
-                values.add((String) entry.get(optType.bodyParam));
-            }
-            return values;
+            JSONObject factObj = (JSONObject) iterator.next();
+            JSONObject entry = (JSONObject) factObj.get("entry");
+            values.add((String) entry.get(optType.bodyParam));
         }
-        else
-        {
-            return values;
-        }
+        return values;
     }
 
     /**
@@ -366,43 +341,25 @@ public class ContentActions extends CMISUtil
      * @param optType content actions (e.g. tag, comments, likes)
      */
     @SuppressWarnings("unchecked")
-    private String getOptionNodeRef(final String response,
+    private String getOptionNodeRef(final HttpResponse response,
                                     final String value,
                                     final ActionType optType)
     {
         String nodeRef = "";
-        if(!StringUtils.isEmpty(response))
+        AlfrescoHttpClient jClient = alfrescoHttpClientFactory.getObject();
+        JSONArray jArray = jClient.getJSONArray(response, "list", "entries");
+        Iterator<JSONObject> iterator = jArray.iterator();
+        while (iterator.hasNext())
         {
-            JSONParser parser = new JSONParser();
-            Object obj;
-            try
+            JSONObject factObj = (JSONObject) iterator.next();
+            JSONObject entry = (JSONObject) factObj.get("entry");
+            String name = (String) entry.get(optType.bodyParam);
+            if(name.equalsIgnoreCase(value))
             {
-                obj = parser.parse(response);
+                nodeRef = (String) entry.get("id");
             }
-            catch (ParseException e)
-            {
-                throw new RuntimeException("Unable to parse response " + response);
-            }
-            JSONObject jsonObject = (JSONObject) obj;
-            JSONObject list = (JSONObject) jsonObject.get("list");
-            JSONArray jArray = (JSONArray) list.get("entries");
-            Iterator<JSONObject> iterator = jArray.iterator();
-            while (iterator.hasNext()) 
-            {
-                JSONObject factObj = (JSONObject) iterator.next();
-                JSONObject entry = (JSONObject) factObj.get("entry");
-                String name = (String) entry.get(optType.bodyParam);
-                if(name.equalsIgnoreCase(value))
-                {
-                    nodeRef = (String) entry.get("id");
-                }
-            }
-            return nodeRef;
         }
-        else
-        {
-            return nodeRef;
-        }
+        return nodeRef;
     }
 
     /**
@@ -419,7 +376,7 @@ public class ContentActions extends CMISUtil
                                                final String siteName,
                                                final String contentName)
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
         return getOptionValues(result, ActionType.TAGS);
     }
 
@@ -439,7 +396,7 @@ public class ContentActions extends CMISUtil
                                 final String contentName,
                                 final String tagName)
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
         return getOptionNodeRef(result, tagName, ActionType.TAGS);
     }
 
@@ -514,7 +471,7 @@ public class ContentActions extends CMISUtil
                                     final String siteName,
                                     final String contentName)
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
         List<String> comments = getOptionValues(result, ActionType.COMMENTS);
         return comments;
     }
@@ -535,7 +492,7 @@ public class ContentActions extends CMISUtil
                                     final String contentName,
                                     final String comment)
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
         return getOptionNodeRef(result, comment, ActionType.COMMENTS);
     }
 
@@ -589,25 +546,12 @@ public class ContentActions extends CMISUtil
                           final String siteName,
                           final String contentName)
     {
-        String result = getOptionResponse(userName, password, siteName, contentName, ActionType.LIKES);
-        if(!StringUtils.isEmpty(result))
+        AlfrescoHttpClient jClient = alfrescoHttpClientFactory.getObject();
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.LIKES);
+        if(200 == result.getStatusLine().getStatusCode())
         {
-            JSONParser parser = new JSONParser();
-            Object obj;
-            try
-            {
-                obj = parser.parse(result);
-            }
-            catch (ParseException e)
-            {
-                throw new RuntimeException("Unable to parse the response " + result, e);
-            }
-            JSONObject jsonObject = (JSONObject) obj;
-            JSONObject list = (JSONObject) jsonObject.get("entry");
-            JSONObject aggregate = (JSONObject) list.get("aggregate");
-            String strLikes =  (String) aggregate.get("numberOfRatings").toString();
-            int nrLikes = Integer.parseInt(strLikes);
-            return nrLikes;
+            String likes = jClient.getParameterFromJSON(result, "numberOfRatings", "entry", "aggregate");
+            return Integer.parseInt(likes);
         }
         return 0;
     }
@@ -1070,7 +1014,7 @@ public class ContentActions extends CMISUtil
             } 
             else if (obj instanceof Folder)
             {
-               copyFolder((Folder) obj, targetFolder);
+                copyFolder((Folder) obj, targetFolder);
             }
         }
     }

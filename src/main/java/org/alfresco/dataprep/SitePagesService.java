@@ -42,7 +42,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
@@ -787,11 +786,7 @@ public class SitePagesService
             switch (response.getStatusLine().getStatusCode())
             {
                 case HttpStatus.SC_OK:
-                    String strResponse = EntityUtils.toString(response.getEntity());
-                    JSONParser parser = new JSONParser();
-                    Object obj = parser.parse(strResponse);
-                    JSONObject jsonObject = (JSONObject) obj;
-                    JSONArray jArray = (JSONArray) jsonObject.get("items");
+                    JSONArray jArray = client.getJSONArray(response, "", "items");
                     Iterator<JSONObject> iterator = ((List<JSONObject>) jArray).iterator();
                     while (iterator.hasNext() && jArray.size() > 0)
                     {
@@ -1236,7 +1231,7 @@ public class SitePagesService
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         HttpResponse response = getComments(userName, password, siteName, page, itemTitle);
-        return client.getSpecificElementFromJArray(response, "items", comment, "content", "nodeRef");
+        return client.getSpecificElementFromJArray(response, null, "items", comment, "content", "nodeRef");
     }
     
     /**

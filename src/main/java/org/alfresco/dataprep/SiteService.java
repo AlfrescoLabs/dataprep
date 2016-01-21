@@ -252,7 +252,7 @@ public class SiteService
             HttpResponse response = client.execute(userName, password, get);
             if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
             {
-                return client.getParameterFromJSON(response, "entry", "guid");
+                return client.getParameterFromJSON(response,"guid", "entry");
             }
         }
         finally
@@ -682,5 +682,22 @@ public class SiteService
         {
             IOUtils.closeQuietly(input);
         }
+    }
+    
+    /**
+     * Enable or disable activity feed from site
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site id
+     * @param enable boolean enable or disable
+     * @return true if successful
+     */
+    public boolean setActivityFeed(final String userName,
+                                   final String password,
+                                   final String siteName,
+                                   final boolean enable)
+    {
+        return true;
     }
 }
