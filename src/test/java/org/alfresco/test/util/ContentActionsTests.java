@@ -144,6 +144,18 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
+    public void addEmptyTag()
+    {
+        Assert.assertFalse(contentAction.addSingleTag(userName, password, siteName, folder, ""));
+    }
+    
+    @Test(expectedExceptions = RuntimeException.class)
+    public void addInvalidTag()
+    {
+        contentAction.addSingleTag(userName, password, siteName, folder, ".//[]'!@#$%^&*()_-+<>?");
+    }
+    
+    @Test
     public void addMultipleTagsFolder()
     {
         String tag1 = "tag1" + System.currentTimeMillis();
@@ -220,7 +232,7 @@ public class ContentActionsTests extends AbstractTest
         contentAction.addComment(userName, password, "fakeSite", commentDoc, "fakeSiteComment");
     }
     
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions = RuntimeException.class)
     public void addEmptyComment()
     {
        contentAction.addComment(userName, password, siteName, folder, "");

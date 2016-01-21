@@ -128,6 +128,8 @@ public class ContentActions extends CMISUtil
                 throw new RuntimeException("Content doesn't exists " + contentName);
             case HttpStatus.SC_FORBIDDEN:
                 throw new RuntimeException("User " + userName + " doesn't have enough rights");
+            case HttpStatus.SC_BAD_REQUEST:
+                throw new RuntimeException("Invalid value: " + value);
             default:
                 logger.error("Unable to add new action: " + response.toString());
                 break;
