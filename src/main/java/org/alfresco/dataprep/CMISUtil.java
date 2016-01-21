@@ -540,7 +540,7 @@ public class CMISUtil
      * 
      * @param seconds time in seconds
      */
-    public static void waitInSeconds(int seconds)
+    protected static void waitInSeconds(int seconds)
     {
         long time0;
         long time1;
@@ -652,8 +652,8 @@ public class CMISUtil
      * @param stream
      * @param contentStream
      */
-    public void closeStreams(InputStream stream,
-                             ContentStream contentStream)
+    protected void closeStreams(InputStream stream,
+                                ContentStream contentStream)
     {
         try
         {

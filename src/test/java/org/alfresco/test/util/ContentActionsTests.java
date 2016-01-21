@@ -56,9 +56,10 @@ public class ContentActionsTests extends AbstractTest
     private String userName = "actionMan" + System.currentTimeMillis();
     private String siteName = "actionSite" + System.currentTimeMillis();
     private String userToInvite = "inviteUser" + System.currentTimeMillis();
-    String permissionUser = "permission" + System.currentTimeMillis();
-    String group = "group" + System.currentTimeMillis();
-    String permissionDoc = "permissionDoc" + System.currentTimeMillis();
+    private String permissionUser = "permission" + System.currentTimeMillis();
+    private String group = "group" + System.currentTimeMillis();
+    private String permissionDoc = "permissionDoc" + System.currentTimeMillis();
+    private String repoDoc = "actionRepoDoc" + System.currentTimeMillis();
     
     @BeforeClass(alwaysRun = true)
     public void userSetup()
@@ -68,6 +69,7 @@ public class ContentActionsTests extends AbstractTest
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, document, document);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, permissionDoc, permissionDoc);
+        content.createDocumentInRepository(userName, password, "Shared", DocumentType.PDF, repoDoc, repoDoc);
         content.createFolder(userName, password, folder, siteName);
         userToInvite = "inviteUser" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, userToInvite, password, userToInvite, "invited", "user");
@@ -645,5 +647,35 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertFalse(newObj.getId().isEmpty());
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, docToMove).isEmpty());
         Assert.assertFalse(content.getNodeRefByPath(userName, password, "Shared/" + docToMove).isEmpty());
+    }
+    
+    @Test
+    public void addTagsInRepository()
+    {
+        String tag1 = "tag1-repo";
+        String tag2 = "tag2-repo";
+        String tag3 = "tag3-repo";
+        List<String> tags = new ArrayList<String>();
+        tags.add(tag1);
+        tags.add(tag2);
+        tags.add(tag3);
+        Assert.assertTrue(contentAction.addSingleTag(userName, password, "Shared/" + repoDoc, "singleRepoTag"));
+        Assert.assertTrue(contentAction.addMultipleTags(userName, password, "Shared/" + repoDoc, tags));
+        List<String> getTags = contentAction.getTagNamesFromContent(userName, password, "Shared/" + repoDoc);
+        Assert.assertTrue(getTags.get(0).equals("singleRepoTag".toLowerCase()));
+        Assert.assertTrue(getTags.get(1).equals(tag1));
+        Assert.assertTrue(getTags.get(2).equals(tag2));
+        Assert.assertTrue(getTags.get(3).equals(tag3));
+    }
+    
+    @Test(dependsOnMethods="addTagsInRepository")
+    public void removeTagsFromRepository()
+    {
+        Assert.assertTrue(contentAction.removeTag(userName, password, "Shared/" + repoDoc, "singleRepoTag"));
+        Assert.assertTrue(contentAction.removeTag(userName, password, "Shared/" + repoDoc, "tag1-repo"));
+        List<String> getTags = contentAction.getTagNamesFromContent(userName, password, "Shared/" + repoDoc);
+        Assert.assertEquals(getTags.size(), 2);
+        Assert.assertTrue(getTags.get(0).equals("tag2-repo"));
+        Assert.assertTrue(getTags.get(1).equals("tag3-repo"));
     }
 }

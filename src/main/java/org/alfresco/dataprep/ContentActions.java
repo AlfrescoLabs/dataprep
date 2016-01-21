@@ -88,16 +88,21 @@ public class ContentActions extends CMISUtil
                                  final String password, 
                                  final String siteName,
                                  final String contentName,
+                                 final boolean repository,
+                                 final String pathToItem,
                                  final ActionType option,
                                  final String value)
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-                || StringUtils.isEmpty(contentName) || StringUtils.isEmpty(value))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }        
+        String nodeRef;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        if(!repository)
+        {
+            nodeRef = getNodeRef(userName, password, siteName, contentName);
+        }
+        else
+        {
+            nodeRef = getNodeRefByPath(userName, password, pathToItem);
+        }
         if(StringUtils.isEmpty(nodeRef))
         {
             throw new RuntimeException("Content doesn't exists " + contentName);
@@ -145,17 +150,22 @@ public class ContentActions extends CMISUtil
                                        final String password, 
                                        final String siteName,
                                        final String contentName,
+                                       final boolean repository,
+                                       final String pathToItem,
                                        final ActionType optType,
                                        final List<String> values)
     {
         String jsonInput = "";
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-            || StringUtils.isEmpty(contentName) || StringUtils.isEmpty(values.toString()))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }        
+        String nodeRef;
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        if(!repository)
+        {
+            nodeRef = getNodeRef(userName, password, siteName, contentName);
+        }
+        else
+        {
+            nodeRef = getNodeRefByPath(userName, password, pathToItem);
+        }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + optType.name;
         HttpPost post  = new HttpPost(reqUrl);
         jsonInput =  ("[{" + "\"" + optType.bodyParam + "\"" + ": \"" + values.get(0) + "\"" );
@@ -194,21 +204,33 @@ public class ContentActions extends CMISUtil
                                  final String password,
                                  final String siteName,
                                  final String contentName,
+                                 final boolean repository,
+                                 final String pathToItem,
                                  final ActionType optType,
                                  final String actionValue)
     {
         String optionNodeRef = "";
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-                || StringUtils.isEmpty(contentName) || StringUtils.isEmpty(actionValue))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }       
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
+        String nodeRef;
+        if(!repository)
+        {
+            nodeRef = getNodeRef(userName, password, siteName, contentName);
+        }
+        else
+        {
+            nodeRef = getNodeRefByPath(userName, password, pathToItem);
+        }
         switch (optType)
         {
             case TAGS:
-                optionNodeRef = getTagNodeRef(userName, password, siteName, contentName, actionValue);
+                if(!repository)
+                {
+                    optionNodeRef = getTagNodeRef(userName, password, siteName, contentName, actionValue);
+                }
+                else
+                {
+                    optionNodeRef = getTagNodeRef(userName, password, pathToItem, actionValue);
+                }
                 break;
             case COMMENTS:
                 optionNodeRef = getCommentNodeRef(userName, password, siteName, contentName, actionValue);
@@ -216,11 +238,11 @@ public class ContentActions extends CMISUtil
             default:
                 break;
         }
-        if(StringUtils.isEmpty(optionNodeRef) || StringUtils.isEmpty(contentNodeRef))
+        if(StringUtils.isEmpty(optionNodeRef) || StringUtils.isEmpty(nodeRef))
         {
             throw new RuntimeException("Content doesn't exists");
         }
-        String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + optType.name + "/" + optionNodeRef;
+        String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + optType.name + "/" + optionNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
         HttpResponse response = client.executeRequest(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
@@ -256,7 +278,24 @@ public class ContentActions extends CMISUtil
                                 final String contentName,
                                 final String tag)
     {
-        return addNewAction(userName, password, siteName, contentName, ActionType.TAGS, tag);
+        return addNewAction(userName, password, siteName, contentName, false, null, ActionType.TAGS, tag);
+    }
+    
+    /**
+     * Create tag for a document or folder from repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to document or folder
+     * @param tag tag for file or folder
+     * @return true if request is successful
+     */
+    public boolean addSingleTag(final String userName,
+                                final String password, 
+                                final String pathToItem,
+                                final String tag)
+    {
+        return addNewAction(userName, password, null, null, true, pathToItem, ActionType.TAGS, tag);
     }
 
     /**
@@ -275,7 +314,24 @@ public class ContentActions extends CMISUtil
                                    final String contentName,
                                    final List<String> tags)
     {
-        return addMultipleActions(userName, password, siteName, contentName, ActionType.TAGS, tags);
+        return addMultipleActions(userName, password, siteName, contentName, false, null, ActionType.TAGS, tags);
+    }
+    
+    /**
+     * Create multiple tags for document or folder
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to document or folder
+     * @param tags list of tags for a file or folder
+     * @return true if request is successful
+     */
+    public boolean addMultipleTags(final String userName,
+                                   final String password, 
+                                   final String pathToItem,
+                                   final List<String> tags)
+    {
+        return addMultipleActions(userName, password, null, null, true, pathToItem, ActionType.TAGS, tags);
     }
 
     /**
@@ -292,15 +348,20 @@ public class ContentActions extends CMISUtil
                                            final String password, 
                                            final String siteName,
                                            final String contentName,
+                                           final boolean repository,
+                                           final String pathToItem,
                                            final ActionType actionType)
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-                || StringUtils.isEmpty(contentName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }        
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String nodeRef = getNodeRef(userName, password, siteName, contentName);
+        String nodeRef;
+        if(!repository)
+        {
+            nodeRef = getNodeRef(userName, password, siteName, contentName);
+        }
+        else
+        {
+            nodeRef = getNodeRefByPath(userName, password, pathToItem);
+        }
         String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + actionType.name;
         if(actionType.equals(ActionType.LIKES))
         {
@@ -376,7 +437,23 @@ public class ContentActions extends CMISUtil
                                                final String siteName,
                                                final String contentName)
     {
-        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.TAGS);
+        return getOptionValues(result, ActionType.TAGS);
+    }
+    
+    /**
+     * Get list of tag names that are set for a document or folder in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @return List list of tags for a file or folder
+     */
+    public List<String> getTagNamesFromContent(final String userName,
+                                               final String password, 
+                                               final String pathToItem)
+    {
+        HttpResponse result = getOptionResponse(userName, password, null, null, true, pathToItem, ActionType.TAGS);
         return getOptionValues(result, ActionType.TAGS);
     }
 
@@ -391,12 +468,30 @@ public class ContentActions extends CMISUtil
      * @return String nodeRef
      */
     public String getTagNodeRef(final String userName,
-                                final String password, 
+                                final String password,
                                 final String siteName,
                                 final String contentName,
                                 final String tagName)
     {
-        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.TAGS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.TAGS);
+        return getOptionNodeRef(result, tagName, ActionType.TAGS);
+    }
+    
+    /**
+     * Get the node ref from a tag in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to document or folder in repository
+     * @param tagName tag of a file of folder
+     * @return String nodeRef
+     */
+    public String getTagNodeRef(final String userName,
+                                final String password, 
+                                final String pathToItem,
+                                final String tagName)
+    {
+        HttpResponse result = getOptionResponse(userName, password, null, null, true, pathToItem, ActionType.TAGS);
         return getOptionNodeRef(result, tagName, ActionType.TAGS);
     }
 
@@ -416,7 +511,24 @@ public class ContentActions extends CMISUtil
                              final String contentName,
                              final String tagName)
     {
-        return removeAction(userName, password, siteName, contentName, ActionType.TAGS, tagName);
+        return removeAction(userName, password, siteName, contentName, false, null, ActionType.TAGS, tagName);
+    }
+    
+    /**
+     * Remove tag from content from repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @param tagName tag of a file or folder
+     * @return true if deleted
+     */
+    public boolean removeTag(final String userName,
+                             final String password,
+                             final String pathToItem,
+                             final String tagName)
+    {
+        return removeAction(userName, password, null, null, true, pathToItem, ActionType.TAGS, tagName);
     }
 
     /**
@@ -435,7 +547,7 @@ public class ContentActions extends CMISUtil
                               final String contentName,
                               final String comment)
     {
-        return addNewAction(userName, password, siteName, contentName, ActionType.COMMENTS, comment);
+        return addNewAction(userName, password, siteName, contentName, false, null, ActionType.COMMENTS, comment);
     }
 
     /**
@@ -454,7 +566,7 @@ public class ContentActions extends CMISUtil
                                        final String contentName,
                                        final List<String> comments)
     {
-        return addMultipleActions(userName, password, siteName, contentName, ActionType.COMMENTS, comments);
+        return addMultipleActions(userName, password, siteName, contentName, false, null, ActionType.COMMENTS, comments);
     }
 
     /**
@@ -471,7 +583,7 @@ public class ContentActions extends CMISUtil
                                     final String siteName,
                                     final String contentName)
     {
-        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.COMMENTS);
         List<String> comments = getOptionValues(result, ActionType.COMMENTS);
         return comments;
     }
@@ -492,7 +604,7 @@ public class ContentActions extends CMISUtil
                                     final String contentName,
                                     final String comment)
     {
-        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.COMMENTS);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.COMMENTS);
         return getOptionNodeRef(result, comment, ActionType.COMMENTS);
     }
 
@@ -512,7 +624,7 @@ public class ContentActions extends CMISUtil
                                  final String contentName,
                                  final String comment)
     {
-        return removeAction(userName, password, siteName, contentName, ActionType.COMMENTS, comment);
+        return removeAction(userName, password, siteName, contentName, false, null, ActionType.COMMENTS, comment);
     }
 
     /**
@@ -529,7 +641,7 @@ public class ContentActions extends CMISUtil
                                final String siteName,
                                final String contentName)
     {
-        return addNewAction(userName, password, siteName, contentName, ActionType.LIKES, "likes");
+        return addNewAction(userName, password, siteName, contentName, false, null, ActionType.LIKES, "likes");
     }
 
     /**
@@ -547,7 +659,7 @@ public class ContentActions extends CMISUtil
                           final String contentName)
     {
         AlfrescoHttpClient jClient = alfrescoHttpClientFactory.getObject();
-        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, ActionType.LIKES);
+        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.LIKES);
         if(200 == result.getStatusLine().getStatusCode())
         {
             String likes = jClient.getParameterFromJSON(result, "numberOfRatings", "entry", "aggregate");
