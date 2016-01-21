@@ -143,16 +143,16 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertTrue(returnTags.get(0).equals("tagfolder"));
     }
     
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void addEmptyTag()
     {
-        Assert.assertFalse(contentAction.addSingleTag(userName, password, siteName, folder, ""));
+        contentAction.addSingleTag(userName, password, siteName, folder, "");
     }
     
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test
     public void addInvalidTag()
     {
-        contentAction.addSingleTag(userName, password, siteName, folder, ".//[]'!@#$%^&*()_-+<>?");
+        Assert.assertFalse(contentAction.addSingleTag(userName, password, siteName, folder, ".//[]'!@#$%^&*()_-+<>?"));
     }
     
     @Test
