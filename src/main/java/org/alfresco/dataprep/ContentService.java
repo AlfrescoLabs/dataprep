@@ -552,7 +552,7 @@ public class ContentService extends CMISUtil
      * @param folderName folder name
      * @throws CmisRuntimeException if invalid folder
      */
-    private void deleteTreeFolder(final String userName,
+    private boolean deleteTreeFolder(final String userName,
                                   final String password,
                                   final boolean inRepository,
                                   final String siteName,
@@ -576,17 +576,22 @@ public class ContentService extends CMISUtil
             {
                 Folder f = (Folder)o;
                 f.refresh();
-                f.deleteTree(true, UnfileObject.DELETE, true);
+                List<String> failedObj = f.deleteTree(true, UnfileObject.DELETE, true);
+                if(failedObj.isEmpty())
+                {
+                    return true;
+                }
             }
             else
             {
                 throw new IllegalArgumentException("Object does not exist or is not a folder");
-            } 
+            }
         }
         catch(CmisInvalidArgumentException nf)
         {
             throw new CmisRuntimeException("Invalid folder " + folderName, nf);
         }
+        return false;
     }
 
     /**
@@ -597,7 +602,7 @@ public class ContentService extends CMISUtil
      * @param siteName site name
      * @param folderName folder name
      */
-    public void deleteTree(final String userName,
+    public boolean deleteTree(final String userName,
                            final String password,
                            final String siteName,
                            final String folderName)
@@ -607,7 +612,7 @@ public class ContentService extends CMISUtil
         {
             throw new IllegalArgumentException("Parameter missing");
         }
-        deleteTreeFolder(userName, password, false, siteName, null, folderName);
+        return deleteTreeFolder(userName, password, false, siteName, null, folderName);
     }
 
     /**

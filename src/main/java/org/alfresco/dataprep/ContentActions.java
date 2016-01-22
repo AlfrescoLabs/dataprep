@@ -235,16 +235,31 @@ public class ContentActions extends CMISUtil
                 }
                 break;
             case COMMENTS:
-                optionNodeRef = getCommentNodeRef(userName, password, siteName, contentName, actionValue);
+                if(!repository)
+                {
+                    optionNodeRef = getCommentNodeRef(userName, password, siteName, contentName, actionValue);
+                }
+                else
+                {
+                    optionNodeRef = getCommentNodeRef(userName, password, pathToItem, actionValue);
+                }
                 break;
             default:
                 break;
         }
-        if(StringUtils.isEmpty(optionNodeRef) || StringUtils.isEmpty(nodeRef))
+        if(StringUtils.isEmpty(nodeRef))
         {
             throw new RuntimeException("Content doesn't exists");
         }
-        String reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + optType.name + "/" + optionNodeRef;
+        String reqUrl = "";
+        if(optType.equals(ActionType.COMMENTS) || optType.equals(ActionType.TAGS))
+        {
+            reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + optType.name + "/" + optionNodeRef;
+        }
+        else
+        {
+            reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + "/ratings/likes";
+        }
         HttpDelete delete = new HttpDelete(reqUrl);
         HttpResponse response = client.executeRequest(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
@@ -257,6 +272,8 @@ public class ContentActions extends CMISUtil
                 return true;
             case HttpStatus.SC_FORBIDDEN:
                 throw new RuntimeException("User" + userName + " doesn't have enough rights");
+            case HttpStatus.SC_METHOD_NOT_ALLOWED:
+                throw new RuntimeException("Invalid item: " + actionValue);
             default:
                 logger.error("Unable to add new action: " + response.toString());
                 break;
@@ -275,7 +292,7 @@ public class ContentActions extends CMISUtil
      * @return true if request is successful
      */
     public boolean addSingleTag(final String userName,
-                                final String password, 
+                                final String password,
                                 final String siteName,
                                 final String contentName,
                                 final String tag)
@@ -293,7 +310,7 @@ public class ContentActions extends CMISUtil
      * @return true if request is successful
      */
     public boolean addSingleTag(final String userName,
-                                final String password, 
+                                final String password,
                                 final String pathToItem,
                                 final String tag)
     {
@@ -329,7 +346,7 @@ public class ContentActions extends CMISUtil
      * @return true if request is successful
      */
     public boolean addMultipleTags(final String userName,
-                                   final String password, 
+                                   final String password,
                                    final String pathToItem,
                                    final List<String> tags)
     {
@@ -347,7 +364,7 @@ public class ContentActions extends CMISUtil
      * @return String Json response
      */
     private HttpResponse getOptionResponse(final String userName,
-                                           final String password, 
+                                           final String password,
                                            final String siteName,
                                            final String contentName,
                                            final boolean repository,
@@ -435,7 +452,7 @@ public class ContentActions extends CMISUtil
      * @return List list of tags for a file or folder
      */
     public List<String> getTagNamesFromContent(final String userName,
-                                               final String password, 
+                                               final String password,
                                                final String siteName,
                                                final String contentName)
     {
@@ -489,7 +506,7 @@ public class ContentActions extends CMISUtil
      * @return String nodeRef
      */
     public String getTagNodeRef(final String userName,
-                                final String password, 
+                                final String password,
                                 final String pathToItem,
                                 final String tagName)
     {
@@ -551,6 +568,23 @@ public class ContentActions extends CMISUtil
     {
         return addNewAction(userName, password, siteName, contentName, false, null, ActionType.COMMENTS, comment);
     }
+    
+    /**
+     * Create a comment for a document or folder from repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @param comment comment for a file or folder
+     * @return true if request is successful
+     */
+    public boolean addComment(final String userName,
+                              final String password,
+                              final String pathToItem,
+                              final String comment)
+    {
+        return addNewAction(userName, password, null, null, true, pathToItem, ActionType.COMMENTS, comment);
+    }
 
     /**
      * Create multiple comments for a document or folder
@@ -563,12 +597,29 @@ public class ContentActions extends CMISUtil
      * @return true if request is successful
      */
     public boolean addMultipleComments(final String userName,
-                                       final String password, 
+                                       final String password,
                                        final String siteName,
                                        final String contentName,
                                        final List<String> comments)
     {
         return addMultipleActions(userName, password, siteName, contentName, false, null, ActionType.COMMENTS, comments);
+    }
+    
+    /**
+     * Create multiple comments for a document or folder in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @param comments list of comments
+     * @return true if request is successful
+     */
+    public boolean addMultipleComments(final String userName,
+                                       final String password,
+                                       final String pathToItem,
+                                       final List<String> comments)
+    {
+        return addMultipleActions(userName, password, null, null, true, pathToItem, ActionType.COMMENTS, comments);
     }
 
     /**
@@ -581,11 +632,28 @@ public class ContentActions extends CMISUtil
      * @return List list of comments
      */
     public List<String> getComments(final String userName,
-                                    final String password, 
+                                    final String password,
                                     final String siteName,
                                     final String contentName)
     {
         HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.COMMENTS);
+        List<String> comments = getOptionValues(result, ActionType.COMMENTS);
+        return comments;
+    }
+    
+    /**
+     * Get list of comments that are set for a document or folder in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @return List list of comments
+     */
+    public List<String> getComments(final String userName,
+                                    final String password,
+                                    final String pathToItem)
+    {
+        HttpResponse result = getOptionResponse(userName, password, null, null, true, pathToItem, ActionType.COMMENTS);
         List<String> comments = getOptionValues(result, ActionType.COMMENTS);
         return comments;
     }
@@ -609,6 +677,24 @@ public class ContentActions extends CMISUtil
         HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.COMMENTS);
         return getOptionNodeRef(result, comment, ActionType.COMMENTS);
     }
+    
+    /**
+     * Get the node ref for comment from repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @param comment comment of a file or folder
+     * @return String nodeRef
+     */
+    public String getCommentNodeRef(final String userName,
+                                    final String password,
+                                    final String pathToItem,
+                                    final String comment)
+    {
+        HttpResponse result = getOptionResponse(userName, password, null, null, true, pathToItem, ActionType.COMMENTS);
+        return getOptionNodeRef(result, comment, ActionType.COMMENTS);
+    }
 
     /**
      * Remove comment from content
@@ -628,6 +714,23 @@ public class ContentActions extends CMISUtil
     {
         return removeAction(userName, password, siteName, contentName, false, null, ActionType.COMMENTS, comment);
     }
+    
+    /**
+     * Remove comment from content in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to item in repository
+     * @param comment comment of a file or folder
+     * @return true if deleted
+     */
+    public boolean removeComment(final String userName,
+                                 final String password,
+                                 final String pathToItem,
+                                 final String comment)
+    {
+        return removeAction(userName, password, null, null, true, pathToItem, ActionType.COMMENTS, comment);
+    }
 
     /**
      * Like a document or folder
@@ -645,7 +748,47 @@ public class ContentActions extends CMISUtil
     {
         return addNewAction(userName, password, siteName, contentName, false, null, ActionType.LIKES, "likes");
     }
+    
+    /**
+     * Like a document or folder from repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to document or folder
+     * @return true if request is successful
+     */
+    public boolean likeContent(final String userName,
+                               final String password,
+                               final String pathToItem)
+    {
+        return addNewAction(userName, password, null, null, true, pathToItem, ActionType.LIKES, "likes");
+    }
 
+    private int countLikes(final String userName,
+                           final String password,
+                           final String siteName,
+                           final String contentName,
+                           final boolean repository,
+                           final String pathToItem)
+    {
+        AlfrescoHttpClient jClient = alfrescoHttpClientFactory.getObject();
+        HttpResponse result;
+        if(!repository)
+        {
+            result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.LIKES);
+        }
+        else
+        {
+            result = getOptionResponse(userName, password, null, null, true, pathToItem, ActionType.LIKES);
+        }
+        if(200 == result.getStatusLine().getStatusCode())
+        {
+            String likes = jClient.getParameterFromJSON(result, "numberOfRatings", "entry", "aggregate");
+            return Integer.parseInt(likes);
+        }
+        return 0;
+    }
+    
     /**
      * Get the number of likes for a document or folder
      * 
@@ -660,18 +803,27 @@ public class ContentActions extends CMISUtil
                           final String siteName,
                           final String contentName)
     {
-        AlfrescoHttpClient jClient = alfrescoHttpClientFactory.getObject();
-        HttpResponse result = getOptionResponse(userName, password, siteName, contentName, false, null, ActionType.LIKES);
-        if(200 == result.getStatusLine().getStatusCode())
-        {
-            String likes = jClient.getParameterFromJSON(result, "numberOfRatings", "entry", "aggregate");
-            return Integer.parseInt(likes);
-        }
-        return 0;
+        return countLikes(userName, password, siteName, contentName, false, null);
+    }
+    
+    /**
+     * Get the number of likes for a document or folder from repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to document or folder
+     * @return int likes
+     */
+    public int countLikes(final String userName,
+                          final String password,
+                          final String pathToItem)
+    {
+        return countLikes(userName, password, null, null, true, pathToItem);
     }
 
     /**
      * Remove like from content
+     * 
      * @param userName login username
      * @param password login password
      * @param siteName site name
@@ -683,29 +835,22 @@ public class ContentActions extends CMISUtil
                               final String siteName,
                               final String contentName)
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName)
-                || StringUtils.isEmpty(contentName))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }       
-        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String contentNodeRef = getNodeRef(userName, password, siteName, contentName);
-        if(StringUtils.isEmpty(contentNodeRef))
-        {
-            throw new RuntimeException("Content doesn't exists");
-        }
-        String reqUrl = client.getApiVersionUrl() + "nodes/" + contentNodeRef + "/ratings/likes";
-        HttpDelete delete = new HttpDelete(reqUrl);  
-        HttpResponse response = client.executeRequest(userName, password, delete);
-        if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
-        {
-            if(logger.isTraceEnabled())
-            {
-                logger.trace("Like is removed successfully from " + contentName);
-            }
-            return true;
-        }
-        return false;
+        return removeAction(userName, password, siteName, contentName, false, null, ActionType.LIKES, "");
+    }
+    
+    /**
+     * Remove like from content in repository
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToItem path to document or folder
+     * @return true if removed
+     */
+    public boolean removeLike(final String userName,
+                              final String password,
+                              final String pathToItem)
+    {
+        return removeAction(userName, password, null, null, true, pathToItem, ActionType.LIKES, "");
     }
 
     /**

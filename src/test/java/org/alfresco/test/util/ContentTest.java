@@ -228,19 +228,19 @@ public class ContentTest extends AbstractTest
     @Test
     public void deleteTree()
     {
-        String siteName = "siteDocNew" + System.currentTimeMillis();
+        String siteId = "delteTree" + System.currentTimeMillis();
         String folder1 = "cmisFolder1" + System.currentTimeMillis();
-        site.create(userName, password, "mydomain", siteName, "my site description", Visibility.PUBLIC);
-        content.createDocument(userName, password, siteName, DocumentType.XML, "xmlDoc", "contentXmlDoc");
-        Folder f = content.createFolder(userName, password, folder, siteName);
-        content.createDocumentInFolder(userName, password, siteName, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
+        site.create(userName, password, "mydomain", siteId, "my site description", Visibility.PUBLIC);
+        Folder f = content.createFolder(userName, password, folder, siteId);
+        content.createDocumentInFolder(userName, password, siteId, folder, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folder1);
         f.createFolder(properties);
-        content.deleteTree(userName, password, siteName, folder);
-        Assert.assertTrue(content.getNodeRef(userName, password, siteName, folder1).isEmpty());
-        Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainDoc).isEmpty());
+        Assert.assertTrue(content.deleteTree(userName, password, siteId, folder));
+        Assert.assertTrue(content.getNodeRef(userName, password, siteId, folder).isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteId, folder1).isEmpty());
+        Assert.assertTrue(content.getNodeRef(userName, password, siteId, plainDoc).isEmpty());
     }
 
     @Test

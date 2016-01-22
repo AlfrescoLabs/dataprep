@@ -540,7 +540,7 @@ public class CMISUtil
      * 
      * @param seconds time in seconds
      */
-    protected static void waitInSeconds(int seconds)
+    protected void waitInSeconds(int seconds)
     {
         long time0;
         long time1;

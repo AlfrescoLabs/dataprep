@@ -258,9 +258,11 @@ public class WorkflowTests extends AbstractTest
     @Test
     public void approveTask()
     {
-        String workflowId = workflow.startGroupReview(workflowUser, password, 
-                "approveTask", new Date(), groupName, Priority.Low, workflowSite, docs, 27, false);
-        Assert.assertTrue(workflow.approveTask(workflowUser, password, workflowId, true, TaskStatus.COMPLETED, "approve done"));
+        groupService.addUserToGroup(ADMIN, ADMIN, groupName, reviewer1);
+        String workflowId = workflow.startMultipleReviewers(workflowUser, password, "approve.multiple", new Date(), reviewers, Priority.High, workflowSite,
+                docs, 98, false);
+        Assert.assertTrue(!workflowId.isEmpty());
+        Assert.assertTrue(workflow.approveTask(reviewer1, password, workflowId, true, TaskStatus.COMPLETED, "approve done"));
     }
 
     @Test

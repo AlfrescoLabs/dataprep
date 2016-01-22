@@ -690,4 +690,51 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertTrue(getTags.get(0).equals("tag2-repo"));
         Assert.assertTrue(getTags.get(1).equals("tag3-repo"));
     }
+    
+    @Test
+    public void addCommentInRepository()
+    {
+        String comm1 = "comm-repo1";
+        String comm2 = "comm-repo2";
+        String comm3 = "comm-repo3";
+        List<String> comments = new ArrayList<String>();
+        comments.add(comm1);
+        comments.add(comm2);
+        comments.add(comm3);
+        Assert.assertTrue(contentAction.addComment(userName, password, "Shared/" + repoDoc, "single Comment in Repo"));
+        Assert.assertTrue(contentAction.addMultipleComments(userName, password, "Shared/" + repoDoc, comments));
+        List<String> getTags = contentAction.getComments(userName, password, "Shared/" + repoDoc);
+        Assert.assertTrue(getTags.get(3).equals("single Comment in Repo"));
+        Assert.assertTrue(getTags.get(2).equals(comm1));
+        Assert.assertTrue(getTags.get(1).equals(comm2));
+        Assert.assertTrue(getTags.get(0).equals(comm3));
+    }
+    
+    @Test(dependsOnMethods="addCommentInRepository")
+    public void removeCommentsFromRepository()
+    {
+        Assert.assertTrue(contentAction.removeComment(userName, password, "Shared/" + repoDoc, "single Comment in Repo"));
+        Assert.assertTrue(contentAction.removeComment(userName, password, "Shared/" + repoDoc, "comm-repo1"));
+        List<String> getTags = contentAction.getComments(userName, password, "Shared/" + repoDoc);
+        Assert.assertEquals(getTags.size(), 2);
+        Assert.assertTrue(getTags.get(0).equals("comm-repo3"));
+        Assert.assertTrue(getTags.get(1).equals("comm-repo2"));
+    }
+    
+    @Test
+    public void likeDocumentRepository()
+    {
+        Assert.assertTrue(contentAction.likeContent(userName, password, "Shared/" + repoDoc));
+        Assert.assertTrue(contentAction.likeContent(userToInvite, password, "Shared/" + repoDoc));
+        Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 2);
+    }
+    
+    @Test(dependsOnMethods="likeDocumentRepository")
+    public void removeLikeRepository()
+    {
+        Assert.assertTrue(contentAction.removeLike(userName, password, "Shared/" + repoDoc));
+        Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 1);
+        Assert.assertTrue(contentAction.removeLike(userToInvite, password, "Shared/" + repoDoc));
+        Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 0);
+    }
 }
