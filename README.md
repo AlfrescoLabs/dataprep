@@ -7,6 +7,14 @@ Git:
     git clone https://github.com/AlfrescoTestAutomation/dataprep.git
 
 ### Use Maven
+'''
+        <dependency>
+            <groupId>org.alfresco.test</groupId>
+            <artifactId>dataprep</artifactId>
+            <version>1.8</version>
+        </dependency>
+'''
+
 
 Open a terminal, change in to the root of the project directory and run:
 
