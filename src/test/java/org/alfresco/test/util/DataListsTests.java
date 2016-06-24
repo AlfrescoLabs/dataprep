@@ -50,7 +50,7 @@ public class DataListsTests extends AbstractTest
     }
     
     @Test
-    public void addContactList()
+    public void addAndUpdateContactList()
     {
         String contactList = "contact" + System.currentTimeMillis();
         ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.CONTACT_LIST, contactList, "contact description");
@@ -61,6 +61,7 @@ public class DataListsTests extends AbstractTest
                     "email", "company", "jobTitle", "phoneOffice", "phoneMobile", "notes");
         Assert.assertFalse(contactItem.getId().isEmpty());
         Assert.assertFalse(contactItem2.getId().isEmpty());
+        Assert.assertNotNull(dataLists.updateDataList(ADMIN, ADMIN, siteId, contactList, "new contact List", "new desc"));
     }
     
     @Test

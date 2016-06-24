@@ -55,7 +55,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void addCalendarEvent()
+    public void addAndUpdateCalendarEvent()
     {
         Date today = new Date();
         Assert.assertTrue(pageService.addCalendarEvent(user, password, theSite, "what1", "where1", "description2", today, today,
@@ -67,6 +67,7 @@ public class SitePagesActionTests extends AbstractTest
         Assert.assertNotNull(name1);
         Assert.assertNotNull(name2);
         Assert.assertFalse(name1.equals(name2));
+        Assert.assertTrue(pageService.updateEvent(user, password, theSite,name1, "what1-new", "where1-new", today, today, "10:00 PM", "11:00 PM", false));
     }
 
     @Test
@@ -135,7 +136,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createWikiPage()
+    public void createAndUpdateWikiPage()
     {
         String wikiTitle1 = "wiki_1" + System.currentTimeMillis();
         String wikiTitle2 = "Wiki Title" + System.currentTimeMillis();
@@ -145,6 +146,7 @@ public class SitePagesActionTests extends AbstractTest
         Assert.assertTrue(pageService.wikiExists(user, password, theSite, wikiTitle1));
         Assert.assertTrue(pageService.wikiExists(user, password, theSite, wikiTitle2));
         Assert.assertFalse(pageService.wikiExists(user, password, theSite, "fakeWiki"));
+        Assert.assertTrue(pageService.updateWikiPage(user, password, theSite, wikiTitle2, "newwikititle1", "new content1", tags));
     }
     
     @Test
@@ -175,7 +177,7 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createBlog()
+    public void createAndUpdateBlog()
     {
         String draftBlog = "draftCreate" + System.currentTimeMillis(); 
         String publishBlog = "publishCreate" + System.currentTimeMillis();
@@ -184,6 +186,7 @@ public class SitePagesActionTests extends AbstractTest
         Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, true, tags));
         Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, true));
         Assert.assertTrue(pageService.blogExists(user, password, theSite, publishBlog, false));
+        Assert.assertTrue( pageService.updateBlogPost(user, password, theSite, draftBlog, draftBlog+"-ed", draftBlog+"new text", false));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -226,11 +229,12 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createLink()
+    public void createAndUpdateLink()
     {
         String linkTitle = "linkCreate" + System.currentTimeMillis();
         Assert.assertTrue(pageService.createLink(user, password, theSite, linkTitle, linkTitle, linkTitle, true, tags));
         Assert.assertTrue(pageService.linkExists(user, password, theSite, linkTitle));
+        Assert.assertTrue(pageService.updateLink(user, password, theSite, linkTitle, "new link title", "new url", "new description", true, tags));
     }
     
     @Test(expectedExceptions = RuntimeException.class)
@@ -274,12 +278,13 @@ public class SitePagesActionTests extends AbstractTest
     }
     
     @Test
-    public void createDiscussionTopic()
+    public void createAndUpdateDiscussionTopic()
     {
         String topicTitle = "topic-" + System.currentTimeMillis();
         site.addPageToSite(user, password, theSite, Page.DISCUSSIONS, null);
         Assert.assertTrue(pageService.createDiscussion(user, password, theSite, topicTitle, topicTitle, tags));
         Assert.assertTrue(pageService.discussionExists(user, password, theSite, topicTitle));
+        Assert.assertTrue(pageService.updateDiscussion(user, password, theSite, topicTitle, "new title1", "new desc", tags));
     }
     
     @Test

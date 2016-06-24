@@ -102,7 +102,7 @@ public class UserService extends CMISUtil
             case HttpStatus.SC_OK:
                 if (logger.isTraceEnabled())
                 {
-                    logger.trace("User created successfully: " + userName);
+                    logger.info("User created successfully: " + userName);
                 }
                 return true;
             case HttpStatus.SC_CONFLICT:

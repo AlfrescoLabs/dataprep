@@ -135,6 +135,7 @@ public class SiteService
        {
            throw new RuntimeException("Failed to create site:" + siteId);
        }
+       logger.info("Site created successfully: " + title);
    }
     /**
      * Checks if site exists

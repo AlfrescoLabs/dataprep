@@ -963,7 +963,7 @@ public class ContentService extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param docType file type
-     * @param docName file name
+     * @param docName file name to be updated
      * @param newContent new content of the file
      * @return true if updated
      */

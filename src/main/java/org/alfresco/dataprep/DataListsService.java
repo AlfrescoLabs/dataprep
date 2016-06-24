@@ -109,6 +109,38 @@ public class DataListsService extends CMISUtil
         newfold.updateProperties(newProp);
         return id;
     }
+    
+    
+    /**
+     * Update data list.
+     * 
+     * @param userName String username
+     * @param password String password
+     * @param siteName String site id
+     * @param listName String name of the list to be updated
+     * @param newListName String new name
+     * @param newDescription String new description
+     * @return ObjectId id of the updated created list
+     */
+    public ObjectId updateDataList(final String userName,
+                                   final String password,
+                                   final String siteName,
+                                   final String listName,
+                                   final String newListName,
+                                   final String newDescription)
+    {
+        getDataLists(userName, password, siteName);
+        String dataListName=getDataListName(userName, password, siteName, listName);
+        
+        // set new title and new description
+        Session session = getCMISSession(userName, password);
+        Folder newfold = (Folder) session.getObjectByPath("/sites/" + siteName + "/datalists/" + dataListName);
+        Map<String, Object> newProp = new HashMap<String, Object>();
+        newProp.put("cm:title", newListName);
+        newProp.put("cm:description", newDescription);
+        return newfold.updateProperties(newProp);
+        
+    }
 
     /**
      * Get data list from a site.

@@ -350,6 +350,133 @@ public class SitePagesService
         }
         return false;
     }
+    
+    /**
+     * Update an event
+     * @param userName String user name
+     * @param password String user password
+     * @param siteName String site name
+     * @param eventName String even name to be updated should be returned by {@link #getEventName()}
+     * @param newWhat String new what
+     * @param newWhere String new event location
+     * @param newStartDate Date new event start date
+     * @param newEndDate Date new event end date
+     * @param newTimeStart String new event start time
+     * @param newTimeEnd String new event time finish
+     * @param newAllDay boolean new all day event
+     * @return boolean true if event is updated
+     */
+    @SuppressWarnings("unchecked")
+    public boolean updateEvent(final String userName,
+                               final String password,
+                               final String siteName,
+                               final String eventName,
+                               final String newWhat,
+                               final String newWhere,
+                               Date newStartDate,
+                               Date newEndDate,
+                               String newTimeStart,
+                               String newTimeEnd,
+                               final boolean newAllDay)
+    {
+        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName) || StringUtils.isEmpty(eventName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        if(StringUtils.isEmpty(eventName))
+        {
+            throw new RuntimeException("Event not found");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/event/" + siteName + "/" + eventName;
+        Date currentDate = new Date();
+        String pattern = "yyyy-MM-dd'T'Z";
+        SimpleDateFormat fulldate = new SimpleDateFormat("EEEE, dd MMMM, yyyy");
+        SimpleDateFormat fullFormat = new SimpleDateFormat(pattern);
+        DateTimeFormatter dtf = DateTimeFormat.forPattern(pattern);
+        String fulldatefrom = "";
+        String fulldateto = "";
+        String timeStart24 = "";
+        String startAt, endAt;
+        if(newTimeStart.contains("AM") || newTimeStart.contains("PM"))
+        {
+            timeStart24 = convertTo24Hour(newTimeStart);
+        }
+        else
+        {
+            timeStart24 = newTimeStart;
+        }
+        String timeEnd24 = "";
+        if(newTimeEnd.contains("AM") || newTimeEnd.contains("PM"))
+        {
+            timeEnd24 = convertTo24Hour(newTimeEnd);
+        }
+        else
+        {
+            timeEnd24 = newTimeEnd;
+        }
+
+        if(newStartDate == null)
+        {
+            // set the current date
+            fulldatefrom = fulldate.format(currentDate);
+            startAt = fullFormat.format(currentDate);
+            DateTime dateTime = dtf.parseDateTime(startAt);
+            startAt = dateTime.toString().replaceFirst("00:00", timeStart24);
+        }
+        else
+        {
+            fulldatefrom = fulldate.format(newStartDate); 
+            startAt = fullFormat.format(newStartDate);
+            DateTime dateTime = dtf.parseDateTime(startAt);
+            startAt = dateTime.toString().replaceFirst("00:00", timeStart24);
+        }
+        if(newEndDate == null)
+        {
+            // set the current date
+            fulldateto = fulldate.format(currentDate);
+            endAt = fullFormat.format(currentDate);
+            DateTime dateTime = dtf.parseDateTime(endAt);
+            endAt = dateTime.toString().replaceFirst("00:00", timeEnd24);
+        }
+        else
+        {
+            fulldateto = fulldate.format(newEndDate); 
+            endAt = fullFormat.format(newEndDate);
+            DateTime dateTime = dtf.parseDateTime(endAt);
+            endAt = dateTime.toString().replaceFirst("00:00", timeEnd24);
+        }
+        HttpPut put=new HttpPut(reqURL);
+        JSONObject body= new JSONObject();
+        body.put("fromdate", fulldatefrom);
+        body.put("start", newTimeStart);
+        body.put("todate", fulldateto);
+        body.put("end", newTimeEnd);
+        body.put("site", siteName);
+        body.put("page", "calendar");
+        body.put("docfolder", "");
+        body.put("what", newWhat);
+        body.put("where", newWhere);
+        body.put("startAt", startAt);
+        body.put("endAt", endAt);
+        if(newAllDay)
+        {
+            body.put("allday", "on");
+        }
+        HttpResponse response = client.executeRequest(userName, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid site " + siteName);
+            default:
+                logger.error("Unable to update event: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
 
     /**
      * Convert time to 24 hour format
@@ -503,6 +630,63 @@ public class SitePagesService
         }
         return false;
     }
+    
+    /**
+     * Update wiki page
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param wikiTitle String wiki title to be updated
+     * @param newWikiTitle String new wiki title
+     * @param newContent String new wiki content
+     * @param newTags new list of tags
+     * @return true if wiki is updated (204 Status)
+     */
+    @SuppressWarnings("unchecked")
+    public boolean updateWikiPage(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  String wikiTitle,
+                                  String newWikiTitle,
+                                  final String newContent,
+                                  final List<String> newTags)
+    {
+        if (wikiTitle.contains(" ")) 
+        {
+            wikiTitle = wikiTitle.replaceAll(" ", "_");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
+        //updated content and tags
+        HttpPut put = new HttpPut(url);
+        JSONObject body = new JSONObject();
+        body.put("page", "wiki-page");
+        body.put("currentVersion", "1.0");
+        body.put("pagecontent", newContent);
+        body.put("tags", createTagsArray(newTags));
+        HttpResponse response = client.executeRequest(userName, password, body, put);
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+        {
+            throw new RuntimeException("Unable to update content and tags of wiki page.");
+        }
+        //update title
+        HttpPost post = new HttpPost(url);
+        body = new JSONObject();
+        body.put("page", "wiki-page");
+        body.put("name", newWikiTitle);
+        response = client.executeRequest(userName, password, body, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Wiki " + wikiTitle + " or site " + siteName + " doesn't exists");
+            default:
+                logger.error("Unable to update title of wiki page: " + response.toString());
+                break;
+        }
+        return false;
+    }
 
     /**
      * Create a new blog post
@@ -604,6 +788,47 @@ public class SitePagesService
         {
             return true;
         }
+    }
+    
+    /**
+     * Update blog post
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param blogTitle String blog title to be updated
+     * @param newBlogTitle String new blog title
+     * @param newBlogText String new blog text
+     * @param isDraft boolean is draft
+     * @return true if blog is updated (200 Status)
+     */
+    @SuppressWarnings("unchecked")
+    public boolean updateBlogPost(final String userName,
+                                  final String password,
+                                  final String siteName,
+                                  final String blogTitle,
+                                  final String newBlogTitle,
+                                  final String newBlogText,
+                                  final boolean isDraft)
+    {
+        String blogName = getBlogName(userName, password, siteName, blogTitle, isDraft);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";  
+        HttpPut put = new HttpPut(url);
+        JSONObject body = new JSONObject();
+        body.put("title", newBlogTitle);
+        body.put("content", newBlogText);
+        HttpResponse response = client.executeRequest(userName, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Blog doesn't exists " + blogTitle);
+            default:
+                logger.error("Unable to update blog post: " + response.toString());
+                break;
+        }
+        return false;
     }
 
     /**
@@ -864,6 +1089,57 @@ public class SitePagesService
         }
         return false;
     }
+    
+    /**
+     * Update link
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String link title to be updated
+     * @param newLinkTitle String new link title
+     * @param newUrl String link new url
+     * @param newDescription String new link description
+     * @param newInternal boolean new internal
+     * @param newTags new List of tags
+     * @return true if link is updated (200 Status)
+     */
+    @SuppressWarnings("unchecked")
+    public boolean updateLink(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String linkTitle,
+                              final String newLinkTitle,
+                              final String newUrl,
+                              final String newDescription,
+                              final boolean newInternal,
+                              final List<String> newTags)
+    {
+        String linkName = getLinkName(userName, password, siteName, linkTitle);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "links/site/" + siteName + "/links/" + linkName;
+        HttpPut put = new HttpPut(url);
+        JSONObject body = new JSONObject();
+        body.put("title", newLinkTitle);
+        body.put("url", newUrl);
+        body.put("description", newDescription);
+        if(newInternal)
+        {
+            body.put("internal", newInternal);
+        }
+        body.put("tags", createTagsArray(newTags));
+        HttpResponse response = client.executeRequest(userName, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Link doesn't exists " + linkTitle);
+            default:
+                logger.error("Unable to update link: " + response.toString());
+                break;
+        }
+        return false;
+    }
 
     /**
      * Create discussion topic
@@ -959,6 +1235,48 @@ public class SitePagesService
         {
             return true;
         }
+    }
+    
+    /**
+     * Update a discussion topic
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param discussionTitle String discussion title to be updated
+     * @param newDiscussionTitle String new title
+     * @param newText String new text
+     * @param newTags List<String> new tags
+     * @return true if updated
+     */
+    @SuppressWarnings("unchecked")
+    public boolean updateDiscussion(final String userName,
+                                    final String password,
+                                    final String siteName,
+                                    final String discussionTitle,
+                                    final String newDiscussionTitle,
+                                    final String newText,
+                                    final List<String> newTags)
+    {
+        String discussionName = getDiscussionName(userName, password, siteName, discussionTitle);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "?page=discussions-topicview";
+        HttpPut put = new HttpPut(url);
+        JSONObject body = new JSONObject();
+        body.put("title", newDiscussionTitle);
+        body.put("content", newText);
+        body.put("tags", createTagsArray(newTags));
+        HttpResponse response = client.executeRequest(userName, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Topic doesn't exists " + discussionTitle);
+            default:
+                logger.error("Unable to updated topic post: " + response.toString());
+                break;
+        }
+        return false;
     }
 
     /**

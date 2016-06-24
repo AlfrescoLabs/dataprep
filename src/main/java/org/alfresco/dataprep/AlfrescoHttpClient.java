@@ -77,6 +77,7 @@ public class AlfrescoHttpClient
         this.host = host;
         this.port = port;
         apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
+        logger.info(String.format("Working on API uri: %s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH));
         client = HttpClientBuilder.create().build();
     }
     
