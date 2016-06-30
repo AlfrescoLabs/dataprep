@@ -176,4 +176,13 @@ public class DataListsTests extends AbstractTest
         ObjectId itemEventId = dataLists.addToDoItem(ADMIN, ADMIN, siteId, toDo, "itemTitle", date, 1, Status.IN_PROGRESS, "notes", userToAssign1, docs);
         Assert.assertFalse(itemEventId.getId().isEmpty());
     }
+    
+    @Test
+    public void deleteContactList()
+    {
+        String contactList = "contact" + System.currentTimeMillis();
+        ObjectId id = dataLists.createDataList(ADMIN, ADMIN, siteId, DataList.CONTACT_LIST, contactList, "contact description");
+        Assert.assertFalse(id.getId().isEmpty());
+        dataLists.deleteDataList(ADMIN, ADMIN, siteId, contactList);
+    }
 }

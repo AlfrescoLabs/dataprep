@@ -141,6 +141,28 @@ public class DataListsService extends CMISUtil
         return newfold.updateProperties(newProp);
         
     }
+    
+    /**
+     * Delete data list.
+     * 
+     * @param userName String username
+     * @param password String password
+     * @param siteName String site id
+     * @param listName String name of the list to be deleted
+     */
+    public void deleteDataList(final String userName,
+                                   final String password,
+                                   final String siteName,
+                                   final String listName)
+    {
+        getDataLists(userName, password, siteName);
+        String dataListName=getDataListName(userName, password, siteName, listName);
+        
+        // set new title and new description
+        Session session = getCMISSession(userName, password);
+        CmisObject datalist = session.getObjectByPath("/sites/" + siteName + "/datalists/" + dataListName);
+        datalist.delete();        
+    }
 
     /**
      * Get data list from a site.
