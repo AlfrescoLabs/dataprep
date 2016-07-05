@@ -1474,16 +1474,16 @@ public class ContentActions extends CMISUtil
      * @return true (200 OK) if permission is set
      */
     public boolean removePermissionForUser(final String userName,
-                                            final String password,
-                                            final String siteName,
-                                            final String contentName,
-                                            final String userToRemove,
-                                            final String role,
-                                            final boolean isInherited)
+                                           final String password,
+                                           final String siteName,
+                                           final String contentName,
+                                           final String userToRemove,
+                                           final String role,
+                                           final boolean isInherited)
     {
         return managePermission(userName, password, siteName, contentName, true, userToRemove, null, role, isInherited, true);
     }
-    
+
     /**
      * Remove permission from a group
      * 
@@ -1497,12 +1497,12 @@ public class ContentActions extends CMISUtil
      * @return true (200 OK) if permission is set
      */
     public boolean removePermissionForGroup(final String userName,
-                                             final String password,
-                                             final String siteName,
-                                             final String contentName,
-                                             final String groupToRemove,
-                                             final String role,
-                                             final boolean isInherited)
+                                            final String password,
+                                            final String siteName,
+                                            final String contentName,
+                                            final String groupToRemove,
+                                            final String role,
+                                            final boolean isInherited)
     {
         return managePermission(userName, password, siteName, contentName, false, null, groupToRemove, role, isInherited, true);
     }

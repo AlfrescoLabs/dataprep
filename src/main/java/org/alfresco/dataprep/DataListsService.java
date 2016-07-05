@@ -274,9 +274,9 @@ public class DataListsService extends CMISUtil
      * @return {@link ObjectId} of new created item
      */
     private ObjectId addItem(final String userName,
-                            final String password,
-                            final ObjectId objectId,
-                            Map<String, Object> propertiesMap)
+                             final String password,
+                             final ObjectId objectId,
+                             Map<String, Object> propertiesMap)
     {
         try
         {

@@ -100,10 +100,7 @@ public class UserService extends CMISUtil
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
-                if (logger.isTraceEnabled())
-                {
-                    logger.info("User created successfully: " + userName);
-                }
+                logger.info("User created successfully: " + userName);
                 return true;
             case HttpStatus.SC_CONFLICT:
                 if (logger.isTraceEnabled())
@@ -189,10 +186,7 @@ public class UserService extends CMISUtil
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("User deleted successfully: " + userName);
-                }
+                logger.trace("User deleted successfully: " + userName);
                 return true;
             case HttpStatus.SC_NOT_FOUND:
                 throw new RuntimeException("User: " + userName + " doesn't exists");
@@ -524,10 +518,7 @@ public class UserService extends CMISUtil
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("Role " + role + " successfully updated for " + userName);
-                }
+                logger.info("Role " + role + " successfully updated for " + userName);
                 return true;
             case HttpStatus.SC_NOT_FOUND:
                 throw new RuntimeException("Invalid site " + siteName);
@@ -654,6 +645,14 @@ public class UserService extends CMISUtil
                               final int position)
     {
         login(userName, password);
+        if(column > 4 || column < 1)
+        {
+            throw new RuntimeException("Maximum number of columns must be at between 1 and 4");
+        }
+        if(position > 5 || position < 1)
+        {
+            throw new RuntimeException("Maximum number of position must be between 1 and 5");
+        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
         JSONObject body = new JSONObject();
@@ -691,10 +690,7 @@ public class UserService extends CMISUtil
             HttpResponse response = client.execute(userName, password, post);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
-                if(logger.isTraceEnabled())
-                {
-                    logger.trace("Dashlet " + dashlet.name + " was added on user: " + userName + " dashboard");
-                }
+                logger.info("Dashlet " + dashlet.name + " was added on user: " + userName + " dashboard");
                 return true;
             }
             else

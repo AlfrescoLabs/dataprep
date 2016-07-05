@@ -460,10 +460,7 @@ public class SiteService
         HttpResponse response = client.executeRequest(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace("Page " + page.pageId + " was added to site " + siteName);
-            }
+            logger.info("Page " + page.pageId + " was added to site " + siteName);
             return true;
         }
         else
@@ -566,10 +563,7 @@ public class SiteService
         HttpResponse response = client.executeRequest(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);
-            }
+            logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);
             return true;
         }
         else
