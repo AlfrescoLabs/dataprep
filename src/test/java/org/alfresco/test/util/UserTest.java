@@ -114,7 +114,7 @@ public class UserTest extends AbstractTest
     public void deleteUserContainingSpecialCharacters()
     {
         String userNameWithSpecialCharacters = "delete \"#user;<=>with?[]^special`{|}characters";
-        userService.create(ADMIN, ADMIN, userNameWithSpecialCharacters, password, email, firstName, lastName);
+        userService.create(ADMIN, ADMIN, userNameWithSpecialCharacters, password + "@test", email, firstName, lastName);
         Assert.assertTrue(userService.delete(ADMIN, ADMIN, userNameWithSpecialCharacters));
         Assert.assertFalse(userService.userExists(ADMIN, ADMIN, userNameWithSpecialCharacters));
     }
@@ -291,8 +291,8 @@ public class UserTest extends AbstractTest
     {
         String theUser = "alfrescouser" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, theUser, password, theUser + domain, firstName, lastName);
-        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_MEETING_WORKSPACES, DashletLayout.THREE_COLUMNS, 3, 1));
-        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DISCUSSIONS, DashletLayout.THREE_COLUMNS, 3, 2));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.THREE_COLUMNS, 3, 1));
+        Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_SITES, DashletLayout.THREE_COLUMNS, 3, 2));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.WEB_VIEW, DashletLayout.FOUR_COLUMNS, 4, 1));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.MY_DOC_WORKSPACES, DashletLayout.FOUR_COLUMNS, 4, 2));
         Assert.assertTrue(userService.addDashlet(theUser, password, UserDashlet.RSS_FEED, DashletLayout.FOUR_COLUMNS, 4, 3));

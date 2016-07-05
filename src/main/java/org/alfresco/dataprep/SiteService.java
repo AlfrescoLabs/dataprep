@@ -460,7 +460,14 @@ public class SiteService
         HttpResponse response = client.executeRequest(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
-            logger.info("Page " + page.pageId + " was added to site " + siteName);
+            if(!multiplePages)
+            {
+                logger.info("Successfully added page "+ page.name() +" to site " + siteName);
+            }
+            else
+            {
+                logger.info("Successfully added "+ pages.size() + " pages to site " + siteName);
+            }
             return true;
         }
         else

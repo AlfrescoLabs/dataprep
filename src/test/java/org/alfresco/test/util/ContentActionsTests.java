@@ -645,7 +645,7 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test(expectedExceptions = RuntimeException.class)
-    public void copyToBPathFakeTo()
+    public void copyToPathFakeTo()
     {
         contentAction.copyTo(userName, password, "Shared", "fakePath");
     }
