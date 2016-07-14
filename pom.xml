@@ -5,7 +5,7 @@
 	<name>Alfresco Dataprep</name>
 	<description>Alfresco dataprep, collection of helpers to prepare and load Alfresco test data</description>
 	<groupId>org.alfresco.test</groupId>
-	<version>1.9.1</version>
+	<version>1.10-SNAPSHOT</version>
 	<organization>
 		<name>Alfresco Software</name>
 		<url>http://www.alfresco.com/</url>
@@ -28,7 +28,7 @@
 		<connection>scm:git:https://github.com/AlfrescoTestAutomation/dataprep.git</connection>
 		<url>https://github.com/AlfrescoTestAutomation/dataprep</url>
 		<developerConnection>scm:git:https://github.com/AlfrescoTestAutomation/dataprep.git</developerConnection>
-		<tag>dataprep-1.10-SNAPSHOT</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<properties>
 		<spring.version>4.1.6.RELEASE</spring.version>
