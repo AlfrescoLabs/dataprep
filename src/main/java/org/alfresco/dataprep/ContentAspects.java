@@ -330,6 +330,29 @@ public class ContentAspects extends CMISUtil
     }
     
     /**
+     * Add Email Alias aspect (emailserver:aliasable)
+     *  
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param contentName folder name
+     * @param addressee value of addressee property
+     */
+    public void addEmailAlias(final String userName,
+                           final String password,
+                           final String siteName,
+                           final String contentName,
+                           final String addressee)
+    {
+        Session session = getCMISSession(userName, password);
+        addAspect(session, siteName, contentName, DocumentAspect.ALIASABLE_EMAIL);
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        propertyMap.put("emailserver:alias", addressee);
+        String contentNodeRef = getNodeRef(session, siteName, contentName);
+        addProperties(session, contentNodeRef, propertyMap);
+    }
+    
+    /**
      * Method to add Index Control Aspect 
      * 
      * @param userName login username
