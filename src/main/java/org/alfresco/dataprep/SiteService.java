@@ -702,4 +702,82 @@ public class SiteService
     {
         return true;
     }
+    
+    /**
+     * Set site as IMAP favorites
+     * 
+     * @param userName String identifier
+     * @param password String password
+     * @param siteName String site name
+     * @return true if marked as IMAP favorite
+     * @throws RuntimeException if site doesn't exists
+     */
+    public boolean setIMAPFavorite(final String userName,
+                               final String password,
+                               final String siteName)
+    {
+        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "people/" + userName + "/preferences";
+        HttpPost post  = new HttpPost(reqUrl);
+        String jsonInput;
+        jsonInput = "{\"org\": {\"alfresco\":{\"share\":{\"sites\":{\"imapFavourites\":{\"" + siteName + "\":true}}}}}}";
+        StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        HttpResponse response = client.executeRequest(userName, password, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Site doesn't exists " + siteName);
+            default:
+                logger.error("Unable to mark as IMAP favorite: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Remove site from IMAP favorites
+     * 
+     * @param userName String identifier
+     * @param password String password
+     * @param siteName String site name
+     * @return true if removed from IMAP favorites
+     * @throws RuntimeException if site doesn't exists
+     */
+    public boolean removeIMAPFavorite(final String userName,
+                               final String password,
+                               final String siteName)
+    {
+        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "people/" + userName + "/preferences";
+        HttpPost post  = new HttpPost(reqUrl);
+        String jsonInput;
+        jsonInput = "{\"org\": {\"alfresco\":{\"share\":{\"sites\":{\"imapFavourites\":{\"" + siteName + "\":false}}}}}}";
+        StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
+        post.setEntity(se);
+        HttpResponse response = client.executeRequest(userName, password, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Site doesn't exists " + siteName);
+            default:
+                logger.error("Unable to mark as IMAP favorite: " + response.toString());
+                break;
+        }
+        return false;
+    }
 }

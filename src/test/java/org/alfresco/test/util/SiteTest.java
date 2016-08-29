@@ -236,4 +236,21 @@ public class SiteTest extends AbstractTest
         Assert.assertTrue(favorites.get(0).equals(site1));
         Assert.assertTrue(favorites.get(1).equals(site2));
     }
+    
+    @Test()
+    public void setSiteAsIMAPFavorite()
+    {
+        String site1 = "IMAPsetsite-1" + System.currentTimeMillis();
+        site.create(theUser, password, MY_DOMAIN, site1, site1 + " description", Visibility.PUBLIC);
+        Assert.assertTrue(site.setIMAPFavorite(theUser, password, site1));
+    }
+    
+    @Test()
+    public void removeSiteFromIMAPFavorites()
+    {
+        String site1 = "IMAPremovesite-1" + System.currentTimeMillis();
+        site.create(theUser, password, MY_DOMAIN, site1, site1 + " description", Visibility.PUBLIC);
+        Assert.assertTrue(site.setIMAPFavorite(theUser, password, site1));
+        Assert.assertTrue(site.removeIMAPFavorite(theUser, password, site1));
+    }
 }
