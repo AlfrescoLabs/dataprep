@@ -592,7 +592,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         HttpState state = null;
         org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
-        String reqURL = client.getAlfrescoUrl() + "share/page/dologin";
+        String reqURL = client.getShareUrl() + "share/page/dologin";
         org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
         NameValuePair[] formParams;
         CookieStore cookieStore = new BasicCookieStore();
@@ -612,7 +612,7 @@ public class UserService extends CMISUtil
                 state = theClient.getState();
                 post.releaseConnection();
                 org.apache.commons.httpclient.methods.GetMethod get = new org.apache.commons.httpclient.methods.GetMethod(
-                        client.getAlfrescoUrl() + "share/page/user/" + userName + "/dashboard");
+                        client.getShareUrl() + "share/page/user/" + userName + "/dashboard");
                 theClient.setState(state);
                 theClient.executeMethod(get);
                 get.releaseConnection();
@@ -654,7 +654,7 @@ public class UserService extends CMISUtil
             throw new RuntimeException("Maximum number of position must be between 1 and 5");
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
+        String url = client.getShareUrl() + DashboardCustomization.ADD_DASHLET_URL;
         JSONObject body = new JSONObject();
         JSONArray array = new JSONArray();
         body.put("dashboardPage", "user/" + userName + "/dashboard");
@@ -716,7 +716,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         HttpState state = null;
         org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
-        String reqURL = client.getAlfrescoUrl() + "share/page/dologout";
+        String reqURL = client.getShareUrl() + "share/page/dologout";
         org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
         try
         {

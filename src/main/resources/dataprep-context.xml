@@ -16,7 +16,9 @@
         <property name="host" value="${alfresco.server}"/>
         <property name="port" value="${alfresco.port}"/>
         <property name="scheme" value="${alfresco.scheme}"/>
+        <property name="sharePort" value="${share.port}"/>
     </bean>
+    
     <bean id="publicApiFactory" class="org.alfresco.dataprep.BasicAuthPublicApiFactory" >
         <property name="scheme" value="${alfresco.scheme}"/>
         <property name="port" value="${alfresco.port}"/>

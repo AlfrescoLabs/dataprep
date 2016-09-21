@@ -82,10 +82,11 @@ public class ContentService extends CMISUtil
         {
             throw new IllegalArgumentException("Parameter missing");
         }
-        Map<String, String> properties = new HashMap<String, String >();
+        Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folderName);
         Session session = getCMISSession(userName, password);
+
         Folder newFolder;
         try
         {
@@ -364,6 +365,7 @@ public class ContentService extends CMISUtil
             properties.put(PropertyIds.NAME, docFile.getName());
         }
         Session session = getCMISSession(userName, password);
+        
         byte[] content = docContent.getBytes();
         InputStream stream = new ByteArrayInputStream(content);
         Document d;
@@ -553,11 +555,11 @@ public class ContentService extends CMISUtil
      * @throws CmisRuntimeException if invalid folder
      */
     private boolean deleteTreeFolder(final String userName,
-                                  final String password,
-                                  final boolean inRepository,
-                                  final String siteName,
-                                  String pathToFolder,
-                                  final String folderName)
+                                     final String password,
+                                     final boolean inRepository,
+                                     final String siteName,
+                                     String pathToFolder,
+                                     final String folderName)
     {   
         String folderId;
         try
@@ -603,9 +605,9 @@ public class ContentService extends CMISUtil
      * @param folderName folder name
      */
     public boolean deleteTree(final String userName,
-                           final String password,
-                           final String siteName,
-                           final String folderName)
+                              final String password,
+                              final String siteName,
+                              final String folderName)
     {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName) 
                 || StringUtils.isEmpty(folderName))

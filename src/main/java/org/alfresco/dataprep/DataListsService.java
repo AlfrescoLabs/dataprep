@@ -161,7 +161,7 @@ public class DataListsService extends CMISUtil
         // set new title and new description
         Session session = getCMISSession(userName, password);
         CmisObject datalist = session.getObjectByPath("/sites/" + siteName + "/datalists/" + dataListName);
-        datalist.delete();        
+        datalist.delete();
     }
 
     /**

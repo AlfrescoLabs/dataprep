@@ -64,19 +64,16 @@ public class AlfrescoHttpClient
     private String scheme;
     private String host;
     private int port;
+    private int sharePort;
     private String apiUrl;
     private String alfrescoUrl;
 
-    public AlfrescoHttpClient(final String scheme, final String host)
-    {
-        this(scheme, host, 80);
-    }
-    
-    public AlfrescoHttpClient(final String scheme, final String host, final int port)
+    public AlfrescoHttpClient(final String scheme, final String host, final int port, final int sharePort)
     {
         this.scheme = scheme;
         this.host = host;
         this.port = port;
+        this.sharePort = sharePort;
         apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
         client = HttpClientBuilder.create().build();
     }
@@ -552,6 +549,11 @@ public class AlfrescoHttpClient
         return port;
     }
     
+    public int getSharePort()
+    {
+        return sharePort;
+    }
+    
     public String getApiUrl()
     {
         return apiUrl;
@@ -561,5 +563,10 @@ public class AlfrescoHttpClient
     {
         alfrescoUrl = String.format("%s://%s:%d/", scheme, host, port);
         return alfrescoUrl;
+    }
+    
+    public String getShareUrl()
+    {
+        return String.format("%s://%s:%d/", scheme, host, sharePort);
     }
 }

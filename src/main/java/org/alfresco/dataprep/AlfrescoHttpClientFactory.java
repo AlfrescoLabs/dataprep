@@ -27,11 +27,22 @@ public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient
     private String host;
     private String scheme;
     private int port;
+    private int sharePort;
     
+    public int getSharePort()
+    {
+        return sharePort;
+    }
+
+    public void setSharePort(int sharePort)
+    {
+        this.sharePort = sharePort;
+    }
+
     @Scope("prototype")
     public AlfrescoHttpClient getObject()
     {
-        return new AlfrescoHttpClient(scheme, host, port);
+        return new AlfrescoHttpClient(scheme, host, port, sharePort);
     }
 
     public Class<?> getObjectType()

@@ -102,6 +102,7 @@ public class SiteService
     {
         create(username, password, domain, siteId, siteId, description, visibility);
     }
+    
     /**
     * Create site using Alfresco public API.
     * 
@@ -137,6 +138,7 @@ public class SiteService
        }
        logger.info("Site created successfully: " + title);
    }
+   
     /**
      * Checks if site exists
      * 
@@ -168,6 +170,7 @@ public class SiteService
             client.close();
         }
     }
+    
     /**
      * Delete an alfresco site.
      * 
@@ -433,7 +436,7 @@ public class SiteService
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + DashboardCustomization.SITE_PAGES_URL;
+        String url = client.getShareUrl() + DashboardCustomization.SITE_PAGES_URL;
         JSONObject body = new JSONObject();
         JSONArray array = new JSONArray();
         body.put("siteId", siteName);
@@ -541,7 +544,7 @@ public class SiteService
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String url = client.getAlfrescoUrl() + DashboardCustomization.ADD_DASHLET_URL;
+        String url = client.getShareUrl() + DashboardCustomization.ADD_DASHLET_URL;
         JSONObject body = new JSONObject();
         JSONArray array = new JSONArray();
         body.put("dashboardPage", "site/" + siteName + "/dashboard");
@@ -687,23 +690,6 @@ public class SiteService
     }
     
     /**
-     * Enable or disable activity feed from site
-     * 
-     * @param userName String user name
-     * @param password String password
-     * @param siteName String site id
-     * @param enable boolean enable or disable
-     * @return true if successful
-     */
-    public boolean setActivityFeed(final String userName,
-                                   final String password,
-                                   final String siteName,
-                                   final boolean enable)
-    {
-        return true;
-    }
-    
-    /**
      * Set site as IMAP favorites
      * 
      * @param userName String identifier
@@ -713,8 +699,8 @@ public class SiteService
      * @throws RuntimeException if site doesn't exists
      */
     public boolean setIMAPFavorite(final String userName,
-                               final String password,
-                               final String siteName)
+                                   final String password,
+                                   final String siteName)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
@@ -752,8 +738,8 @@ public class SiteService
      * @throws RuntimeException if site doesn't exists
      */
     public boolean removeIMAPFavorite(final String userName,
-                               final String password,
-                               final String siteName)
+                                      final String password,
+                                      final String siteName)
     {
         if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(siteName))
         {
