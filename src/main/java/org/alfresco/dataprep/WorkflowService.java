@@ -256,15 +256,15 @@ public class WorkflowService extends CMISUtil
      * @return String workflow id
      */
     public String startGroupReview(final String userName,
-                                    final String password,
-                                    final String message,
-                                    final Date dueDate,
-                                    final String assignedGroup,
-                                    final Priority priority,
-                                    final String documentsSite,
-                                    final List<String> documents,
-                                    final int requiredApprovePercent,
-                                    final boolean sendEmail)
+                                   final String password,
+                                   final String message,
+                                   final Date dueDate,
+                                   final String assignedGroup,
+                                   final Priority priority,
+                                   final String documentsSite,
+                                   final List<String> documents,
+                                   final int requiredApprovePercent,
+                                   final boolean sendEmail)
     {
         return startWorkflow(userName, password, WorkflowType.GroupReview, message, dueDate, priority,
                 null, assignedGroup, false, documentsSite, documents, null, requiredApprovePercent, sendEmail);

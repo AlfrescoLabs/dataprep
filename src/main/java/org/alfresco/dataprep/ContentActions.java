@@ -1235,7 +1235,6 @@ public class ContentActions extends CMISUtil
         return copyTo(userName, password, null, null, null, null, true, pathFrom, pathTo);
     }
 
-    
     /**
      * Copy folder with all childs 
      * 
@@ -1505,5 +1504,29 @@ public class ContentActions extends CMISUtil
                                             final boolean isInherited)
     {
         return managePermission(userName, password, siteName, contentName, false, null, groupToRemove, role, isInherited, true);
+    }
+    
+    public void renameContent(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String contentName,
+                              final String newName)
+    {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put(PropertyIds.NAME, newName);
+        Session session = getCMISSession(userName, password);
+        addProperties(session,  getNodeRef(session, siteName, contentName), properties);
+    }
+    
+    
+    public void renameContent(final String userName,
+                              final String password,
+                              final String contentPath,
+                              final String newName)
+    {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put(PropertyIds.NAME, newName);
+        Session session = getCMISSession(userName, password);
+        addProperties(session, getNodeRefByPath(session, contentPath), properties);
     }
 }

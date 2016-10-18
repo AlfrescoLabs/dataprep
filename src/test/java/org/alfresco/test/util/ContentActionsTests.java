@@ -737,4 +737,25 @@ public class ContentActionsTests extends AbstractTest
         Assert.assertTrue(contentAction.removeLike(userToInvite, password, "Shared/" + repoDoc));
         Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 0);
     }
+    
+    @Test
+    public void renameContentFromSite()
+    {
+        String renameDoc = "renameDoc" + System.currentTimeMillis();
+        content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, renameDoc, renameDoc);
+        contentAction.renameContent(userName, password, siteName, renameDoc, renameDoc + "-edit");
+        Assert.assertTrue(content.getNodeRef(userName, password, siteName, renameDoc).isEmpty());
+        Assert.assertFalse(content.getNodeRef(userName, password, siteName, renameDoc + "-edit").isEmpty());
+    }
+    
+    @Test
+    public void renameFolderInRepository()
+    {
+        String folder = "newFolder" + System.currentTimeMillis();
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
+        Assert.assertFalse(newFolder.getId().isEmpty());
+        contentAction.renameContent(ADMIN, ADMIN, "Shared/" + folder, folder + "-edit");
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + folder).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + folder + "-edit").isEmpty());
+    }
 }
