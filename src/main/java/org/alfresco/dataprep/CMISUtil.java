@@ -322,14 +322,13 @@ public class CMISUtil
     /**
      * Method to add aspect
      *
-     * @param userName String identifier
-     * @param password String password
+     * @param session cmis session
      * @param contentNodeRef String node identifier
      * @param documentAspects aspect to apply on node
      */
-    public void addAspect(final Session session,
-                          final String contentNodeRef,
-                          List<DocumentAspect> documentAspects)
+    protected void addAspect(final Session session,
+                             final String contentNodeRef,
+                             List<DocumentAspect> documentAspects)
     {
         try
         {
@@ -346,6 +345,45 @@ public class CMISUtil
             for (DocumentAspect aspect : documentAspects)
             {
                 secondaryTypes.add(aspect.getProperty());
+            }
+            Map<String, Object> properties = new HashMap<String, Object>();
+            {
+                properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondaryTypes);
+            }
+            contentObj.updateProperties(properties);
+        }
+        catch(CmisInvalidArgumentException ia)
+        {
+            throw new CmisRuntimeException("Invalid content " + contentNodeRef, ia);
+        }
+    }
+    
+    /**
+     * Method to add aspect
+     *
+     * @param session cmis session
+     * @param contentNodeRef String node identifier
+     * @param aspectPropertyName aspect to apply on node
+     */
+    protected void addAspect(final Session session,
+                             final String contentNodeRef,
+                             final String... aspectPropertiesName)
+    {
+        try
+        {
+            CmisObject contentObj = session.getObject(contentNodeRef);
+            List<SecondaryType> secondaryTypesList = contentObj.getSecondaryTypes();
+            List<String> secondaryTypes = new ArrayList<String>();
+            if (secondaryTypesList != null)
+            {
+                for (SecondaryType secondaryType : secondaryTypesList)
+                {
+                    secondaryTypes.add(secondaryType.getId());
+                }
+            }
+            for(String aspect : aspectPropertiesName)
+            {
+                secondaryTypes.add(aspect);
             }
             Map<String, Object> properties = new HashMap<String, Object>();
             {
@@ -380,6 +418,16 @@ public class CMISUtil
         {
             throw new CmisRuntimeException("Invalid content " + contentNodeRef, ia);
         }
+    }
+    
+    public void addProperties(final String userName,
+                              final String password,
+                              final String pathToContent,
+                              Map<String, Object> properties)
+    {
+        Session session = getCMISSession(userName, password);
+        CmisObject content = session.getObjectByPath(pathToContent);
+        content.updateProperties(properties);
     }
 
     /**
@@ -580,7 +628,7 @@ public class CMISUtil
     /**
      * Get cmis object by path
      * 
-     * @param session the session
+     * @param session {@link Session} the session
      * @param pathToItem String path to item
      * @return CmisObject cmis object
      */
@@ -598,11 +646,34 @@ public class CMISUtil
     }
     
     /**
+     * Get cmis object by path
+     * 
+     * @param userName String user name
+     * @param password String user password
+     * @param pathToItem String path to item
+     * @return CmisObject cmis object
+     */
+    public CmisObject getCmisObject(final String userName,
+                                    final String password,
+                                    final String pathToItem)
+    {
+        try
+        {
+            Session session = getCMISSession(userName, password);
+            return session.getObjectByPath(pathToItem);
+        }
+        catch(CmisObjectNotFoundException nf)
+        {
+            throw new CmisRuntimeException("Path doesn't exist " + pathToItem);
+        }
+    }
+    
+    /**
      * Get Document object for a file
      *
      * @param session the session
      * @param siteId site id
-     * @param contentName file or folder name
+     * @param fileName file name
      * @return CmisObject cmis object
      */
     public Document getDocumentObject(final Session session,
@@ -623,11 +694,36 @@ public class CMISUtil
     }
     
     /**
+     * Get Document object for a file
+     *
+     * @param userName String user name
+     * @param password String user password
+     * @param pathToDocument path to document
+     * @return CmisObject cmis object
+     */
+    public Document getDocumentObject(final String userName,
+                                      final String password,
+                                      final String pathToDocument)
+    {
+        Document d = null;
+        CmisObject docObj = getCmisObject(userName, password, pathToDocument);
+        if(docObj instanceof Document)
+        {
+            d = (Document)docObj;
+        }
+        else if(docObj instanceof Folder)
+        {
+            throw new CmisRuntimeException("Content from " + pathToDocument + " is not a document");
+        }
+        return d;
+    }
+    
+    /**
      * Get Folder object for a folder
      *
      * @param session the session
      * @param siteId site id
-     * @param contentName file or folder name
+     * @param folderName folder name
      * @return CmisObject cmis object
      */
     public Folder getFolderObject(final Session session,
@@ -643,6 +739,31 @@ public class CMISUtil
         else if(folderObj instanceof Document)
         {
             throw new CmisRuntimeException("Content " + folderName + " is not a folder");
+        }
+        return f;
+    }
+    
+    /**
+     * Get Folder object for a folder
+     *
+     * @param userName String user name
+     * @param password String user password
+     * @param pathToFolder path to folder
+     * @return CmisObject cmis object
+     */
+    public Folder getFolderObject(final String userName,
+                                  final String password,
+                                  final String pathToFolder)
+    {
+        Folder f = null;
+        CmisObject folderObj = getCmisObject(userName, password, pathToFolder);
+        if(folderObj instanceof Folder)
+        {
+            f = (Folder)folderObj;
+        }
+        else if(folderObj instanceof Document)
+        {
+            throw new CmisRuntimeException("Content from " + pathToFolder + " is not a folder");
         }
         return f;
     }

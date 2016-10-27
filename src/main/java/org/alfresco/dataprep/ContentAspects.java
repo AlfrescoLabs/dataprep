@@ -41,11 +41,10 @@ public class ContentAspects extends CMISUtil
     /**
      * Add aspect for document or folder
      * 
-     * @param userName login username
-     * @param password login password
+     * @param session cmis session
      * @param siteName site name
      * @param contentName file or folder name
-     * @param aspect aspect to add
+     * @param aspect {@link DocumentAspect} aspect to add
      */
     public void addAspect(final Session session,
                           final String siteName,
@@ -65,7 +64,7 @@ public class ContentAspects extends CMISUtil
      * @param password login password
      * @param siteName site name
      * @param contentName file or folder name
-     * @param aspect aspect to add
+     * @param aspect {@link DocumentAspect} aspect to add
      */
     public void addAspect(final String userName,
                           final String password,
@@ -78,6 +77,23 @@ public class ContentAspects extends CMISUtil
         List<DocumentAspect> aspectsToAdd = new ArrayList<DocumentAspect>();
         aspectsToAdd.add(aspect);
         addAspect(session, contentNodeRef, aspectsToAdd);
+    }
+    
+    /**
+     * Add aspect for document or folder
+     * @param userName String user name
+     * @param password String password
+     * @param pathToContent String path to content document or folder
+     * @param aspectPropertyName String aspect property name (e.g. P:cm:dublincore)
+     */
+    public void addAspect(final String userName,
+                          final String password,
+                          final String pathToContent,
+                          final String... aspectPropertiesName)
+    {
+        Session session = getCMISSession(userName, password);
+        String contentNodeRef = getNodeRefByPath(session, pathToContent);
+        addAspect(session, contentNodeRef, aspectPropertiesName);
     }
 
     /**
@@ -105,7 +121,7 @@ public class ContentAspects extends CMISUtil
             for (SecondaryType secondaryType : secondaryTypesList)
             {
                 secondaryTypes.add(secondaryType.getId());
-            }        
+            }
             secondaryTypes.remove(aspectToRemove.getProperty());
             Map<String, Object> properties = new HashMap<String, Object>();
             {
