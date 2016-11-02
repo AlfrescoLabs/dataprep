@@ -69,6 +69,10 @@ public class WorkflowService extends CMISUtil
         {
             return this.id;
         }
+        public String getProcessDefinitionKey()
+        {
+            return this.id.substring(0, this.id.indexOf(":"));
+        }
     }
     
     public enum TaskStatus
