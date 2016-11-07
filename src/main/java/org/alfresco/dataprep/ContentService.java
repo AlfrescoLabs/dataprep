@@ -101,7 +101,11 @@ public class ContentService extends CMISUtil
                 {
                     path = "";
                 }
-                Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
+                if(!String.valueOf(path.charAt(0)).equals("/"))
+                {
+                    path = "/" + path;
+                }
+                Folder repository = (Folder) session.getObjectByPath("/" + path);
                 newFolder = repository.createFolder(properties);
             }
             return newFolder;
@@ -155,7 +159,7 @@ public class ContentService extends CMISUtil
      * @param userName login username
      * @param password login password
      * @param folderName folder name
-     * @param path (e.g: 'Shared', 'Data Dictionary/Scripts)
+     * @param path (e.g: '/Shared', '/Data Dictionary/Scripts)
      * @return Folder CMIS folder object
      */
     public Folder createFolderInRepository(final String userName,
@@ -210,7 +214,7 @@ public class ContentService extends CMISUtil
      * If the folder is in 'Company Home' set the folder or document name in path.
      * @param userName login username
      * @param password login password
-     * @param path String path to folder or document(e.g.: Shared/file.docx, Guest Home/folder)
+     * @param path String path to folder or document(e.g.: /Shared/file.docx, /Guest Home/folder)
      * @throws CmisRuntimeException if error
      */
     public void deleteContentByPath(final String userName,
@@ -285,7 +289,7 @@ public class ContentService extends CMISUtil
      * 
      * @param userName login username
      * @param password login password
-     * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
+     * @param path where to create the document(e.g.: /Shared, /Data Dictionary/Messages)
      * @param docType DocumentType file type
      * @param docName file name
      * @param docContent file content
@@ -391,7 +395,11 @@ public class ContentService extends CMISUtil
                 {
                     path = "";
                 }
-                Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + path);
+                if(!String.valueOf(path.charAt(0)).equals("/"))
+                {
+                    path = "/" + path;
+                }
+                Folder repository = (Folder) session.getObjectByPath(path);
                 d = repository.createDocument(properties, contentStream, VersioningState.MAJOR);
             }
             d.refresh();
@@ -623,7 +631,7 @@ public class ContentService extends CMISUtil
      * 
      * @param userName login username
      * @param password login password
-     * @param path path to folder (e.g. 'Shared')
+     * @param path path to folder (e.g. '/Shared')
      */
     public void deleteTreeByPath(final String userName,
                                  final String password,
@@ -689,6 +697,10 @@ public class ContentService extends CMISUtil
                 if(pathInRepo == null)
                 {
                     pathInRepo = "";
+                }
+                if(!String.valueOf(pathInRepo.charAt(0)).equals("/"))
+                {
+                    pathInRepo = "/" + pathInRepo;
                 }
                 Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathInRepo);
                 d = repository.createDocument(properties, contentStream, VersioningState.MAJOR);

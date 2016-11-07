@@ -379,7 +379,7 @@ public class WorkflowTests extends AbstractTest
         String docToAdd1 = "pathDoc-1-" + System.currentTimeMillis();
         String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTaskByPath", 
                 new Date(), workflowUser, Priority.High, workflowSite, docs, true);
-        contentService.createDocumentInRepository(workflowUser, password, "Shared", DocumentType.MSPOWERPOINT, docToAdd1, docToAdd1);
+        contentService.createDocumentInRepository(workflowUser, password, "/Shared", DocumentType.MSPOWERPOINT, docToAdd1, docToAdd1);
         Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, "Shared/" + docToAdd1));
     }
 }

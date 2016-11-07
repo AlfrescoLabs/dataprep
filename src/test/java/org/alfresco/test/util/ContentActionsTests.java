@@ -69,7 +69,7 @@ public class ContentActionsTests extends AbstractTest
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, document, document);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, permissionDoc, permissionDoc);
-        content.createDocumentInRepository(userName, password, "Shared", DocumentType.PDF, repoDoc, repoDoc);
+        content.createDocumentInRepository(userName, password, "/Shared", DocumentType.PDF, repoDoc, repoDoc);
         content.createFolder(userName, password, folder, siteName);
         userToInvite = "inviteUser" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, userToInvite, password, userToInvite, "invited", "user");
@@ -486,9 +486,9 @@ public class ContentActionsTests extends AbstractTest
         Folder objectMoved = (Folder) contentAction.moveTo(userName, password, siteName, subFolder, siteName, targetFolder);
         Assert.assertTrue(objectMoved.getFolderParent().getName().equals(targetFolder));
         Assert.assertFalse(content.getNodeRefByPath(userName, password,
-                "Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + moveDoc).isEmpty());
+                "/Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + moveDoc).isEmpty());
         Assert.assertTrue(content.getNodeRefByPath(userName, password, 
-                "Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + subFolder).isEmpty());
+                "/Sites/" + siteName + "/documentLibrary/" + sourceFolder + "/" + subFolder).isEmpty());
     }
     
     @Test(expectedExceptions = CmisRuntimeException.class)
@@ -658,7 +658,7 @@ public class ContentActionsTests extends AbstractTest
         CmisObject newObj = contentAction.moveTo(userName, password, "Sites/" + siteName + "/documentLibrary/" + docToMove, "Shared");
         Assert.assertFalse(newObj.getId().isEmpty());
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, docToMove).isEmpty());
-        Assert.assertFalse(content.getNodeRefByPath(userName, password, "Shared/" + docToMove).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(userName, password, "/Shared/" + docToMove).isEmpty());
     }
     
     @Test
@@ -671,9 +671,9 @@ public class ContentActionsTests extends AbstractTest
         tags.add(tag1);
         tags.add(tag2);
         tags.add(tag3);
-        Assert.assertTrue(contentAction.addSingleTag(userName, password, "Shared/" + repoDoc, "singleRepoTag"));
-        Assert.assertTrue(contentAction.addMultipleTags(userName, password, "Shared/" + repoDoc, tags));
-        List<String> getTags = contentAction.getTagNamesFromContent(userName, password, "Shared/" + repoDoc);
+        Assert.assertTrue(contentAction.addSingleTag(userName, password, "/Shared/" + repoDoc, "singleRepoTag"));
+        Assert.assertTrue(contentAction.addMultipleTags(userName, password, "/Shared/" + repoDoc, tags));
+        List<String> getTags = contentAction.getTagNamesFromContent(userName, password, "/Shared/" + repoDoc);
         Assert.assertTrue(getTags.get(0).equals("singleRepoTag".toLowerCase()));
         Assert.assertTrue(getTags.get(1).equals(tag1));
         Assert.assertTrue(getTags.get(2).equals(tag2));
@@ -683,9 +683,9 @@ public class ContentActionsTests extends AbstractTest
     @Test(dependsOnMethods="addTagsInRepository")
     public void removeTagsFromRepository()
     {
-        Assert.assertTrue(contentAction.removeTag(userName, password, "Shared/" + repoDoc, "singleRepoTag"));
-        Assert.assertTrue(contentAction.removeTag(userName, password, "Shared/" + repoDoc, "tag1-repo"));
-        List<String> getTags = contentAction.getTagNamesFromContent(userName, password, "Shared/" + repoDoc);
+        Assert.assertTrue(contentAction.removeTag(userName, password, "/Shared/" + repoDoc, "singleRepoTag"));
+        Assert.assertTrue(contentAction.removeTag(userName, password, "/Shared/" + repoDoc, "tag1-repo"));
+        List<String> getTags = contentAction.getTagNamesFromContent(userName, password, "/Shared/" + repoDoc);
         Assert.assertEquals(getTags.size(), 2);
         Assert.assertTrue(getTags.get(0).equals("tag2-repo"));
         Assert.assertTrue(getTags.get(1).equals("tag3-repo"));
@@ -701,9 +701,9 @@ public class ContentActionsTests extends AbstractTest
         comments.add(comm1);
         comments.add(comm2);
         comments.add(comm3);
-        Assert.assertTrue(contentAction.addComment(userName, password, "Shared/" + repoDoc, "single Comment in Repo"));
-        Assert.assertTrue(contentAction.addMultipleComments(userName, password, "Shared/" + repoDoc, comments));
-        List<String> getTags = contentAction.getComments(userName, password, "Shared/" + repoDoc);
+        Assert.assertTrue(contentAction.addComment(userName, password, "/Shared/" + repoDoc, "single Comment in Repo"));
+        Assert.assertTrue(contentAction.addMultipleComments(userName, password, "/Shared/" + repoDoc, comments));
+        List<String> getTags = contentAction.getComments(userName, password, "/Shared/" + repoDoc);
         Assert.assertTrue(getTags.get(3).equals("single Comment in Repo"));
         Assert.assertTrue(getTags.get(2).equals(comm1));
         Assert.assertTrue(getTags.get(1).equals(comm2));
@@ -713,9 +713,9 @@ public class ContentActionsTests extends AbstractTest
     @Test(dependsOnMethods="addCommentInRepository")
     public void removeCommentsFromRepository()
     {
-        Assert.assertTrue(contentAction.removeComment(userName, password, "Shared/" + repoDoc, "single Comment in Repo"));
-        Assert.assertTrue(contentAction.removeComment(userName, password, "Shared/" + repoDoc, "comm-repo1"));
-        List<String> getTags = contentAction.getComments(userName, password, "Shared/" + repoDoc);
+        Assert.assertTrue(contentAction.removeComment(userName, password, "/Shared/" + repoDoc, "single Comment in Repo"));
+        Assert.assertTrue(contentAction.removeComment(userName, password, "/Shared/" + repoDoc, "comm-repo1"));
+        List<String> getTags = contentAction.getComments(userName, password, "/Shared/" + repoDoc);
         Assert.assertEquals(getTags.size(), 2);
         Assert.assertTrue(getTags.get(0).equals("comm-repo3"));
         Assert.assertTrue(getTags.get(1).equals("comm-repo2"));
@@ -724,18 +724,18 @@ public class ContentActionsTests extends AbstractTest
     @Test
     public void likeDocumentRepository()
     {
-        Assert.assertTrue(contentAction.likeContent(userName, password, "Shared/" + repoDoc));
-        Assert.assertTrue(contentAction.likeContent(userToInvite, password, "Shared/" + repoDoc));
-        Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 2);
+        Assert.assertTrue(contentAction.likeContent(userName, password, "/Shared/" + repoDoc));
+        Assert.assertTrue(contentAction.likeContent(userToInvite, password, "/Shared/" + repoDoc));
+        Assert.assertEquals(contentAction.countLikes(userName, password, "/Shared/" + repoDoc), 2);
     }
     
     @Test(dependsOnMethods="likeDocumentRepository")
     public void removeLikeRepository()
     {
-        Assert.assertTrue(contentAction.removeLike(userName, password, "Shared/" + repoDoc));
-        Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 1);
-        Assert.assertTrue(contentAction.removeLike(userToInvite, password, "Shared/" + repoDoc));
-        Assert.assertEquals(contentAction.countLikes(userName, password, "Shared/" + repoDoc), 0);
+        Assert.assertTrue(contentAction.removeLike(userName, password, "/Shared/" + repoDoc));
+        Assert.assertEquals(contentAction.countLikes(userName, password, "/Shared/" + repoDoc), 1);
+        Assert.assertTrue(contentAction.removeLike(userToInvite, password, "/Shared/" + repoDoc));
+        Assert.assertEquals(contentAction.countLikes(userName, password, "/Shared/" + repoDoc), 0);
     }
     
     @Test
@@ -752,10 +752,10 @@ public class ContentActionsTests extends AbstractTest
     public void renameFolderInRepository()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "/Shared");
         Assert.assertFalse(newFolder.getId().isEmpty());
-        contentAction.renameContent(ADMIN, ADMIN, "Shared/" + folder, folder + "-edit");
-        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + folder).isEmpty());
-        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + folder + "-edit").isEmpty());
+        contentAction.renameContent(ADMIN, ADMIN, "/Shared/" + folder, folder + "-edit");
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "/Shared/" + folder).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "/Shared/" + folder + "-edit").isEmpty());
     }
 }

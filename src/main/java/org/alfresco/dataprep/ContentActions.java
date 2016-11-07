@@ -1515,7 +1515,7 @@ public class ContentActions extends CMISUtil
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.put(PropertyIds.NAME, newName);
         Session session = getCMISSession(userName, password);
-        addProperties(session,  getNodeRef(session, siteName, contentName), properties);
+        addProperties(session, getNodeRef(session, siteName, contentName), properties);
     }
     
     

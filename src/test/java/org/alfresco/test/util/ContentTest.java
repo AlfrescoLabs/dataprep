@@ -392,17 +392,17 @@ public class ContentTest extends AbstractTest
     public void createFolderInRepository()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, "/" +folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
         Assert.assertEquals(newFolder.getFolderParent().getName(), "Company Home");
-        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, folder).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "/" + folder).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInRepositoryTwice()
     {
-        content.createFolderInRepository(ADMIN, ADMIN, folder, null);
-        content.createFolderInRepository(ADMIN, ADMIN, folder, null);
+        content.createFolderInRepository(ADMIN, ADMIN, "/" + folder, null);
+        content.createFolderInRepository(ADMIN, ADMIN, "/" + folder, null);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -411,24 +411,24 @@ public class ContentTest extends AbstractTest
         String userName = "cmisUser" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, userName, password, password, "firstname", "lastname");
         String folder = "newFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(userName, password, folder, null);
+        content.createFolderInRepository(userName, password, "/" + folder, null);
     }
 
     @Test
     public void createFolderInRepositoryByPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "Guest Home");
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "/Guest Home");
         Assert.assertFalse(newFolder.getId().isEmpty());
         Assert.assertEquals(newFolder.getFolderParent().getName(), "Guest Home");
-        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "Guest Home/" + folder).isEmpty());
+        Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "/Guest Home/" + folder).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void createFolderInRepositoryInvalidPath()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared/InvalidPath");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "/Shared/InvalidPath");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -439,7 +439,7 @@ public class ContentTest extends AbstractTest
         String folder = "newFolder" + System.currentTimeMillis();
         Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
-        content.deleteContentByPath(userName, password, folder);
+        content.deleteContentByPath(userName, password, "/" + folder);
     }
 
     @Test
@@ -449,7 +449,7 @@ public class ContentTest extends AbstractTest
         Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
         content.deleteContentByPath(ADMIN, ADMIN, folder);
-        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, folder).isEmpty());
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "/" + folder).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -458,7 +458,7 @@ public class ContentTest extends AbstractTest
         String folder = "newFolder" + System.currentTimeMillis();
         Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
-        content.deleteContentByPath(ADMIN, ADMIN, "Shared/Invalid");
+        content.deleteContentByPath(ADMIN, ADMIN, "/Shared/Invalid");
     }
 
     @Test
@@ -482,8 +482,8 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "shareFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "/Shared");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -491,7 +491,7 @@ public class ContentTest extends AbstractTest
     public void createDocInRepositoryInvalidPath()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "invalidPath", DocumentType.TEXT_PLAIN, doc, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/invalidPath", DocumentType.TEXT_PLAIN, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -500,7 +500,7 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 
@@ -509,22 +509,22 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/Shared", DocumentType.TEXT_PLAIN, file, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
-        content.deleteContentByPath(ADMIN, ADMIN, "Shared/" + file.getName());
-        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN,  "Shared/" + file.getName()).isEmpty());
+        content.deleteContentByPath(ADMIN, ADMIN, "/Shared/" + file.getName());
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN,  "/Shared/" + file.getName()).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void deleteFileFromRepoInvalidUser()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared", DocumentType.TEXT_PLAIN, doc, "shared doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/Shared", DocumentType.TEXT_PLAIN, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
         String userName = "deleteUser" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, userName, password, password, "firstname", "lastname");
-        content.deleteContentByPath(userName, password, "Shared/" + doc);
-        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + doc).isEmpty());
+        content.deleteContentByPath(userName, password, "/Shared/" + doc);
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "/Shared/" + doc).isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -539,10 +539,10 @@ public class ContentTest extends AbstractTest
         String doc = "repoDoc-" + System.currentTimeMillis();
         File file = new File(doc);
         String folder = "shareFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "/Shared");
         Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared/" + folder, DocumentType.MSWORD, file, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
-        content.deleteContentByPath(ADMIN, ADMIN, "Shared/" + folder);
+        content.deleteContentByPath(ADMIN, ADMIN, "/Shared/" + folder);
     }
 
     @Test
@@ -550,11 +550,11 @@ public class ContentTest extends AbstractTest
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "sharedFolder" + System.currentTimeMillis();
-        content.createFolderInRepository(ADMIN, ADMIN, folder, "Shared");
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        content.createFolderInRepository(ADMIN, ADMIN, folder, "/Shared");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/Shared/" + folder, DocumentType.MSWORD, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
-        content.deleteTreeByPath(ADMIN, ADMIN, "Shared/" + folder);
-        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/" + folder).isEmpty());
+        content.deleteTreeByPath(ADMIN, ADMIN, "/Shared/" + folder);
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "/Shared/" + folder).isEmpty());
     }
 
     @Test
@@ -571,10 +571,10 @@ public class ContentTest extends AbstractTest
     public void uploadDocInRepository()
     {
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-xml.xml";
-        Document d = content.uploadFileInRepository(ADMIN, ADMIN, "Shared", pathToFile);
+        Document d = content.uploadFileInRepository(ADMIN, ADMIN, "/Shared", pathToFile);
         Assert.assertFalse(d.getId().isEmpty());
-        content.deleteContentByPath(ADMIN, ADMIN, "Shared/UploadFile-xml.xml");
-        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "Shared/UploadFile-xml.xml").isEmpty());
+        content.deleteContentByPath(ADMIN, ADMIN, "/Shared/UploadFile-xml.xml");
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "/Shared/UploadFile-xml.xml").isEmpty());
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -583,7 +583,7 @@ public class ContentTest extends AbstractTest
         String pathToFile = DATA_FOLDER + SLASH + "UploadFile-plaintext.txt";
         Document d = content.uploadFileInRepository(ADMIN, ADMIN, "Shared", pathToFile);
         Assert.assertFalse(d.getId().isEmpty());
-        content.uploadFileInRepository(ADMIN, ADMIN, "Shared", pathToFile);
+        content.uploadFileInRepository(ADMIN, ADMIN, "/Shared", pathToFile);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -600,8 +600,8 @@ public class ContentTest extends AbstractTest
         String doc = "repoDoc-" + System.currentTimeMillis();
         String folder = "shareFolder" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, user, user, user + "@test", "firstName", "lastName");
-        content.createFolderInRepository(user, user, folder, "User Homes/" + user);
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "User Homes/" + user + "/" + folder, DocumentType.MSWORD, doc, "shared doc content");
+        content.createFolderInRepository(user, user, folder, "/User Homes/" + user);
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/User Homes/" + user + "/" + folder, DocumentType.MSWORD, doc, "shared doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 }

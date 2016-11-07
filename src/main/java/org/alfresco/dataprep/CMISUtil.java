@@ -56,6 +56,7 @@ public class CMISUtil
 {
     public enum DocumentType
     {
+        UNDEFINED("N#A"),
         TEXT_PLAIN("text/plain"),
         XML("text/xml"),
         HTML("text/html"),
@@ -272,12 +273,12 @@ public class CMISUtil
      * Get the node ref for a item by path
      * @param userName String user
      * @param password String password
-     * @param pathToContent String path to item (e.g. Sites/siteId/documentLibrary/doc.txt)
+     * @param pathToContent String path to item (e.g. /Sites/siteId/documentLibrary/doc.txt)
      * @return String node ref of the item
      */
     public String getNodeRefByPath(final String userName,
                                    final String password,
-                                   final String pathToContent)
+                                   String pathToContent)
     {
         Session session = getCMISSession(userName, password);
         if(StringUtils.isEmpty(pathToContent))
@@ -286,7 +287,11 @@ public class CMISUtil
         }
         try
         {
-            CmisObject content = session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathToContent);
+            if(!String.valueOf(pathToContent.charAt(0)).equals("/"))
+            {
+                pathToContent = "/" + pathToContent;
+            }
+            CmisObject content = session.getObjectByPath(pathToContent);
             return content.getId().split(";")[0];
         }
         catch(CmisObjectNotFoundException nf)
@@ -298,7 +303,7 @@ public class CMISUtil
     /**
      * Get the node ref for a item by path
      * @param session the session
-     * @param pathToContent String path to item (e.g. Sites/siteId/documentLibrary/doc.txt)
+     * @param pathToContent String path to item (e.g. /Sites/siteId/documentLibrary/doc.txt)
      * @return String node ref of the item
      */
     public String getNodeRefByPath(Session session,
@@ -310,7 +315,7 @@ public class CMISUtil
         }
         try
         {
-            CmisObject content = session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathToContent);
+            CmisObject content = session.getObjectByPath(pathToContent);
             return content.getId().split(";")[0];
         }
         catch(CmisObjectNotFoundException nf)
