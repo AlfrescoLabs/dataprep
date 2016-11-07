@@ -281,6 +281,18 @@ public class CMISUtil
                                    String pathToContent)
     {
         Session session = getCMISSession(userName, password);
+        return getNodeRefByPath(session, pathToContent);
+    }
+    
+    /**
+     * Get the node ref for a item by path
+     * @param session the session
+     * @param pathToContent String path to item (e.g. /Sites/siteId/documentLibrary/doc.txt)
+     * @return String node ref of the item
+     */
+    public String getNodeRefByPath(Session session,
+                                   String pathToContent)
+    {
         if(StringUtils.isEmpty(pathToContent))
         {
             throw new CmisRuntimeException("Path to content is missing");
@@ -291,30 +303,6 @@ public class CMISUtil
             {
                 pathToContent = "/" + pathToContent;
             }
-            CmisObject content = session.getObjectByPath(pathToContent);
-            return content.getId().split(";")[0];
-        }
-        catch(CmisObjectNotFoundException nf)
-        {
-            return "";
-        }
-    }
-    
-    /**
-     * Get the node ref for a item by path
-     * @param session the session
-     * @param pathToContent String path to item (e.g. /Sites/siteId/documentLibrary/doc.txt)
-     * @return String node ref of the item
-     */
-    public String getNodeRefByPath(Session session,
-                                   final String pathToContent)
-    {
-        if(StringUtils.isEmpty(pathToContent))
-        {
-            throw new CmisRuntimeException("Path to content is missing");
-        }
-        try
-        {
             CmisObject content = session.getObjectByPath(pathToContent);
             return content.getId().split(";")[0];
         }

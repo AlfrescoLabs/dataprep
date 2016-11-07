@@ -99,7 +99,7 @@ public class ContentService extends CMISUtil
             {
                 if(path == null)
                 {
-                    path = "";
+                    path = "/";
                 }
                 if(!String.valueOf(path.charAt(0)).equals("/"))
                 {
@@ -393,7 +393,7 @@ public class ContentService extends CMISUtil
             {
                 if(path == null)
                 {
-                    path = "";
+                    path = "/";
                 }
                 if(!String.valueOf(path.charAt(0)).equals("/"))
                 {
@@ -696,7 +696,7 @@ public class ContentService extends CMISUtil
             {
                 if(pathInRepo == null)
                 {
-                    pathInRepo = "";
+                    pathInRepo = "/";
                 }
                 if(!String.valueOf(pathInRepo.charAt(0)).equals("/"))
                 {
