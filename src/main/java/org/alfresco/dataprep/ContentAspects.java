@@ -73,10 +73,7 @@ public class ContentAspects extends CMISUtil
                           DocumentAspect aspect)
     {
         Session session = getCMISSession(userName, password);
-        String contentNodeRef = getNodeRef(session, siteName, contentName);
-        List<DocumentAspect> aspectsToAdd = new ArrayList<DocumentAspect>();
-        aspectsToAdd.add(aspect);
-        addAspect(session, contentNodeRef, aspectsToAdd);
+        addAspect(session, siteName, contentName, aspect);
     }
     
     /**
@@ -92,29 +89,49 @@ public class ContentAspects extends CMISUtil
                           final String... aspectPropertiesName)
     {
         Session session = getCMISSession(userName, password);
-        String contentNodeRef = getNodeRefByPath(session, pathToContent);
-        addAspect(session, contentNodeRef, aspectPropertiesName);
+        addAspect(session, pathToContent, aspectPropertiesName);
+    }
+    
+    /**
+     * Add aspect for document or folder
+     * @param userName String user name
+     * @param password String password
+     * @param pathToContent String path to content document or folder
+     * @param aspectsPropertyName String aspect property name (e.g. P:cm:dublincore)
+     */
+    public void addAspect(final Session session,
+                          final String pathToContent,
+                          final String... aspectsPropertyName)
+    {
+        super.addAspect(session, getNodeRefByPath(session, pathToContent), aspectsPropertyName);
     }
 
     /**
      * Remove aspect from document or folder
      * 
-     * @param userName login username
-     * @param password login password
+     * @param session {@link Session}
      * @param siteName site name
      * @param contentName file or folder name
      * @param aspectToRemove aspect to be removed
      */
-    public void removeAspect(final String userName,
-                             final String password,
-                             final String siteName,
-                             final String contentName,
-                             DocumentAspect aspectToRemove)
+    private void removeAspect(final Session session,
+                              final String siteName,
+                              final String contentName,
+                              final boolean inRepo,
+                              final String pathToContent,
+                              DocumentAspect aspectToRemove)
     {
         try
         {
-            Session session = getCMISSession(userName, password);
-            String contentNodeRef = getNodeRef(session, siteName, contentName);
+            String contentNodeRef;
+            if(inRepo)
+            {
+                contentNodeRef = getNodeRefByPath(session, pathToContent);
+            }
+            else
+            {
+                contentNodeRef = getNodeRef(session, siteName, contentName);
+            }
             CmisObject contentObj = session.getObject(contentNodeRef);
             List<SecondaryType> secondaryTypesList = contentObj.getSecondaryTypes();
             List<String> secondaryTypes = new ArrayList<String>();
@@ -133,6 +150,83 @@ public class ContentAspects extends CMISUtil
         {
             throw new CmisRuntimeException("Invalid content " + contentName, ia);
         }
+    }
+    
+    /**
+     * Remove aspect from document or folder
+     * 
+     * @param session {@link Session}
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param aspectToRemove aspect to be removed
+     */
+    public void removeAspect(final Session session,
+                             final String siteName,
+                             final String contentName,
+                             DocumentAspect aspectToRemove)
+    {
+        removeAspect(session, siteName, contentName, false, null, aspectToRemove);
+    }
+    
+    /**
+     * Remove aspect from document or folder by path
+     * 
+     * @param session {@link Session}
+     * @param pathToContent
+     * @param aspectToRemove aspect to be removed
+     */
+    public void removeAspect(final Session session,
+                             final String pathToContent,
+                             DocumentAspect aspectToRemove)
+    {
+        removeAspect(session, null, null, true, pathToContent, aspectToRemove);
+    }
+    
+    /**
+     * Remove aspect from document or folder by path
+     * 
+     * @param session
+     * @param pathToContent
+     * @param aspectsPropertyName aspects property name (e.g. P:cm:dublincore, P:cm:generalclassifiable)
+     */
+    public void removeAspect(final Session session,
+                             final String pathToContent,
+                             final String... aspectsPropertyName)
+    {
+        CmisObject contentObj = getCmisObject(session, pathToContent);
+        List<SecondaryType> secondaryTypesList = contentObj.getSecondaryTypes();
+        List<String> secondaryTypes = new ArrayList<String>();
+        for (SecondaryType secondaryType : secondaryTypesList)
+        {
+            secondaryTypes.add(secondaryType.getId());
+        }
+        for(String aspect : aspectsPropertyName)
+        {
+            secondaryTypes.remove(aspect);
+        }
+        Map<String, Object> properties = new HashMap<String, Object>();
+        {
+            properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondaryTypes);
+        }
+        contentObj.updateProperties(properties);
+    }
+    
+    /**
+     * Remove aspect from document or folder
+     * 
+     * @param session {@link Session}
+     * @param siteName site name
+     * @param contentName file or folder name
+     * @param aspectToRemove aspect to be removed
+     */
+    public void removeAspect(final String userName,
+                             final String password,
+                             final String siteName,
+                             final String contentName,
+                             DocumentAspect aspectToRemove)
+    {
+        Session session = getCMISSession(userName, password);
+        removeAspect(session, siteName, contentName, aspectToRemove);
     }
     
     /**

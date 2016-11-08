@@ -422,9 +422,44 @@ public class CMISUtil
         CmisObject content = session.getObjectByPath(pathToContent);
         content.updateProperties(properties);
     }
+    
+    private List<Property<?>> getProperties(final Session session,
+                                            final String siteName,
+                                            final String contentName,
+                                            final boolean byPath,
+                                            final String pathToContent)
+    {
+        String nodeRef;
+        if(byPath)
+        {
+            nodeRef = getNodeRefByPath(session, pathToContent);
+        }
+        else
+        {
+            nodeRef = getNodeRef(session, siteName, contentName);
+        }
+        
+        CmisObject obj = session.getObject(nodeRef);
+        return obj.getProperties();
+    }
 
     /**
-     * Method to get all object properties
+     * Method to get all object properties for content from site
+     *
+     * @param session {@link Session}
+     * @param siteName String site identifier
+     * @param contentName String content identifier
+     * @return {@link Property} list of content properties
+     */
+    public List<Property<?>> getProperties(final Session session,
+                                           final String siteName,
+                                           final String contentName)
+    {
+        return getProperties(session, siteName, contentName, false, null);
+    }
+    
+    /**
+     * Method to get all object properties for content from site
      *
      * @param userName String identifier
      * @param password String password
@@ -438,9 +473,36 @@ public class CMISUtil
                                            final String contentName)
     {
         Session session = getCMISSession(userName, password);
-        String nodeRef = getNodeRef(session, siteName, contentName);
-        CmisObject obj = session.getObject(nodeRef);
-        return obj.getProperties();
+        return getProperties(session, siteName, contentName, false, null);
+    }
+    
+    /**
+     * Method to get all object properties for content by path
+     *
+     * @param userName String identifier
+     * @param password String password
+     * @param pathToContent 
+     * @return {@link Property} list of content properties
+     */
+    public List<Property<?>> getProperties(final String userName,
+                                           final String password,
+                                           final String pathToContent)
+    {
+        Session session = getCMISSession(userName, password);
+        return getProperties(session, null, null, true, pathToContent);
+    }
+    
+    /**
+     * Method to get all object properties for content by path
+     *
+     * @param session {@link Session}
+     * @param pathToContent
+     * @return {@link Property} list of content properties
+     */
+    public List<Property<?>> getProperties(final Session session,
+                                           final String pathToContent)
+    {
+        return getProperties(session, null, null, true, pathToContent);
     }
     
     /**
@@ -689,17 +751,15 @@ public class CMISUtil
     /**
      * Get Document object for a file
      *
-     * @param userName String user name
-     * @param password String user password
+     * @param session {@link Session}
      * @param pathToDocument path to document
-     * @return CmisObject cmis object
+     * @return {@link Document}
      */
-    public Document getDocumentObject(final String userName,
-                                      final String password,
+    public Document getDocumentObject(final Session session,
                                       final String pathToDocument)
     {
         Document d = null;
-        CmisObject docObj = getCmisObject(userName, password, pathToDocument);
+        CmisObject docObj = getCmisObject(session, pathToDocument);
         if(docObj instanceof Document)
         {
             d = (Document)docObj;
@@ -709,6 +769,22 @@ public class CMISUtil
             throw new CmisRuntimeException("Content from " + pathToDocument + " is not a document");
         }
         return d;
+    }
+    
+    /**
+     * Get Document object for a file
+     *
+     * @param userName
+     * @param password
+     * @param pathToDocument path to document
+     * @return {@link Document}
+     */
+    public Document getDocumentObject(final String userName,
+                                      final String password,
+                                      final String pathToDocument)
+    {
+        Session session = getCMISSession(userName, password);
+        return getDocumentObject(session, pathToDocument);
     }
     
     /**
@@ -737,19 +813,17 @@ public class CMISUtil
     }
     
     /**
-     * Get Folder object for a folder
+     * Get Folder cmis object 
      *
-     * @param userName String user name
-     * @param password String user password
+     * @param session {@link Session}
      * @param pathToFolder path to folder
-     * @return CmisObject cmis object
+     * @return {@link Folder}
      */
-    public Folder getFolderObject(final String userName,
-                                  final String password,
+    public Folder getFolderObject(final Session session,
                                   final String pathToFolder)
     {
         Folder f = null;
-        CmisObject folderObj = getCmisObject(userName, password, pathToFolder);
+        CmisObject folderObj = getCmisObject(session, pathToFolder);
         if(folderObj instanceof Folder)
         {
             f = (Folder)folderObj;
@@ -759,6 +833,22 @@ public class CMISUtil
             throw new CmisRuntimeException("Content from " + pathToFolder + " is not a folder");
         }
         return f;
+    }
+    
+    /**
+     * Get Folder cmis object 
+     * 
+     * @param userName 
+     * @param password
+     * @param pathToFolder
+     * @return {@link Folder}
+     */
+    public Folder getFolderObject(final String userName,
+                                  final String password,
+                                  final String pathToFolder)
+    {
+        Session session = getCMISSession(userName, password);
+        return getFolderObject(session, pathToFolder);
     }
     
     /**

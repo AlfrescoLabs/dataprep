@@ -31,6 +31,7 @@ import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Property;
+import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,27 @@ public class ContentAspectsTests extends AbstractTest
         doc = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.createFolder(userName, password, folder, siteName);
         template = content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, templateDoc, templateDoc);
+    }
+    
+    @Test
+    public void addRemoveAspectsByPath()
+    {
+        String testDoc = "pathTestDoc.txt" + System.currentTimeMillis();
+        String contentPath = "/Shared/" + testDoc;
+        Session session = contentAspect.getCMISSession(userName, password);
+        content.createDocumentInRepository(session, "/Shared", DocumentType.MSEXCEL, testDoc, testDoc);
+        Assert.assertNotNull(content.getDocumentObject(session, contentPath));
+        contentAspect.addAspect(session, contentPath, DocumentAspect.DUBLIN_CORE.getProperty(), 
+                    DocumentAspect.CLASSIFIABLE.getProperty());
+        List<Property<?>> properties = contentAspect.getProperties(session, contentPath);
+        Assert.assertTrue(properties.toString().contains(DocumentAspect.DUBLIN_CORE.getProperty()));
+        Assert.assertTrue(properties.toString().contains(DocumentAspect.CLASSIFIABLE.getProperty()));
+        
+        // remove aspects
+        contentAspect.removeAspect(session, contentPath, DocumentAspect.DUBLIN_CORE.getProperty(), DocumentAspect.CLASSIFIABLE.getProperty());
+        properties = contentAspect.getProperties(session, contentPath);
+        Assert.assertFalse(properties.toString().contains(DocumentAspect.DUBLIN_CORE.getProperty()));
+        Assert.assertFalse(properties.toString().contains(DocumentAspect.CLASSIFIABLE.getProperty()));
     }
     
     @Test

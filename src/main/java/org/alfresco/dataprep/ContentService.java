@@ -38,6 +38,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExists
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -63,30 +64,26 @@ public class ContentService extends CMISUtil
     /**
      * Create a new folder
      * 
-     * @param userName login username
-     * @param password login password
+     * @param session {@link Session}}
      * @param folderName folder name
      * @param siteName site name
      * @param inRepository if folder is created in repository
-     * @param path path from repository (e.g. Shared)
+     * @param path path from repository (e.g. '/Shared')
      * @return {@link Folder} CMIS folder object
      */
-    private Folder addFolder(final String userName,
-                             final String password,
+    private Folder addFolder(final Session session,
                              final String folderName,
                              final String siteName,
                              final boolean inRepository,
                              String path)
     {
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
+        if (session == null || StringUtils.isEmpty(folderName))
         {
-            throw new IllegalArgumentException("Parameter missing");
+            throw new IllegalArgumentException("Please provide the session and folder name");
         }
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         properties.put(PropertyIds.NAME, folderName);
-        Session session = getCMISSession(userName, password);
-
         Folder newFolder;
         try
         {
@@ -120,7 +117,7 @@ public class ContentService extends CMISUtil
             {
                 throw new CmisRuntimeException("Invalid path -> " + path, nf);
             }
-        }  
+        }
         catch(CmisContentAlreadyExistsException ae)
         {
             throw new CmisRuntimeException("Folder already exists " + folderName, ae);
@@ -131,8 +128,34 @@ public class ContentService extends CMISUtil
         }
         catch (CmisUnauthorizedException ue) 
         {
-            throw new CmisRuntimeException("User " + userName + " is not authorized to create folder in repository");
+            throw new CmisRuntimeException("Unauthorized to create folder in repository");
         }
+    }
+    
+    /**
+     * Create a new folder
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param folderName folder name
+     * @param siteName site name
+     * @param inRepository if folder is created in repository
+     * @param path path from repository (e.g. '/Shared')
+     * @return {@link Folder} CMIS folder object
+     */
+    private Folder addFolder(final String userName,
+                             final String password,
+                             final String folderName,
+                             final String siteName,
+                             final boolean inRepository,
+                             String path)
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(folderName))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        Session session = getCMISSession(userName, password);
+        return addFolder(session, folderName, siteName, inRepository, path);
     }
 
     /**
@@ -150,6 +173,21 @@ public class ContentService extends CMISUtil
                                final String siteName)
     {
         return addFolder(userName, password, folderName, siteName, false, null);
+    }
+    
+    /**
+     * Create a new folder in site
+     * 
+     * @param session {@link Session}}
+     * @param folderName folder name
+     * @param siteName site name
+     * @return {@link Folder} CMIS folder object
+     */
+    public Folder createFolder(final Session session,
+                               final String folderName,
+                               final String siteName)
+    {
+        return addFolder(session, folderName, siteName, false, null);
     }
 
     /**
@@ -172,6 +210,22 @@ public class ContentService extends CMISUtil
             throw new IllegalArgumentException("Please provide a path!");
         }
         return addFolder(userName, password, folderName, null, true, path);
+    }
+    
+    /**
+     * Create a new folder by path in repository
+     * If path is NULL, folder will be created in ROOT of repository.
+     *
+     * @param session {@link Session}}
+     * @param folderName folder name
+     * @param path (e.g: '/Shared', '/Data Dictionary/Scripts)
+     * @return Folder CMIS folder object
+     */
+    public Folder createFolderInRepository(final Session session,
+                                           final String folderName,
+                                           final String path)
+    {
+        return addFolder(session, folderName, null, true, path);
     }
 
     /**
@@ -211,7 +265,7 @@ public class ContentService extends CMISUtil
 
     /**
      * Delete a folder or document by path
-     * If the folder is in 'Company Home' set the folder or document name in path.
+     *
      * @param userName login username
      * @param password login password
      * @param path String path to folder or document(e.g.: /Shared/file.docx, /Guest Home/folder)
@@ -240,6 +294,19 @@ public class ContentService extends CMISUtil
             throw new CmisRuntimeException("User " + userName + " is not authorized to delete this content: " + path, ue);
         }
     }
+    
+    /**
+     * Delete a folder or document by path
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param path String path to folder or document(e.g.: /Shared/file.docx, /Guest Home/folder)
+     */
+    public void deleteContentByPath(final Session session,
+                                    final String path)
+    {
+        session.getObjectByPath(path).delete();
+    }
 
     /**
      * Create a new document in site
@@ -261,6 +328,25 @@ public class ContentService extends CMISUtil
     {
         return createDoc(userName, password, siteName, fileType, true, null, docName, docContent, false, null);
     }
+    
+    /**
+     * Create a new document in site
+     * 
+     * @param session {@link Session}
+     * @param siteName site name
+     * @param fileType DocumentType file type
+     * @param docName String file name
+     * @param docContent file content
+     * @return {@link Document} CMIS document object
+     */
+    public Document createDocument(final Session session,
+                                   final String siteName,
+                                   final DocumentType fileType,
+                                   final File docName,
+                                   final String docContent)
+    {
+        return createDoc(session, siteName, fileType, true, null, docName, docContent, false, null);
+    }
 
     /**
      * Create a new document in site
@@ -281,6 +367,25 @@ public class ContentService extends CMISUtil
                                    final String docContent)
     {
         return createDoc(userName, password, siteName, docType, false, docName, null, docContent, false, null);
+    }
+    
+    /**
+     * Create a new document in site
+     * 
+     * @param session {@link Session}
+     * @param siteName site name
+     * @param docType DocumentType file type
+     * @param docName file name
+     * @param docContent file content
+     * @return {@link Document} CMIS document object
+     */
+    public Document createDocument(final Session session,
+                                   final String siteName,
+                                   final DocumentType docType,
+                                   final String docName,
+                                   final String docContent)
+    {
+        return createDoc(session, siteName, docType, false, docName, null, docContent, false, null);
     }
 
     /**
@@ -304,6 +409,26 @@ public class ContentService extends CMISUtil
     {
         return createDoc(userName, password, null, docType, false, docName, null, docContent, true, path);
     }
+    
+    /**
+     * Create a new document in repository
+     * If path is NULL, document will be created in ROOT of repository.
+     * 
+     * @param session {@link Session}
+     * @param path where to create the document(e.g.: /Shared, /Data Dictionary/Messages)
+     * @param docType DocumentType file type
+     * @param docName file name
+     * @param docContent file content
+     * @return {@link Document} CMIS document object
+     */
+    public Document createDocumentInRepository(final Session session,
+                                               final String path,
+                                               final DocumentType docType,
+                                               final String docName,
+                                               final String docContent)
+    {
+        return createDoc(session, null, docType, false, docName, null, docContent, true, path);
+    }
 
     /**
      * Create a new document in repository
@@ -326,12 +451,33 @@ public class ContentService extends CMISUtil
     {
         return createDoc(userName, password, null, docType, true, null, docName, docContent, true, path);
     }
-
+    
+    
+    
+    /**
+     * Create a new document in repository
+     * If path is NULL, document will be created in ROOT of repository.
+     * 
+     * @param session {@link Session}
+     * @param path where to create the document(e.g.: Shared, Data Dictionary/Messages)
+     * @param docType DocumentType file type
+     * @param docName File file name
+     * @param docContent file content
+     * @return Document CMIS document object
+     */
+    public Document createDocumentInRepository(final Session session,
+                                               final String path,
+                                               final DocumentType docType,
+                                               final File docFile,
+                                               final String docContent)
+    {
+        return createDoc(session, null, docType, true, null, docFile, docContent, true, path);
+    }
+    
     /**
      * Create a new document
      * 
-     * @param userName login username
-     * @param password login password
+     * @param session {@link Session}
      * @param siteName site name
      * @param docType DocumentType file type
      * @param isFile boolean true if type File
@@ -342,8 +488,7 @@ public class ContentService extends CMISUtil
      * @param path path in repository
      * @return {@link Document} CMIS document object
      */
-    private Document createDoc(final String userName,
-                               final String password,
+    private Document createDoc(final Session session,
                                final String siteName,
                                final DocumentType docType,
                                final boolean isFile,
@@ -354,10 +499,6 @@ public class ContentService extends CMISUtil
                                String path)
     {
         ContentStream contentStream = null;
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }  
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         if(!isFile)
@@ -368,11 +509,10 @@ public class ContentService extends CMISUtil
         {
             properties.put(PropertyIds.NAME, docFile.getName());
         }
-        Session session = getCMISSession(userName, password);
-        
         byte[] content = docContent.getBytes();
         InputStream stream = new ByteArrayInputStream(content);
         Document d;
+        Folder parentFolder;
         try
         { 
             if(!isFile)
@@ -385,9 +525,8 @@ public class ContentService extends CMISUtil
             }
             if(!inRepository)
             {
-                Folder documentLibrary = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
-                documentLibrary.refresh();
-                d = documentLibrary.createDocument(properties, contentStream, VersioningState.MAJOR);
+                parentFolder = (Folder) session.getObjectByPath("/Sites/" + siteName + "/documentLibrary");
+                parentFolder.refresh();
             }
             else
             {
@@ -399,8 +538,15 @@ public class ContentService extends CMISUtil
                 {
                     path = "/" + path;
                 }
-                Folder repository = (Folder) session.getObjectByPath(path);
-                d = repository.createDocument(properties, contentStream, VersioningState.MAJOR);
+                parentFolder = (Folder) session.getObjectByPath(path);
+            }
+            try
+            {
+                d = parentFolder.createDocument(properties, contentStream, VersioningState.MAJOR);
+            }
+            catch(CmisStorageException cs)
+            {
+                d = parentFolder.createDocument(properties, contentStream, VersioningState.MAJOR);
             }
             d.refresh();
             return d;
@@ -442,6 +588,40 @@ public class ContentService extends CMISUtil
         {
             closeStreams(stream, contentStream);
         }
+    }
+    
+    /**
+     * Create a new document
+     * 
+     * @param userName
+     * @param password
+     * @param siteName site name
+     * @param docType DocumentType file type
+     * @param isFile boolean true if type File
+     * @param docName file name
+     * @param docFile file doc
+     * @param docContent file content
+     * @param inRepository boolean create in repository
+     * @param path path in repository
+     * @return {@link Document} CMIS document object
+     */
+    private Document createDoc(final String userName,
+                               final String password,
+                               final String siteName,
+                               final DocumentType docType,
+                               final boolean isFile,
+                               final String docName,
+                               final File docFile,
+                               final String docContent,
+                               final boolean inRepository,
+                               String path)
+    {
+        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password))
+        {
+            throw new IllegalArgumentException("Parameter missing");
+        }
+        Session session = getCMISSession(userName, password);
+        return createDoc(session, siteName, docType, isFile, docName, docFile, docContent, inRepository, path);
     }
 
     /**
@@ -554,16 +734,14 @@ public class ContentService extends CMISUtil
     /**
      * Delete a parent folder that has children
      * 
-     * @param userName login username
-     * @param password login password
+     * @param session {@link Session}
      * @param inRepository boolean if folder is in repository
      * @param siteName site name
      * @param path in repository
      * @param folderName folder name
      * @throws CmisRuntimeException if invalid folder
      */
-    private boolean deleteTreeFolder(final String userName,
-                                     final String password,
+    private boolean deleteTreeFolder(final Session session,
                                      final boolean inRepository,
                                      final String siteName,
                                      String pathToFolder,
@@ -572,14 +750,13 @@ public class ContentService extends CMISUtil
         String folderId;
         try
         {
-            Session session = getCMISSession(userName, password);
             if(!inRepository)
             {
                 folderId = getNodeRef(session, siteName, folderName);
             }
             else
             {
-                folderId = getNodeRefByPath(userName, password, pathToFolder);
+                folderId = getNodeRefByPath(session, pathToFolder);
             }
             CmisObject o = session.getObject(folderId);
             if(o instanceof Folder)
@@ -622,7 +799,8 @@ public class ContentService extends CMISUtil
         {
             throw new IllegalArgumentException("Parameter missing");
         }
-        return deleteTreeFolder(userName, password, false, siteName, null, folderName);
+        Session session = getCMISSession(userName, password);
+        return deleteTreeFolder(session, false, siteName, null, folderName);
     }
 
     /**
@@ -641,7 +819,8 @@ public class ContentService extends CMISUtil
         {
             throw new IllegalArgumentException("Parameter missing");
         }
-        deleteTreeFolder(userName, password, true, null, pathToFolder, null);
+        Session session = getCMISSession(userName, password);
+        deleteTreeFolder(session, true, null, pathToFolder, null);
     }
 
     /**
