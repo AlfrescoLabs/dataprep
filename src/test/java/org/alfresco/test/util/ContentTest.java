@@ -392,7 +392,7 @@ public class ContentTest extends AbstractTest
     public void createFolderInRepository()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, "/" +folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
         Assert.assertFalse(newFolder.getId().isEmpty());
         Assert.assertEquals(newFolder.getFolderParent().getName(), "Company Home");
         Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "/" + folder).isEmpty());
