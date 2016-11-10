@@ -151,9 +151,9 @@ public class DataListsService extends CMISUtil
      * @param listName String name of the list to be deleted
      */
     public void deleteDataList(final String userName,
-                                   final String password,
-                                   final String siteName,
-                                   final String listName)
+                               final String password,
+                               final String siteName,
+                               final String listName)
     {
         getDataLists(userName, password, siteName);
         String dataListName=getDataListName(userName, password, siteName, listName);

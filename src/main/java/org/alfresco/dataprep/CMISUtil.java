@@ -299,9 +299,13 @@ public class CMISUtil
         }
         try
         {
-            if(!String.valueOf(pathToContent.charAt(0)).equals("/"))
+            if(!StringUtils.startsWith(pathToContent, "/"))
             {
                 pathToContent = "/" + pathToContent;
+            }
+            if(StringUtils.endsWith(pathToContent, "/"))
+            {
+                pathToContent = StringUtils.removeEnd(pathToContent, "/");
             }
             CmisObject content = session.getObjectByPath(pathToContent);
             return content.getId().split(";")[0];
