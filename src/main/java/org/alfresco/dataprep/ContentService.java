@@ -802,6 +802,20 @@ public class ContentService extends CMISUtil
         Session session = getCMISSession(userName, password);
         return deleteTreeFolder(session, false, siteName, null, folderName);
     }
+    
+    /**
+     * Delete a parent folder that has children in site
+     * 
+     * @param session {@link Session}
+     * @param siteName site name
+     * @param folderName folder name
+     */
+    public boolean deleteTree(final Session session,
+                              final String siteName,
+                              final String folderName)
+    {
+        return deleteTreeFolder(session, false, siteName, null, folderName);
+    }
 
     /**
      * Delete a parent folder that has children in repository
@@ -820,6 +834,19 @@ public class ContentService extends CMISUtil
             throw new IllegalArgumentException("Parameter missing");
         }
         Session session = getCMISSession(userName, password);
+        deleteTreeFolder(session, true, null, pathToFolder, null);
+    }
+    
+    /**
+     * Delete a parent folder that has children in repository
+     * If folder is in root of repository, set PATH to NULL.
+     * 
+     * @param session {@link Session}
+     * @param path path to folder (e.g. '/Shared')
+     */
+    public void deleteTreeByPath(final Session session,
+                                 final String pathToFolder)
+    {
         deleteTreeFolder(session, true, null, pathToFolder, null);
     }
 

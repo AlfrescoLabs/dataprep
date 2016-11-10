@@ -1028,10 +1028,56 @@ public class ContentActions extends CMISUtil
                              final String siteId,
                              final String fileName)
     {
+        Session session = getCMISSession(userName, password);
+        return checkOut(session, siteId, fileName);
+    }
+    
+    /**
+     * Checks out the document and returns the object id of the PWC (private
+     * working copy).
+     *
+     * @param session {@link Session}
+     * @param siteId site name
+     * @param fileName file
+     * @return ObjectId object id of PWC
+     */
+    public ObjectId checkOut(final Session session,
+                             final String siteId,
+                             final String fileName)
+    {
+        return checkOut(session, siteId, fileName, false, null);
+    }
+    
+    /**
+     * Checks out the document and returns the object id of the PWC (private
+     * working copy).
+     *
+     * @param session {@link Session}
+     * @param pathToFile String path to document (e.g. /Shared/testFile.txt)
+     * @return ObjectId object id of PWC
+     */
+    public ObjectId checkOut(final Session session,
+                             final String pathToFile)
+    {
+        return checkOut(session, null, null, true, pathToFile);
+    }
+    
+    private ObjectId checkOut(final Session session,
+                              final String siteId,
+                              final String fileName,
+                              final boolean inRepo,
+                              final String pathToDocument)
+    {
         try
         {
-            Session session = getCMISSession(userName, password);
-            return getDocumentObject(session, siteId, fileName).checkOut();
+            if(inRepo)
+            {
+                return getDocumentObject(session, pathToDocument).checkOut();
+            }
+            else
+            {
+                return getDocumentObject(session, siteId, fileName).checkOut();
+            }
         }
         catch(CmisVersioningException cv)
         {
@@ -1047,7 +1093,6 @@ public class ContentActions extends CMISUtil
      * @param password login password
      * @param siteId site name
      * @param fileName file
-     * @return ObjectId object id of PWC
      */
     public void cancelCheckOut(final String userName,
                                final String password,
@@ -1062,6 +1107,26 @@ public class ContentActions extends CMISUtil
         catch(CmisRuntimeException re)
         {
             throw new CmisRuntimeException("File " + fileName + " is not selected for editing", re);
+        }
+    }
+    
+    /**
+     * If this is a PWC (private working copy) the check out will be reversed.
+     * If this is not a PWC it an exception will be thrown.
+     *
+     * @param session {@link Session}
+     * @param pathToFile path to document (e.g. /Shared/testFile.txt)
+     */
+    public void cancelCheckOut(final Session session,
+                               final String pathToFile)
+    {
+        try
+        {
+            getDocumentObject(session, pathToFile).cancelCheckOut();
+        }
+        catch(CmisRuntimeException re)
+        {
+            throw new CmisRuntimeException("File from" + pathToFile + " is not selected for editing", re);
         }
     }
     
@@ -1152,8 +1217,7 @@ public class ContentActions extends CMISUtil
         return getDocumentObject(session, siteId, fileName).getVersionLabel();
     }
     
-    private CmisObject copyTo(final String userName,
-                              final String password,
+    private CmisObject copyTo(final Session session,
                               final String sourceSite,
                               final String contentName,
                               final String targetSite,
@@ -1164,7 +1228,6 @@ public class ContentActions extends CMISUtil
     {
         CmisObject objTarget = null;
         CmisObject copiedContent = null;
-        Session session = getCMISSession(userName, password);
         CmisObject objFrom = null;
         if(!byPath)
         {
@@ -1202,7 +1265,7 @@ public class ContentActions extends CMISUtil
      *
      * @param userName user name
      * @param password password
-     * @param siteName source site
+     * @param sourceSite source site
      * @param contentName content to be copied
      * @param targetSite tartget site
      * @param targetFolder target folder. If null document library is set
@@ -1215,7 +1278,8 @@ public class ContentActions extends CMISUtil
                              final String targetSite,
                              final String targetFolder)
     {
-        return copyTo(userName, password, sourceSite, contentName, targetSite, targetFolder, false, null, null);
+        Session session = getCMISSession(userName, password);
+        return copyTo(session, sourceSite, contentName, targetSite, targetFolder, false, null, null);
     }
     
     /**
@@ -1232,7 +1296,23 @@ public class ContentActions extends CMISUtil
                              final String pathFrom,
                              final String pathTo)
     {
-        return copyTo(userName, password, null, null, null, null, true, pathFrom, pathTo);
+        Session session = getCMISSession(userName, password);
+        return copyTo(session, null, null, null, null, true, pathFrom, pathTo);
+    }
+    
+    /**
+     * Copy item by path
+     * 
+     * @param session {@link Session}
+     * @param pathFrom String path from
+     * @param pathTo String path to
+     * @return
+     */
+    public CmisObject copyTo(final Session session,
+                             final String pathFrom,
+                             final String pathTo)
+    {
+        return copyTo(session, null, null, null, null, true, pathFrom, pathTo);
     }
 
     /**
@@ -1277,8 +1357,7 @@ public class ContentActions extends CMISUtil
         }
     }
     
-    private CmisObject moveTo(final String userName,
-                              final String password,
+    private CmisObject moveTo(final Session session,
                               final String sourceSite,
                               final String contentName,
                               final String targetSite,
@@ -1289,7 +1368,6 @@ public class ContentActions extends CMISUtil
     {
         CmisObject objTarget = null;
         CmisObject movedContent = null;
-        Session session = getCMISSession(userName, password);
         CmisObject objFrom = null;
         if(!byPath)
         {
@@ -1343,7 +1421,27 @@ public class ContentActions extends CMISUtil
                              final String targetSite,
                              final String targetFolder)
     {
-        return moveTo(userName, password, sourceSite, contentName, targetSite, targetFolder, false, null, null);
+        Session session = getCMISSession(userName, password);
+        return moveTo(session, sourceSite, contentName, targetSite, targetFolder, false, null, null);
+    }
+    
+    /**
+     * Move file or folder in site
+     * 
+     * @param session {@link Session}
+     * @param siteName source site
+     * @param contentName content to be moved
+     * @param targetSite tartget site
+     * @param targetFolder target folder. If null document library is set
+     * @return CmisObject of new created object
+     */
+    public CmisObject moveTo(final Session session,
+                             final String sourceSite,
+                             final String contentName,
+                             final String targetSite,
+                             final String targetFolder)
+    {
+        return moveTo(session, sourceSite, contentName, targetSite, targetFolder, false, null, null);
     }
     
     /**
@@ -1360,7 +1458,23 @@ public class ContentActions extends CMISUtil
                              final String pathFrom,
                              final String pathTo)
     {
-        return moveTo(userName, password, null, null, null, null, true, pathFrom, pathTo);
+        Session session = getCMISSession(userName, password);
+        return moveTo(session, null, null, null, null, true, pathFrom, pathTo);
+    }
+    
+    /**
+     * Move file or folder by path
+     * 
+     * @param session {@link Session}
+     * @param pathFrom path to source
+     * @param pathTo path to content
+     * @return CmisObject of new created object
+     */
+    public CmisObject moveTo(final Session session,
+                             final String pathFrom,
+                             final String pathTo)
+    {
+        return moveTo(session, null, null, null, null, true, pathFrom, pathTo);
     }
 
     @SuppressWarnings("unchecked")
@@ -1506,6 +1620,15 @@ public class ContentActions extends CMISUtil
         return managePermission(userName, password, siteName, contentName, false, null, groupToRemove, role, isInherited, true);
     }
     
+    /**
+     * Rename content (file or folder) in site
+     * 
+     * @param userName
+     * @param password
+     * @param siteName
+     * @param contentName
+     * @param newName
+     */
     public void renameContent(final String userName,
                               final String password,
                               final String siteName,
@@ -1518,15 +1641,36 @@ public class ContentActions extends CMISUtil
         addProperties(session, getNodeRef(session, siteName, contentName), properties);
     }
     
-    
+    /**
+     * Rename content (file or folder) from path
+     * 
+     * @param userName
+     * @param password
+     * @param contentPath
+     * @param newName
+     */
     public void renameContent(final String userName,
                               final String password,
                               final String contentPath,
                               final String newName)
     {
+        Session session = getCMISSession(userName, password);
+        renameContent(session, contentPath, newName);
+    }
+    
+    /**
+     * Rename content (file or folder) from path
+     * 
+     * @param session {@link Session}
+     * @param contentPath
+     * @param newName
+     */
+    public void renameContent(final Session session,
+                              final String contentPath,
+                              final String newName)
+    {
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.put(PropertyIds.NAME, newName);
-        Session session = getCMISSession(userName, password);
         addProperties(session, getNodeRefByPath(session, contentPath), properties);
     }
 }

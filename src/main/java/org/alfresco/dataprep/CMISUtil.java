@@ -413,6 +413,28 @@ public class CMISUtil
         }
     }
     
+    /**
+     * Method to add properties for aspects by path
+     *
+     * @param session {@link Session}
+     * @param contentNodeRef String node identifier
+     * @param propertiesMap Map of properties
+     */
+    public void addPropertiesByPath(final Session session,
+                                    final String pathToContent,
+                                    Map<String, Object> propertiesMap)
+    {
+        try
+        {
+            CmisObject contentObj = session.getObjectByPath(pathToContent);
+            contentObj.updateProperties(propertiesMap);
+        }
+        catch(CmisInvalidArgumentException ia)
+        {
+            throw new CmisRuntimeException("Invalid content from" + pathToContent, ia);
+        }
+    }
+    
     public void addProperties(final String userName,
                               final String password,
                               final String pathToContent,

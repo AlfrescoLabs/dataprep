@@ -449,10 +449,10 @@ public class ContentAspects extends CMISUtil
      * @param addressee value of addressee property
      */
     public void addEmailAlias(final String userName,
-                           final String password,
-                           final String siteName,
-                           final String contentName,
-                           final String addressee)
+                              final String password,
+                              final String siteName,
+                              final String contentName,
+                              final String addressee)
     {
         Session session = getCMISSession(userName, password);
         addAspect(session, siteName, contentName, DocumentAspect.ALIASABLE_EMAIL);
