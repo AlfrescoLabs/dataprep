@@ -946,7 +946,31 @@ public class SitePagesService
             return "";
         }
     }
-    
+
+    /**
+     * Get the node ref of a link
+     * @param userName String user name
+     * @param password String password
+     * @param siteName String site name
+     * @param linkTitle String blog title
+     * @return String node ref of a link
+     */
+    public String getLinkNodeRef(final String userName,
+                              final String password,
+                              final String siteName,
+                              final String linkTitle)
+    {
+        Map<String, String> ids = getIds(userName, password, siteName, linkTitle, Page.LINKS);
+        if(!ids.isEmpty())
+        {
+            return ids.get("nodeRef");
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     /**
      * Verify if link exists
      * @param userName String user name
