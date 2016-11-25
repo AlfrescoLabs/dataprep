@@ -714,10 +714,18 @@ public class CMISUtil
      * @return CmisObject cmis object
      */
     public CmisObject getCmisObject(final Session session,
-                                    final String pathToItem)
+                                    String pathToItem)
     {
         try
         {
+            if(!StringUtils.startsWith(pathToItem, "/"))
+            {
+                pathToItem = "/" + pathToItem;
+            }
+            if(StringUtils.endsWith(pathToItem, "/"))
+            {
+                pathToItem = StringUtils.removeEnd(pathToItem, "/");
+            }
             return session.getObjectByPath(pathToItem);
         }
         catch(CmisObjectNotFoundException nf)
@@ -736,10 +744,18 @@ public class CMISUtil
      */
     public CmisObject getCmisObject(final String userName,
                                     final String password,
-                                    final String pathToItem)
+                                    String pathToItem)
     {
         try
         {
+            if(!StringUtils.startsWith(pathToItem, "/"))
+            {
+                pathToItem = "/" + pathToItem;
+            }
+            if(StringUtils.endsWith(pathToItem, "/"))
+            {
+                pathToItem = StringUtils.removeEnd(pathToItem, "/");
+            }
             Session session = getCMISSession(userName, password);
             return session.getObjectByPath(pathToItem);
         }
@@ -785,6 +801,7 @@ public class CMISUtil
                                       final String pathToDocument)
     {
         Document d = null;
+       
         CmisObject docObj = getCmisObject(session, pathToDocument);
         if(docObj instanceof Document)
         {

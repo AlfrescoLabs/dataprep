@@ -98,11 +98,7 @@ public class ContentService extends CMISUtil
                 {
                     path = "/";
                 }
-                if(!String.valueOf(path.charAt(0)).equals("/"))
-                {
-                    path = "/" + path;
-                }
-                Folder repository = (Folder) session.getObjectByPath("/" + path);
+                Folder repository = getFolderObject(session, path);
                 newFolder = repository.createFolder(properties);
             }
             return newFolder;
@@ -534,11 +530,7 @@ public class ContentService extends CMISUtil
                 {
                     path = "/";
                 }
-                if(!String.valueOf(path.charAt(0)).equals("/"))
-                {
-                    path = "/" + path;
-                }
-                parentFolder = (Folder) session.getObjectByPath(path);
+                parentFolder = getFolderObject(session, path);
             }
             try
             {
