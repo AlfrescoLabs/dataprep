@@ -790,6 +790,55 @@ public class WorkflowService extends CMISUtil
     }
     
     /**
+     * Approve or reject a Site Membership Request
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param taskId String task id
+     * @param approve boolean approve or reject
+     * @param comment String comment
+     * @return 200 OK if successful
+     */
+    @SuppressWarnings("unchecked")
+    public boolean approveSiteMembershipRequest(final String assignedUser,
+                               final String password,
+                               final String taskId,
+                               final boolean approve,
+                               final String comment)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getAlfrescoUrl() + "alfresco/s/api/task/activiti%24" + taskId + "/formprocessor";
+        HttpPost post = new HttpPost(api);
+        JSONObject data = new JSONObject();
+        if(approve)
+        {
+            data.put("prop_imwf_reviewOutcome", "approve");
+        }
+        else
+        {
+            data.put("prop_imwf_reviewOutcome", "reject");
+        }
+        data.put("prop_transitions", "Next");
+        data.put("prop_bpm_comment", comment);
+        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly executed " + post);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + taskId);
+            default:
+                logger.error("Unable to execute request " + taskId + " " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
      * Cancel workflow process
      * 
      * @param owner String workflow owner
