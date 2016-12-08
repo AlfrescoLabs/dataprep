@@ -40,12 +40,18 @@ import org.testng.annotations.Test;
  */
 public class WorkflowTests extends AbstractTest
 {
-    @Autowired WorkflowService workflow;
-    @Autowired ContentService contentService;
-    @Autowired SiteService siteService;
-    @Autowired UserService userService;
-    @Autowired GroupService groupService;
-    @Autowired SitePagesService sitePages;
+    @Autowired
+    WorkflowService workflow;
+    @Autowired
+    ContentService contentService;
+    @Autowired
+    SiteService siteService;
+    @Autowired
+    UserService userService;
+    @Autowired
+    GroupService groupService;
+    @Autowired
+    SitePagesService sitePages;
     private String workflowUser = "workflowUser" + System.currentTimeMillis();
     private String workflowSite = "workflowSite" + System.currentTimeMillis();
     private String plainDoc = "plainDoc";
@@ -79,8 +85,8 @@ public class WorkflowTests extends AbstractTest
     @Test
     public void createNewTask()
     {
-        String workflowId = workflow.startNewTask(workflowUser, password, "New Task Message", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "New Task Message", new Date(), workflowUser, Priority.High, workflowSite, docs,
+                true);
         Assert.assertTrue(!workflowId.isEmpty());
         String taskId = workflow.getTaskId(workflowUser, password, workflowId);
         Assert.assertTrue(!taskId.isEmpty());
@@ -89,49 +95,50 @@ public class WorkflowTests extends AbstractTest
     @Test
     public void createNewTaskItemsByPath()
     {
-        Assert.assertTrue(!workflow.startNewTask(workflowUser, password, "NewTaskByPaths", new Date(), workflowUser, Priority.Low, pathToItems, true).isEmpty());
+        Assert.assertTrue(
+                !workflow.startNewTask(workflowUser, password, "NewTaskByPaths", new Date(), workflowUser, Priority.Low, pathToItems, true).isEmpty());
     }
 
     @Test
     public void createGroupReview()
     {
-        Assert.assertTrue(!workflow.startGroupReview(workflowUser, password, "group message", new Date(), groupName, Priority.Low, workflowSite, docs, 27,
-                false).isEmpty());
-        Assert.assertTrue(!workflow.startGroupReview(workflowUser, password, "itemsByPath", new Date(), groupName, Priority.High, pathToItems, 69, true)
-                .isEmpty());
+        Assert.assertTrue(!workflow
+                .startGroupReview(workflowUser, password, "group message", new Date(), groupName, Priority.Low, workflowSite, docs, 27, false).isEmpty());
+        Assert.assertTrue(
+                !workflow.startGroupReview(workflowUser, password, "itemsByPath", new Date(), groupName, Priority.High, pathToItems, 69, true).isEmpty());
     }
 
     @Test
     public void createWorkflowMultipleReviewers()
     {
-        String workflowId = workflow.startMultipleReviewers(workflowUser, password, "multipleReviews", new Date(), reviewers, Priority.High, workflowSite,
-                docs, 98, false);
+        String workflowId = workflow.startMultipleReviewers(workflowUser, password, "multipleReviews", new Date(), reviewers, Priority.High, workflowSite, docs,
+                98, false);
         Assert.assertFalse(workflowId.isEmpty());
         String taskUser1 = workflow.getTaskId(reviewer1, password, workflowId);
         Assert.assertFalse(taskUser1.isEmpty());
         String taskUser2 = workflow.getTaskId(reviewer2, password, workflowId);
         Assert.assertFalse(taskUser2.isEmpty());
         Assert.assertNotSame(taskUser2, taskUser1);
-        Assert.assertTrue(!workflow.startMultipleReviewers(workflowUser, password, "pathMultiple", new Date(), reviewers, Priority.Low, pathToItems, 80, true)
-                .isEmpty());
+        Assert.assertTrue(
+                !workflow.startMultipleReviewers(workflowUser, password, "pathMultiple", new Date(), reviewers, Priority.Low, pathToItems, 80, true).isEmpty());
     }
 
     @Test
     public void createPooledReview()
     {
-        Assert.assertTrue(!workflow.startPooledReview(workflowUser, password, "pooledPathItems", new Date(), groupName, Priority.High, pathToItems, false)
+        Assert.assertTrue(
+                !workflow.startPooledReview(workflowUser, password, "pooledPathItems", new Date(), groupName, Priority.High, pathToItems, false).isEmpty());
+        Assert.assertTrue(!workflow.startPooledReview(workflowUser, password, "pooledReview", new Date(), groupName, Priority.Normal, workflowSite, docs, false)
                 .isEmpty());
-        Assert.assertTrue(!workflow
-                .startPooledReview(workflowUser, password, "pooledReview", new Date(), groupName, Priority.Normal, workflowSite, docs, false).isEmpty());
     }
 
     @Test
     public void createSingleReviewer()
     {
-        Assert.assertTrue(!workflow.startSingleReview(workflowUser, password, "singleReview Path", new Date(), workflowUser, Priority.High, pathToItems, true)
-                .isEmpty());
-        Assert.assertTrue(!workflow.startSingleReview(workflowUser, password, "singleReviewer", new Date(), workflowUser, Priority.Low, workflowSite, docs,
-                false).isEmpty());
+        Assert.assertTrue(
+                !workflow.startSingleReview(workflowUser, password, "singleReview Path", new Date(), workflowUser, Priority.High, pathToItems, true).isEmpty());
+        Assert.assertTrue(!workflow
+                .startSingleReview(workflowUser, password, "singleReviewer", new Date(), workflowUser, Priority.Low, workflowSite, docs, false).isEmpty());
     }
 
     @Test
@@ -286,61 +293,57 @@ public class WorkflowTests extends AbstractTest
         String user1 = "user-1" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, user1, password, workflowUser + domain, "1", "usr");
         groupService.addUserToGroup(ADMIN, ADMIN, groupName, user1);
-        String workflowId = workflow.startGroupReview(workflowUser, password, "taskDoneNotFinishedWorkflow", new Date(), 
-                groupName, Priority.Low, workflowSite, docs, 27, false);
+        String workflowId = workflow.startGroupReview(workflowUser, password, "taskDoneNotFinishedWorkflow", new Date(), groupName, Priority.Low, workflowSite,
+                docs, 27, false);
         Assert.assertTrue(workflow.taskDone(user1, password, workflowId, TaskStatus.COMPLETED, "completed by " + workflowUser));
     }
-    
+
     @Test
     public void cancelWorkflow()
     {
-        String workflowId = workflow.startNewTask(workflowUser, password, "cancelWorkflow", new Date(), workflowUser,
-                Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "cancelWorkflow", new Date(), workflowUser, Priority.High, workflowSite, docs, true);
         Assert.assertTrue(workflow.cancelWorkflow(workflowUser, password, workflowId));
     }
-    
+
     @Test
     public void cancelCompletedWorkflow()
     {
-        String workflowId = workflow.startNewTask(workflowUser, password, "cancelCompleted", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "cancelCompleted", new Date(), workflowUser, Priority.High, workflowSite, docs, true);
         Assert.assertTrue(workflow.taskDone(workflowUser, password, workflowId, TaskStatus.COMPLETED, "completed task " + workflowUser));
         Assert.assertTrue(workflow.taskDone(workflowUser, password, workflowId, TaskStatus.COMPLETED, "completed workflow " + workflowUser));
         Assert.assertFalse(workflow.cancelWorkflow(workflowUser, password, workflowId));
     }
-    
+
     @Test
     public void deleteCompletedWorkflow()
     {
-        String workflowId = workflow.startNewTask(workflowUser, password, "deleteWorkflow", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "deleteWorkflow", new Date(), workflowUser, Priority.High, workflowSite, docs, true);
         Assert.assertTrue(workflow.taskDone(workflowUser, password, workflowId, TaskStatus.COMPLETED, "completed task " + workflowUser));
         Assert.assertTrue(workflow.taskDone(workflowUser, password, workflowId, TaskStatus.COMPLETED, "completed workflow " + workflowUser));
         Assert.assertTrue(workflow.deleteWorkflow(workflowUser, password, workflowId));
     }
-    
+
     @Test
     public void deleteUncompletedWorkflow()
     {
-        String workflowId = workflow.startNewTask(workflowUser, password, "deleteUncompleteWorkflow", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "deleteUncompleteWorkflow", new Date(), workflowUser, Priority.High, workflowSite,
+                docs, true);
         Assert.assertTrue(workflow.taskDone(workflowUser, password, workflowId, TaskStatus.COMPLETED, "completed task " + workflowUser));
         Assert.assertTrue(workflow.deleteWorkflow(workflowUser, password, workflowId));
     }
-    
+
     @Test
     public void addItemsToTask()
     {
         String docToAdd1 = "addTask-1-" + System.currentTimeMillis();
         String docToAdd2 = "addTask-2-" + System.currentTimeMillis();
-        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTask", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTask", new Date(), workflowUser, Priority.High, workflowSite, docs, true);
         contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, docToAdd1, docToAdd1);
         contentService.createDocument(workflowUser, password, workflowSite, DocumentType.TEXT_PLAIN, docToAdd2, docToAdd2);
         Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, workflowSite, docToAdd1));
         Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, workflowSite, docToAdd2));
     }
-    
+
     @Test
     public void addItemsToTaskPooledReview()
     {
@@ -358,28 +361,57 @@ public class WorkflowTests extends AbstractTest
         Assert.assertTrue(workflow.addItemToTask(user1, password, workflowId, workflowSite, docToAdd1));
         Assert.assertTrue(workflow.addItemToTask(user1, password, workflowId, workflowSite, docToAdd2));
     }
-    
+
     @Test
     public void addItemsToTaskFakeDoc()
     {
-        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTask", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTask", new Date(), workflowUser, Priority.High, workflowSite, docs, true);
         Assert.assertFalse(workflow.addItemToTask(workflowUser, password, workflowId, workflowSite, "fakeDoc"));
     }
-    
+
     @Test(expectedExceptions = RuntimeException.class)
     public void addItemsToTaskFakeWorkflow()
     {
         workflow.addItemToTask(workflowUser, password, "fakeProcess", workflowSite, plainDoc);
     }
-    
+
     @Test
     public void addItemsToTaskByPath()
     {
         String docToAdd1 = "pathDoc-1-" + System.currentTimeMillis();
-        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTaskByPath", 
-                new Date(), workflowUser, Priority.High, workflowSite, docs, true);
+        String workflowId = workflow.startNewTask(workflowUser, password, "addItemsToTaskByPath", new Date(), workflowUser, Priority.High, workflowSite, docs,
+                true);
         contentService.createDocumentInRepository(workflowUser, password, "/Shared", DocumentType.MSPOWERPOINT, docToAdd1, docToAdd1);
         Assert.assertTrue(workflow.addItemToTask(workflowUser, password, workflowId, "Shared/" + docToAdd1));
+    }
+
+    @Test
+    public void approveSiteMembershipRequest()
+    {
+        String user = "userApprove" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, user, password, workflowUser + domain, user, "lastname");
+
+        workflowSite = "workflowSite" + System.currentTimeMillis();
+        siteService.create(workflowUser, password, "mydomain", workflowSite, "my site description", Visibility.MODERATED);
+
+        userService.requestSiteMembership(user, password, workflowSite);
+        String workflowId = workflow.getWorkflowId(ADMIN, ADMIN, user);
+        String taskId = workflow.getTaskId(ADMIN, ADMIN, workflowId);
+        workflow.approveSiteMembershipRequest(workflowUser, password, taskId, true, "approve");
+    }
+
+    @Test
+    public void rejectSiteMembershipRequest()
+    {
+        String user = "userReject" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, user, password, workflowUser + domain, user, "lastname");
+
+        workflowSite = "workflowSite" + System.currentTimeMillis();
+        siteService.create(workflowUser, password, "mydomain", workflowSite, "my site description", Visibility.MODERATED);
+
+        userService.requestSiteMembership(user, password, workflowSite);
+        String workflowId = workflow.getWorkflowId(ADMIN, ADMIN, user);
+        String taskId = workflow.getTaskId(ADMIN, ADMIN, workflowId);
+        workflow.approveSiteMembershipRequest(workflowUser, password, taskId, false, "reject");
     }
 }
