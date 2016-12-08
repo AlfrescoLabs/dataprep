@@ -790,6 +790,55 @@ public class WorkflowService extends CMISUtil
     }
     
     /**
+     * Approve or reject a Site Membership Request
+     * 
+     * @param assignedUser String assigned user
+     * @param password String password
+     * @param taskId String task id
+     * @param approve boolean approve or reject
+     * @param comment String comment
+     * @return 200 OK if successful
+     */
+    @SuppressWarnings("unchecked")
+    public boolean approveSiteMembershipRequest(final String assignedUser,
+                               final String password,
+                               final String taskId,
+                               final boolean approve,
+                               final String comment)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getAlfrescoUrl() + "alfresco/s/api/task/activiti%24" + taskId + "/formprocessor";
+        HttpPost post = new HttpPost(api);
+        JSONObject data = new JSONObject();
+        if(approve)
+        {
+            data.put("prop_imwf_reviewOutcome", "approve");
+        }
+        else
+        {
+            data.put("prop_imwf_reviewOutcome", "reject");
+        }
+        data.put("prop_transitions", "Next");
+        data.put("prop_bpm_comment", comment);
+        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Successfuly executed " + post);
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Invalid process id: " + taskId);
+            default:
+                logger.error("Unable to execute request " + taskId + " " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
      * Cancel workflow process
      * 
      * @param owner String workflow owner
@@ -929,6 +978,48 @@ public class WorkflowService extends CMISUtil
                                  final String pathToItem)
     {
         return addItemToTask(assignedUser, password, workflowId, true, null, null, pathToItem);
+    }
+    
+        /**
+     * Get the workflow id for the user that started a process
+     * 
+     * @param user String user
+     * @param password String password
+     * @param startedBy String user that started the process
+     * @return String workflowId
+     */
+    public String getWorkflowId(final String user, final String password, final String startedBy)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes/";
+        HttpGet get = new HttpGet(api);
+        try
+        {
+            HttpResponse response = client.execute(user, password, get);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                JSONArray jArray = client.getJSONArray(response, "list", "entries");
+                for (Object item : jArray)
+                {
+                    JSONObject jobject = (JSONObject) item;
+                    JSONObject entry = (JSONObject) jobject.get("entry");
+                    String startedByElement = (String) entry.get("startUserId");
+                    if (!StringUtils.isEmpty(startedByElement))
+                    {
+                        if (startedByElement.equals(startedBy))
+                        {
+                            return (String) entry.get("id");
+                        }
+                    }
+                }
+            }
+        }
+        finally
+        {
+            client.close();
+            get.releaseConnection();
+        }
+        return "";
     }
 }
 
