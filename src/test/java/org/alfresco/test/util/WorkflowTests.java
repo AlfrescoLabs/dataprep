@@ -390,10 +390,8 @@ public class WorkflowTests extends AbstractTest
     {
         String user = "userApprove" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, user, password, workflowUser + domain, user, "lastname");
-
-        workflowSite = "workflowSite" + System.currentTimeMillis();
+        String workflowSite = "workflowSite" + System.currentTimeMillis();
         siteService.create(workflowUser, password, "mydomain", workflowSite, "my site description", Visibility.MODERATED);
-
         userService.requestSiteMembership(user, password, workflowSite);
         String workflowId = workflow.getWorkflowId(ADMIN, ADMIN, user);
         String taskId = workflow.getTaskId(ADMIN, ADMIN, workflowId);
@@ -405,10 +403,8 @@ public class WorkflowTests extends AbstractTest
     {
         String user = "userReject" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, user, password, workflowUser + domain, user, "lastname");
-
-        workflowSite = "workflowSite" + System.currentTimeMillis();
+        String workflowSite = "workflowSite" + System.currentTimeMillis();
         siteService.create(workflowUser, password, "mydomain", workflowSite, "my site description", Visibility.MODERATED);
-
         userService.requestSiteMembership(user, password, workflowSite);
         String workflowId = workflow.getWorkflowId(ADMIN, ADMIN, user);
         String taskId = workflow.getTaskId(ADMIN, ADMIN, workflowId);
