@@ -930,5 +930,47 @@ public class WorkflowService extends CMISUtil
     {
         return addItemToTask(assignedUser, password, workflowId, true, null, null, pathToItem);
     }
+    
+        /**
+     * Get the workflow id for the user that started a process
+     * 
+     * @param user String user
+     * @param password String password
+     * @param startedBy String user that started the process
+     * @return String workflowId
+     */
+    public String getWorkflowId(final String user, final String password, final String startedBy)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes/";
+        HttpGet get = new HttpGet(api);
+        try
+        {
+            HttpResponse response = client.execute(user, password, get);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                JSONArray jArray = client.getJSONArray(response, "list", "entries");
+                for (Object item : jArray)
+                {
+                    JSONObject jobject = (JSONObject) item;
+                    JSONObject entry = (JSONObject) jobject.get("entry");
+                    String startedByElement = (String) entry.get("startUserId");
+                    if (!StringUtils.isEmpty(startedByElement))
+                    {
+                        if (startedByElement.equals(startedBy))
+                        {
+                            return (String) entry.get("id");
+                        }
+                    }
+                }
+            }
+        }
+        finally
+        {
+            client.close();
+            get.releaseConnection();
+        }
+        return "";
+    }
 }
 
