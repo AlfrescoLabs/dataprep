@@ -397,7 +397,7 @@ public class WorkflowTests extends AbstractTest
         userService.requestSiteMembership(user, password, workflowSite);
         String workflowId = workflow.getWorkflowId(ADMIN, ADMIN, user);
         String taskId = workflow.getTaskId(ADMIN, ADMIN, workflowId);
-        workflow.approveSiteMembershipRequest(workflowUser, password, taskId, true, "approve");
+        Assert.assertTrue(workflow.approveSiteMembershipRequest(workflowUser, password, taskId, true, "approve"));
     }
 
     @Test
@@ -412,6 +412,6 @@ public class WorkflowTests extends AbstractTest
         userService.requestSiteMembership(user, password, workflowSite);
         String workflowId = workflow.getWorkflowId(ADMIN, ADMIN, user);
         String taskId = workflow.getTaskId(ADMIN, ADMIN, workflowId);
-        workflow.approveSiteMembershipRequest(workflowUser, password, taskId, false, "reject");
+        Assert.assertTrue(workflow.approveSiteMembershipRequest(workflowUser, password, taskId, false, "reject"));
     }
 }
