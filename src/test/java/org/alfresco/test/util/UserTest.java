@@ -71,7 +71,7 @@ public class UserTest extends AbstractTest
     }
 
     @Test
-    public void creatEnterpriseUser()
+    public void createEnterpriseUser()
     {
         boolean result = userService.create(ADMIN, ADMIN, userName, password, email, firstName, lastName);
         Assert.assertTrue(result);
@@ -546,5 +546,28 @@ public class UserTest extends AbstractTest
     public void deleteTrashcanFakeItem()
     {
         Assert.assertFalse(userService.deleteItemFromTranshcan(globalUser, password, "34242-3242wed-3652"));
+    }
+    
+    @Test
+    public void disableUser()
+    {
+        String userToDisable = "disableMe" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, userToDisable, password, userToDisable + domain, firstName, lastName);
+        Assert.assertTrue(userService.disableUser(ADMIN, ADMIN, userToDisable, true));
+    }
+    
+    @Test
+    public void disableInxistentUser()
+    {
+        Assert.assertFalse(userService.disableUser(ADMIN, ADMIN, "user-" + System.currentTimeMillis(), true));
+    }
+    
+    @Test
+    public void disableEnableUser()
+    {
+        String userToDisable = "disableMe" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, userToDisable, password, userToDisable + domain, firstName, lastName);
+        Assert.assertTrue(userService.disableUser(ADMIN, ADMIN, userToDisable, true));
+        Assert.assertTrue(userService.disableUser(ADMIN, ADMIN, userToDisable, false));
     }
 }

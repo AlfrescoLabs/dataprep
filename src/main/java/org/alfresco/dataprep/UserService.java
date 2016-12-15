@@ -163,6 +163,51 @@ public class UserService extends CMISUtil
         }
         return false;
     }
+    
+    /**
+     * Disable or enable user
+     * 
+     * @param adminUserName String admin user
+     * @param admisPassword String admin password
+     * @param userToDisable String user to disable or enable
+     * @param disable boolean true to disable / false to enable 
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public boolean disableUser(final String adminUserName,
+                               final String admisPassword,
+                               final String userToDisable,
+                               final boolean disable)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "people/" + encodeUserName(userToDisable);
+        JSONObject userBody = new JSONObject();
+        userBody.put("disableAccount", disable);
+        HttpPut put = new HttpPut(url);
+        put.setEntity(client.setMessageBody(userBody));
+        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                if(disable)
+                {
+                    logger.info(String.format("User %s disabled successfully", userToDisable));
+                }
+                else
+                {
+                    logger.info(String.format("User %s enabled successfully", userToDisable));
+                }
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                logger.error(String.format("User %s doesn't exists", userToDisable));
+                break;
+            default:
+                logger.error(String.format("Unable to update user %s. Error: %s" ,userToDisable, response.toString()));
+                break;
+        }
+        return false;
+    }
+    
     /**
      * Delete a user from enterprise.
      * 
