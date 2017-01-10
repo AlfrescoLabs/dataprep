@@ -253,4 +253,13 @@ public class SiteTest extends AbstractTest
         Assert.assertTrue(site.setIMAPFavorite(theUser, password, site1));
         Assert.assertTrue(site.removeIMAPFavorite(theUser, password, site1));
     }
+    
+    @Test()
+    public void updateSiteVisibility()
+    {
+        String site1 = "updateSite" + System.currentTimeMillis();
+        site.create(theUser, password, MY_DOMAIN, site1, site1 + " description", Visibility.PUBLIC);
+        Assert.assertTrue(site.updateSiteVisibility(theUser, password, site1, Visibility.MODERATED));
+        Assert.assertTrue(site.updateSiteVisibility(theUser, password, site1, Visibility.PRIVATE));
+    }
 }

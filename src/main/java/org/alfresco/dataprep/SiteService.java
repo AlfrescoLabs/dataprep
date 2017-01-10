@@ -40,6 +40,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
@@ -762,6 +763,40 @@ public class SiteService
                 throw new RuntimeException("Site doesn't exists " + siteName);
             default:
                 logger.error("Unable to mark as IMAP favorite: " + response.toString());
+                break;
+        }
+        return false;
+    }
+    
+    /**
+     * Update site visibility
+     * 
+     * @param userName user name
+     * @param password user password
+     * @param siteName site id
+     * @param newVisibility {@link Visibility} new visibility
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public boolean updateSiteVisibility(final String userName,
+                                        final String password,
+                                        final String siteName,
+                                        final Visibility newVisibility)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiUrl() + "sites/" + siteName;
+        HttpPut put = new HttpPut(reqUrl);
+        JSONObject body = new JSONObject();
+        body.put("visibility", newVisibility.toString());
+        HttpResponse response = client.executeRequest(userName, password, body, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                throw new RuntimeException("Site doesn't exists " + siteName);
+            default:
+                logger.error("Unable to update site visibility: " + response.toString());
                 break;
         }
         return false;
