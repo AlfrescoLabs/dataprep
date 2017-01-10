@@ -1074,7 +1074,7 @@ public class UserService extends CMISUtil
         if(isItem)
         {
             // delete or recover a specific item
-            url = client.getApiUrl() + "archive/archive/SpacesStore/" + nodeRef;
+            url = client.getApiUrl() + "archive/archive/SpacesStore/" + nodeRef.split(";")[0];
         }
         else
         {
@@ -1154,15 +1154,9 @@ public class UserService extends CMISUtil
         return manageTrashcan(userName, password, true, true, nodeRef);
     }
     
-    /**
-     * Get the deleted items from trashcan
-     * 
-     * @param userName String user name
-     * @param password String password
-     * @return List<String> items from trashcan
-     */
-    public List<String> getItemsFromTrashcan(final String userName,
-                                             final String password)
+    private List<String> getItemsFromTrashcan(final String userName,
+                                              final String password,
+                                              final boolean byName)
     {
         List<String> items = new ArrayList<String>();
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
@@ -1173,7 +1167,14 @@ public class UserService extends CMISUtil
             HttpResponse response = client.execute(userName, password, get);
             if(200 == response.getStatusLine().getStatusCode())
             {
-                items = client.getElementsFromJsonArray(response, "data", "deletedNodes", "name");
+                if(byName)
+                {
+                    items = client.getElementsFromJsonArray(response, "data", "deletedNodes", "name");
+                }
+                else
+                {
+                    items = client.getElementsFromJsonArray(response, "data", "deletedNodes", "nodeRef");
+                }
             }
             return items;
         }
@@ -1182,5 +1183,31 @@ public class UserService extends CMISUtil
             get.releaseConnection();
             client.close();
         }
+    }
+    
+    /**
+     * Get the deleted items from trash can by name
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @return List<String> items from trash can
+     */
+    public List<String> getItemsNameFromTrashcan(final String userName,
+                                                 final String password)
+    {
+        return getItemsFromTrashcan(userName, password, true);
+    }
+    
+    /**
+     * Get the deleted items from trash can by noderef
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @return List<String> items from trash can
+     */
+    public List<String> getItemsNodeRefFromTrashcan(final String userName,
+                                                    final String password)
+    {
+        return getItemsFromTrashcan(userName, password, false);
     }
 }

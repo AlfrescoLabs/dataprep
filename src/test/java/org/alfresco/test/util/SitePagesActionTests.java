@@ -18,11 +18,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.alfresco.dataprep.ContentService;
+import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.alfresco.dataprep.SitePagesService;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
-import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
@@ -40,7 +39,6 @@ public class SitePagesActionTests extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private UserService userService;
     @Autowired private SitePagesService pageService;
-    @Autowired private ContentService contentService;
     private String user = "theUser" + System.currentTimeMillis();
     private String theSite = "theSite" + System.currentTimeMillis();
     List<String>tags = new ArrayList<String>();

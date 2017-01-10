@@ -22,6 +22,8 @@ import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.UserDashlet;
 import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
+import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.Folder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
@@ -511,7 +513,7 @@ public class UserTest extends AbstractTest
         contentService.deleteFolder(globalUser, password, globalSite, folder);
         contentService.deleteDocument(globalUser, password, globalSite, doc);
         Assert.assertTrue(userService.emptyTrashcan(globalUser, password));
-        Assert.assertTrue(userService.getItemsFromTrashcan(globalUser, password).isEmpty());
+        Assert.assertTrue(userService.getItemsNameFromTrashcan(globalUser, password).isEmpty());
     }
     
     @Test
@@ -519,16 +521,17 @@ public class UserTest extends AbstractTest
     {
         String folder = "deleteFold" + System.currentTimeMillis();
         String doc = "deleteDoc" + System.currentTimeMillis();
-        contentService.createFolder(globalUser, password, folder, globalSite);
-        contentService.createDocument(globalUser, password, globalSite, DocumentType.MSPOWERPOINT, doc, doc);
-        String nodeRef = contentService.getNodeRef(globalUser, password, globalSite, doc);
-        String nodeRefFolder = contentService.getNodeRef(globalUser, password, globalSite, folder);
+        Folder cmisFolder = contentService.createFolder(globalUser, password, folder, globalSite);
+        Document cmisDocument = contentService.createDocument(globalUser, password, globalSite, DocumentType.MSPOWERPOINT, doc, doc);
+
         contentService.deleteFolder(globalUser, password, globalSite, folder);
         contentService.deleteDocument(globalUser, password, globalSite, doc);
-        Assert.assertTrue(userService.deleteItemFromTranshcan(globalUser, password, nodeRef));
-        Assert.assertTrue(userService.getItemsFromTrashcan(globalUser, password).get(0).equalsIgnoreCase(folder));
-        Assert.assertTrue(userService.deleteItemFromTranshcan(globalUser, password, nodeRefFolder));
-        Assert.assertTrue(userService.getItemsFromTrashcan(globalUser, password).isEmpty());
+        
+        Assert.assertTrue(userService.deleteItemFromTranshcan(globalUser, password, cmisDocument.getId()));
+        Assert.assertTrue(userService.getItemsNameFromTrashcan(globalUser, password).get(0).equalsIgnoreCase(folder));
+        Assert.assertTrue(userService.getItemsNodeRefFromTrashcan(globalUser, password).get(0).contains(cmisFolder.getId()));
+        Assert.assertTrue(userService.deleteItemFromTranshcan(globalUser, password, cmisFolder.getId()));
+        Assert.assertTrue(userService.getItemsNameFromTrashcan(globalUser, password).isEmpty());
     }
     
     @Test

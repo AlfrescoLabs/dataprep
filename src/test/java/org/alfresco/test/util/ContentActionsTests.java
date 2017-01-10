@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.alfresco.dataprep.ContentActions;
-import org.alfresco.dataprep.ContentAspects;
 import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.GroupService;
 import org.alfresco.dataprep.SiteService;
@@ -48,7 +47,6 @@ public class ContentActionsTests extends AbstractTest
     @Autowired private SiteService site;
     @Autowired private ContentService content;
     @Autowired private ContentActions contentAction;
-    @Autowired private ContentAspects contentAspect;
     @Autowired private GroupService groupService;
     private String document = "actionDoc";
     private String folder = "testFolder";

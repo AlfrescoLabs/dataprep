@@ -49,12 +49,13 @@ import org.apache.http.protocol.HTTP;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
-@Service
+
 /**
  * Class to manage different content actions (tagging, comments, likes, favorites)
  * 
  * @author Bogdan Bocancea 
  */
+@Service
 public class ContentActions extends CMISUtil
 {
     private enum ActionType
@@ -1316,7 +1317,7 @@ public class ContentActions extends CMISUtil
     }
 
     /**
-     * Copy folder with all childs 
+     * Copy folder with children
      * 
      * @param toCopyFolder source folder
      * @param targetFolder target folder
@@ -1334,7 +1335,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Copy all the childs of the source folder to the target folder
+     * Copy children of the source folder to the target folder
      * 
      * @param sourceFolder
      * @param targetFolder
