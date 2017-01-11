@@ -25,6 +25,7 @@ import org.alfresco.dataprep.UserService;
 import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,12 +200,26 @@ public class ContentTest extends AbstractTest
     }
 
     @Test
-    public void deleteDocumentFromRoot()
+    public void deleteDocumentFromSiteRoot()
     {
         String plainDoc = "deleteDoc";
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, plainDoc, plainDoc);
         content.deleteDocument(userName, password, siteName, plainDoc);
         Assert.assertTrue(content.getNodeRef(userName, password, siteName, plainDoc).isEmpty());
+    }
+    
+    @Test
+    public void deleteContentByPath()
+    {
+        Session session = content.getCMISSession(ADMIN, ADMIN);
+        String document = "deleteDoc" + System.currentTimeMillis();
+        String folder = "deleteFolder" + System.currentTimeMillis();
+        content.createDocumentInRepository(session, "/", DocumentType.TEXT_PLAIN, document, document);
+        content.createFolderInRepository(session, folder, "/");
+        content.deleteContent(ADMIN, ADMIN, "/" + document);
+        content.deleteContent(ADMIN, ADMIN, "/" + folder);
+        Assert.assertTrue(content.getNodeRefByPath(session, "/" + document).isEmpty());
+        Assert.assertTrue(content.getNodeRefByPath(ADMIN,ADMIN, "/" + folder).isEmpty());
     }
 
     @Test
@@ -369,6 +384,18 @@ public class ContentTest extends AbstractTest
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, plainDoc).equals(newContentPlain));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, xml).equals(newContentXml));
         Assert.assertTrue(content.getDocumentContent(userName, password, siteName, docx).equals(newDocContent));
+    }
+    
+    @Test
+    public void updateContentByPath()
+    {
+        String plainDoc = "plain" + System.currentTimeMillis();
+        String path = "/Shared/" + plainDoc;
+        content.createDocumentInRepository(userName, password, "/Shared", DocumentType.TEXT_PLAIN, plainDoc, "first content");
+        Assert.assertTrue(content.updateDocumentContent(userName, password, path, DocumentType.TEXT_PLAIN, "second content"));
+        Assert.assertTrue(content.getDocumentContent(userName, password, path).equals("second content"));
+        Assert.assertTrue(content.updateDocumentContent(userName, password, path, DocumentType.TEXT_PLAIN, "last content"));
+        Assert.assertTrue(content.getDocumentContent(userName, password, path).equals("last content"));
     }
 
     @Test

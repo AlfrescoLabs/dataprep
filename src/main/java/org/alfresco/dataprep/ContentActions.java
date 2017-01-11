@@ -1154,9 +1154,55 @@ public class ContentActions extends CMISUtil
                             final boolean majorVersion,
                             final String checkinComment)
     {
+        return checkIn(userName, password, false, null, siteId, docName, fileType, newContent, majorVersion, checkinComment);
+    }
+    
+    /**
+     * Check in document. If this is not a PWC(private working copy) check out for the 
+     * file will be made.
+     *
+     * @param userName login username
+     * @param password login password
+     * @param pathToDocument path to document
+     * @param fileType DocumentType type of document
+     * @param newContent String new content to be set
+     * @param majorVersion boolean true to set major version
+     * @param checkinComment String check in comment
+     * @return ObjectId object id of PWC
+     */
+    public ObjectId checkIn(final String userName,
+                            final String password,
+                            final String pathToDocument,
+                            final DocumentType fileType,
+                            final String newContent,
+                            final boolean majorVersion,
+                            final String checkinComment)
+    {
+        return checkIn(userName, password, true, pathToDocument, null, null, fileType, newContent, majorVersion, checkinComment);
+    }
+    
+    private ObjectId checkIn(final String userName,
+                             final String password,
+                             final boolean byPath,
+                             final String pathToDocument,
+                             final String siteId,
+                             final String docName,
+                             final DocumentType fileType,
+                             final String newContent,
+                             final boolean majorVersion,
+                             final String checkinComment)
+    {
         Document pwc = null;
         Session session = getCMISSession(userName, password);
-        Document docToModify = getDocumentObject(session, siteId, docName);
+        Document docToModify = null;
+        if(byPath)
+        {
+            docToModify = getDocumentObject(session, pathToDocument);
+        }
+        else
+        {
+            docToModify = getDocumentObject(session, siteId, docName);
+        }
         String id = docToModify.getVersionSeriesCheckedOutId();
         InputStream stream = null;
         ContentStream contentStream = null;
@@ -1182,7 +1228,7 @@ public class ContentActions extends CMISUtil
         try
         {
             stream = new ByteArrayInputStream(content);
-            contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+            contentStream = session.getObjectFactory().createContentStream(docToModify.getName(), Long.valueOf(content.length), fileType.type, stream);
             try
             {
                 return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
@@ -1190,7 +1236,7 @@ public class ContentActions extends CMISUtil
             catch(CmisStorageException se)
             {
                 logger.error("Error when trying to checkin: ", se);
-                contentStream = session.getObjectFactory().createContentStream(docName, Long.valueOf(content.length), fileType.type, stream);
+                contentStream = session.getObjectFactory().createContentStream(docToModify.getName(), Long.valueOf(content.length), fileType.type, stream);
                 return pwc.checkIn(majorVersion, null, contentStream, checkinComment);
             }
         }
@@ -1216,6 +1262,22 @@ public class ContentActions extends CMISUtil
     {
         Session session = getCMISSession(userName, password);
         return getDocumentObject(session, siteId, fileName).getVersionLabel();
+    }
+    
+    /**
+     * Get the version of a file
+     *
+     * @param userName login username
+     * @param password login password
+     * @param pathToDocument
+     * @return String file version
+     */
+    public String getVersion(final String userName,
+                             final String password,
+                             final String pathToDocument)
+    {
+        Session session = getCMISSession(userName, password);
+        return getDocumentObject(session, pathToDocument).getVersionLabel();
     }
     
     private CmisObject copyTo(final Session session,

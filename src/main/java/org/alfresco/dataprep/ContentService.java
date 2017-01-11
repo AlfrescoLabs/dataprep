@@ -722,6 +722,33 @@ public class ContentService extends CMISUtil
             throw new CmisRuntimeException("Invalid file: " + docName, ia);
         }
     }
+    
+    /**
+     * Delete content: folders (without children) and documents
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param pathToContent
+     */
+    public void deleteContent(final String userName,
+                              final String password,
+                              final String pathToContent)
+    {
+        Session session = getCMISSession(userName, password); 
+        getCmisObject(session, pathToContent).delete();
+    }
+    
+    /**
+     * Delete content: folders (without children) and documents
+     * 
+     * @param session {@link Session}
+     * @param pathToContent
+     */
+    public void deleteContent(final Session session,
+                              final String pathToContent)
+    {
+        getCmisObject(session, pathToContent).delete();
+    }
 
     /**
      * Delete a parent folder that has children
@@ -1144,8 +1171,42 @@ public class ContentService extends CMISUtil
                                      final String siteName,
                                      final String docName)
     {
+        return getDocumentContent(userName, password, false, null, siteName, docName);
+    }
+    
+    /**
+     * Get the content from a document
+     * 
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param docName file name
+     * @return String content of document
+     */
+    public String getDocumentContent(final String userName,
+                                    final String password,
+                                    final String pathToDocument)
+    {
+        return getDocumentContent(userName, password, true, pathToDocument, null, null);
+    }
+    
+    private String getDocumentContent(final String userName,
+                                      final String password,
+                                      final boolean byPath,
+                                      final String pathToDocument,
+                                      final String siteName,
+                                      final String docName)
+    {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String docNodeRef = getNodeRef(userName, password, siteName, docName);
+        String docNodeRef;
+        if(byPath)
+        {
+            docNodeRef = getNodeRefByPath(userName, password, pathToDocument);
+        }
+        else
+        {
+            docNodeRef = getNodeRef(userName, password, siteName, docName);
+        }
         String serviceUrl = client.getApiUrl().replace("service/", "") + "-default-/public/cmis/versions/1.1/atom/content?id=" + docNodeRef;
         HttpGet get = new HttpGet(serviceUrl);
         try
@@ -1168,7 +1229,7 @@ public class ContentService extends CMISUtil
         }
         return "";
     }
-
+    
     /**
      * Update content of a document
      * @param userName login username
@@ -1179,15 +1240,25 @@ public class ContentService extends CMISUtil
      * @param newContent new content of the file
      * @return true if updated
      */
-    public boolean updateDocumentContent(final String userName,
-                                         final String password,
-                                         final String siteName,
-                                         final DocumentType docType,
-                                         final String docName,
-                                         final String newContent)
+    private boolean updateDocumentContent(final String userName,
+                                          final String password,
+                                          final boolean byPath,
+                                          final String pathToDocument,
+                                          final String siteName,
+                                          final String docName,
+                                          final DocumentType docType,
+                                          final String newContent)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String docNodeRef = getNodeRef(userName, password, siteName, docName);
+        String docNodeRef;
+        if(byPath)
+        {
+            docNodeRef = getNodeRefByPath(userName, password, pathToDocument);
+        }
+        else
+        {
+            docNodeRef = getNodeRef(userName, password, siteName, docName);
+        }
         if(StringUtils.isEmpty(docNodeRef))
         {
             throw new RuntimeException("Content doesn't exists");
@@ -1214,5 +1285,43 @@ public class ContentService extends CMISUtil
             client.close();
         }
         return false;
+    }
+
+    /**
+     * Update content of a document
+     * @param userName login username
+     * @param password login password
+     * @param siteName site name
+     * @param docType file type
+     * @param docName file name to be updated
+     * @param newContent new content of the file
+     * @return true if updated
+     */
+    public boolean updateDocumentContent(final String userName,
+                                         final String password,
+                                         final String siteName,
+                                         final DocumentType docType,
+                                         final String docName,
+                                         final String newContent)
+    {
+        return updateDocumentContent(userName, password, false, null, siteName, docName, docType, newContent);
+    }
+    
+    /**
+     * Update content of a document
+     * @param userName login username
+     * @param password login password
+     * @param pathToDocument
+     * @param docType file type
+     * @param newContent new content of the file
+     * @return true if updated
+     */
+    public boolean updateDocumentContent(final String userName,
+                                         final String password,
+                                         final String pathToDocument,
+                                         final DocumentType docType,
+                                         final String newContent)
+    {
+        return updateDocumentContent(userName, password, true, pathToDocument, null, null, docType, newContent);
     }
 }
