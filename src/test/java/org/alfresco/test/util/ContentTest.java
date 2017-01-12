@@ -216,8 +216,8 @@ public class ContentTest extends AbstractTest
         String folder = "deleteFolder" + System.currentTimeMillis();
         content.createDocumentInRepository(session, "/", DocumentType.TEXT_PLAIN, document, document);
         content.createFolderInRepository(session, folder, "/");
-        content.deleteContent(ADMIN, ADMIN, "/" + document);
-        content.deleteContent(ADMIN, ADMIN, "/" + folder);
+        content.deleteItem(ADMIN, ADMIN, "/" + document);
+        content.deleteItem(ADMIN, ADMIN, "/" + folder);
         Assert.assertTrue(content.getNodeRefByPath(session, "/" + document).isEmpty());
         Assert.assertTrue(content.getNodeRefByPath(ADMIN,ADMIN, "/" + folder).isEmpty());
     }

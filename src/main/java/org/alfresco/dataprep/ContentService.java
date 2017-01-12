@@ -724,28 +724,28 @@ public class ContentService extends CMISUtil
     }
     
     /**
-     * Delete content: folders (without children) and documents
+     * Delete item: folder (without children) or document
      * 
      * @param userName login username
      * @param password login password
      * @param pathToContent
      */
-    public void deleteContent(final String userName,
-                              final String password,
-                              final String pathToContent)
+    public void deleteItem(final String userName,
+                           final String password,
+                           final String pathToContent)
     {
         Session session = getCMISSession(userName, password); 
         getCmisObject(session, pathToContent).delete();
     }
     
     /**
-     * Delete content: folders (without children) and documents
+     * Delete item: folder (without children) or document
      * 
      * @param session {@link Session}
      * @param pathToContent
      */
-    public void deleteContent(final Session session,
-                              final String pathToContent)
+    public void deleteItem(final Session session,
+                           final String pathToContent)
     {
         getCmisObject(session, pathToContent).delete();
     }
