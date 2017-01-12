@@ -1184,8 +1184,8 @@ public class ContentService extends CMISUtil
      * @return String content of document
      */
     public String getDocumentContent(final String userName,
-                                    final String password,
-                                    final String pathToDocument)
+                                     final String password,
+                                     final String pathToDocument)
     {
         return getDocumentContent(userName, password, true, pathToDocument, null, null);
     }
@@ -1323,5 +1323,22 @@ public class ContentService extends CMISUtil
                                          final String newContent)
     {
         return updateDocumentContent(userName, password, true, pathToDocument, null, null, docType, newContent);
+    }
+    
+    /**
+     * Update content of a document
+     * @param userName login username
+     * @param password login password
+     * @param pathToDocument
+     * @param newContent new content of the file
+     * @return true if updated
+     */
+    public boolean updateDocumentContent(final String userName,
+                                         final String password,
+                                         final String pathToDocument,
+                                         final String newContent)
+    {
+        String name = new File(pathToDocument).getName();
+        return updateDocumentContent(userName, password, true, pathToDocument, null, null, DocumentType.fromName(name), newContent);
     }
 }

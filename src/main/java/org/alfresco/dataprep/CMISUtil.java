@@ -44,6 +44,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentExcep
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUnauthorizedException;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -56,18 +57,34 @@ public class CMISUtil
 {
     public enum DocumentType
     {
-        UNDEFINED("N#A"),
-        TEXT_PLAIN("text/plain"),
-        XML("text/xml"),
-        HTML("text/html"),
-        PDF("application/pdf"),
-        MSWORD("application/msword"),
-        MSEXCEL( "application/vnd.ms-excel"),
-        MSPOWERPOINT("application/vnd.ms-powerpoint");
+        UNDEFINED("N#A", ""),
+        TEXT_PLAIN("text/plain", "txt"),
+        XML("text/xml", "xml"),
+        HTML("text/html", "html"),
+        PDF("application/pdf", "pdf"),
+        MSWORD("application/msword", "doc"),
+        MSWORD2007("application/msword", "docx"),
+        MSEXCEL( "application/vnd.ms-excel", "xls"),
+        MSEXCEL2007("application/vnd.ms-excel", "xlsx"),
+        MSPOWERPOINT("application/vnd.ms-powerpoint", "ppt"),
+        MSPOWERPOINT2007("application/vnd.ms-powerpoint", "pptx");
         public final String type;
-        DocumentType(String type)
+        public final String extention;
+        DocumentType(String type, String extention)
         {
             this.type = type;
+            this.extention = extention;
+        }
+        
+        public static DocumentType fromName(String fileName)
+        {
+            String extension = FilenameUtils.getExtension(fileName);
+            for(DocumentType docType : DocumentType.values())
+            {
+                if (docType.extention.equals(extension))
+                    return docType;
+            }
+            return DocumentType.UNDEFINED;
         }
     }
     

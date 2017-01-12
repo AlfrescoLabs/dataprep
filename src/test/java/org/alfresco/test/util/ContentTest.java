@@ -389,10 +389,10 @@ public class ContentTest extends AbstractTest
     @Test
     public void updateContentByPath()
     {
-        String plainDoc = "plain" + System.currentTimeMillis();
+        String plainDoc = "plain" + System.currentTimeMillis() + ".txt";
         String path = "/Shared/" + plainDoc;
         content.createDocumentInRepository(userName, password, "/Shared", DocumentType.TEXT_PLAIN, plainDoc, "first content");
-        Assert.assertTrue(content.updateDocumentContent(userName, password, path, DocumentType.TEXT_PLAIN, "second content"));
+        Assert.assertTrue(content.updateDocumentContent(userName, password, path, "second content"));
         Assert.assertTrue(content.getDocumentContent(userName, password, path).equals("second content"));
         Assert.assertTrue(content.updateDocumentContent(userName, password, path, DocumentType.TEXT_PLAIN, "last content"));
         Assert.assertTrue(content.getDocumentContent(userName, password, path).equals("last content"));

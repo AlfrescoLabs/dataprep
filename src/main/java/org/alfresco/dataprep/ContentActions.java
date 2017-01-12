@@ -15,6 +15,7 @@
 package org.alfresco.dataprep;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -1179,6 +1180,29 @@ public class ContentActions extends CMISUtil
                             final String checkinComment)
     {
         return checkIn(userName, password, true, pathToDocument, null, null, fileType, newContent, majorVersion, checkinComment);
+    }
+    
+    /**
+     * Check in document. If this is not a PWC(private working copy) check out for the 
+     * file will be made.
+     *
+     * @param userName login username
+     * @param password login password
+     * @param pathToDocument path to document
+     * @param newContent String new content to be set
+     * @param majorVersion boolean true to set major version
+     * @param checkInComment String check in comment
+     * @return ObjectId object id of PWC
+     */
+    public ObjectId checkIn(final String userName,
+                            final String password,
+                            final String pathToDocument,
+                            final String newContent,
+                            final boolean majorVersion,
+                            final String checkInComment)
+    {
+        String fileName = new File(pathToDocument).getName();
+        return checkIn(userName, password, true, pathToDocument, null, null, DocumentType.fromName(fileName), newContent, majorVersion, checkInComment);
     }
     
     private ObjectId checkIn(final String userName,
