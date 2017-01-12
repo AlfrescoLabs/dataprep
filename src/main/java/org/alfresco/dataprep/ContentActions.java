@@ -1155,7 +1155,8 @@ public class ContentActions extends CMISUtil
                             final boolean majorVersion,
                             final String checkinComment)
     {
-        return checkIn(userName, password, false, null, siteId, docName, fileType, newContent, majorVersion, checkinComment);
+        Session session = getCMISSession(userName, password);
+        return checkIn(session, false, null, siteId, docName, fileType, newContent, majorVersion, checkinComment);
     }
     
     /**
@@ -1179,7 +1180,8 @@ public class ContentActions extends CMISUtil
                             final boolean majorVersion,
                             final String checkinComment)
     {
-        return checkIn(userName, password, true, pathToDocument, null, null, fileType, newContent, majorVersion, checkinComment);
+        Session session = getCMISSession(userName, password);
+        return checkIn(session, true, pathToDocument, null, null, fileType, newContent, majorVersion, checkinComment);
     }
     
     /**
@@ -1201,12 +1203,33 @@ public class ContentActions extends CMISUtil
                             final boolean majorVersion,
                             final String checkInComment)
     {
+        Session session = getCMISSession(userName, password);
         String fileName = new File(pathToDocument).getName();
-        return checkIn(userName, password, true, pathToDocument, null, null, DocumentType.fromName(fileName), newContent, majorVersion, checkInComment);
+        return checkIn(session, true, pathToDocument, null, null, DocumentType.fromName(fileName), newContent, majorVersion, checkInComment);
     }
     
-    private ObjectId checkIn(final String userName,
-                             final String password,
+    /**
+     * Check in document. If this is not a PWC(private working copy) check out for the 
+     * file will be made.
+     *
+     * @param session {@link Session}
+     * @param pathToDocument path to document
+     * @param newContent String new content to be set
+     * @param majorVersion boolean true to set major version
+     * @param checkInComment String check in comment
+     * @return ObjectId object id of PWC
+     */
+    public ObjectId checkIn(final Session session,
+                            final String pathToDocument,
+                            final String newContent,
+                            final boolean majorVersion,
+                            final String checkInComment)
+    {
+        String fileName = new File(pathToDocument).getName();
+        return checkIn(session, true, pathToDocument, null, null, DocumentType.fromName(fileName), newContent, majorVersion, checkInComment);
+    }
+    
+    private ObjectId checkIn(final Session session,
                              final boolean byPath,
                              final String pathToDocument,
                              final String siteId,
@@ -1217,7 +1240,6 @@ public class ContentActions extends CMISUtil
                              final String checkinComment)
     {
         Document pwc = null;
-        Session session = getCMISSession(userName, password);
         Document docToModify = null;
         if(byPath)
         {
@@ -1301,6 +1323,19 @@ public class ContentActions extends CMISUtil
                              final String pathToDocument)
     {
         Session session = getCMISSession(userName, password);
+        return getDocumentObject(session, pathToDocument).getVersionLabel();
+    }
+    
+    /**
+     * Get the version of a file
+     *
+     * @param session {@link Session}
+     * @param pathToDocument
+     * @return String file version
+     */
+    public String getVersion(final Session session,
+                             final String pathToDocument)
+    {
         return getDocumentObject(session, pathToDocument).getVersionLabel();
     }
     
