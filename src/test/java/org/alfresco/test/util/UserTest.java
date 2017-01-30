@@ -573,4 +573,19 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.disableUser(ADMIN, ADMIN, userToDisable, true));
         Assert.assertTrue(userService.disableUser(ADMIN, ADMIN, userToDisable, false));
     }
+    
+    @Test
+    public void setUserQuota()
+    {
+        String userToUpdate = "quotaUser" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, userToUpdate, password, userToUpdate + domain, firstName, lastName);
+        Assert.assertTrue(userService.setUserQuota(ADMIN, ADMIN, userToUpdate, 2));
+    }
+    
+    @Test
+    public void setUserQuotaInexistentUser()
+    {
+        String userToUpdate = "quotaUser" + System.currentTimeMillis();
+        Assert.assertFalse(userService.setUserQuota(ADMIN, ADMIN, userToUpdate, 2));
+    }
 }

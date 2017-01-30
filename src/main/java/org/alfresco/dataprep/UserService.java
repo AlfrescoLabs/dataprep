@@ -208,6 +208,46 @@ public class UserService extends CMISUtil
         return false;
     }
     
+    
+    /**
+     * Set user quota in MB
+     * 
+     * @param adminUserName String admin user
+     * @param admisPassword String admin password
+     * @param userToSet String set quota for user
+     * @param quota int size in MB
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public boolean setUserQuota(final String adminUserName,
+                                final String admisPassword,
+                                final String userToSet,
+                                final int quotaMb)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "people/" + encodeUserName(userToSet);
+        JSONObject userBody = new JSONObject();
+        long MEGABYTE = 1024L * 1024L;
+        long bytes = quotaMb * MEGABYTE;
+        userBody.put("quota", bytes);
+        HttpPut put = new HttpPut(url);
+        put.setEntity(client.setMessageBody(userBody));
+        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, put);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                logger.info(String.format("User %s successfully updated with quota %s", userToSet, quotaMb));
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                logger.error(String.format("User %s doesn't exists", userToSet));
+                break;
+            default:
+                logger.error(String.format("Unable to update user %s. Error: %s" ,userToSet, response.toString()));
+                break;
+        }
+        return false;
+    }
+    
     /**
      * Delete a user from enterprise.
      * 
