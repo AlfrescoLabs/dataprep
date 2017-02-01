@@ -588,4 +588,19 @@ public class UserTest extends AbstractTest
         String userToUpdate = "quotaUser" + System.currentTimeMillis();
         Assert.assertFalse(userService.setUserQuota(ADMIN, ADMIN, userToUpdate, 2));
     }
+    
+    @Test
+    public void isUserAuthorized()
+    {
+        String userToVerify = "disableMe" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, userToVerify, password, userToVerify + domain, firstName, lastName);
+        Assert.assertFalse(userService.isUserAuthorized(ADMIN, ADMIN, userToVerify));
+        site.create(userToVerify,
+                    password,
+                    "myDomain",
+                    "site" + System.currentTimeMillis(), 
+                    "my site description", 
+                    Visibility.MODERATED);
+        Assert.assertTrue(userService.isUserAuthorized(ADMIN, ADMIN, userToVerify));
+    }
 }

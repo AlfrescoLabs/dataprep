@@ -165,6 +165,40 @@ public class UserService extends CMISUtil
     }
     
     /**
+     * Verify if user is authorized
+     * @param adminUser
+     * @param adminPassword
+     * @param userToVerify
+     * @return
+     */
+    public boolean isUserAuthorized(final String adminUser,
+                                    final String adminPassword,
+                                    final String userToVerify)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "people/" + encodeUserName(userToVerify);
+        HttpGet get = new HttpGet(url);
+        try
+        {
+            HttpResponse response = client.execute(adminUser, adminPassword, get);
+            if(200 == response.getStatusLine().getStatusCode())
+            {
+                String status = client.getParameterFromJSON(response, "authorizationStatus", "");
+                if(status.equals("AUTHORIZED"))
+                {
+                    return true;
+                }
+            }
+        }
+        finally
+        {
+            get.releaseConnection();
+            client.close();
+        }
+        return false;
+    }
+    
+    /**
      * Disable or enable user
      * 
      * @param adminUserName String admin user
@@ -202,12 +236,11 @@ public class UserService extends CMISUtil
                 logger.error(String.format("User %s doesn't exists", userToDisable));
                 break;
             default:
-                logger.error(String.format("Unable to update user %s. Error: %s" ,userToDisable, response.toString()));
+                logger.error(String.format("Unable to update user %s. Error: %s" , userToDisable, response.toString()));
                 break;
         }
         return false;
     }
-    
     
     /**
      * Set user quota in MB
