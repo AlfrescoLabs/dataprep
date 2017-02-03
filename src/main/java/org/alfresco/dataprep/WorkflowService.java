@@ -186,6 +186,83 @@ public class WorkflowService extends CMISUtil
         return "";
     }
     
+    @SuppressWarnings("unchecked")
+    private String startProcessWithId(final String processDefId,
+                                 final String userName,
+                                 final String password,
+                                 final String message,
+                                 Date due,
+                                 Priority priority,
+                                 final List<String> assignedUsers,
+                                 final String assignedGroup,
+                                 final boolean docsByPath,
+                                 final String documentsSite,
+                                 final List<String> docsToAttach,
+                                 final List<String> pathsToDocs,
+                                 final int requiredApprovePercent,
+                                 final boolean sendEmail)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "processes";
+        logger.info("Create process using url: " + api);
+        DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'Z");
+        SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd'T'Z");
+        String dueDate = fullFormat.format(due);
+        DateTime dateTime = dtf.parseDateTime(dueDate);
+        HttpPost post = new HttpPost(api);
+        JSONObject body = new JSONObject();
+        body.put("processDefinitionId", processDefId);
+        JSONArray items = new JSONArray();
+        if(!(docsToAttach == null) || !(pathsToDocs == null))
+        {
+            if(!docsByPath)
+            {
+                for(int i = 0; i<docsToAttach.size(); i++)
+                {
+                    items.add(getNodeRef(userName, password, documentsSite, docsToAttach.get(i)));
+                }
+            }
+            else
+            {
+                for(int i=0; i<pathsToDocs.size(); i++)
+                {
+                    items.add(getNodeRefByPath(userName, password, pathsToDocs.get(i)));
+                }
+            }
+        }
+        JSONObject variables = new JSONObject();
+        variables.put("bpm_assignee", assignedUsers.get(0));
+        variables.put("bpm_workflowDescription", message);
+        variables.put("bpm_sendEMailNotifications", sendEmail);
+        variables.put("bpm_workflowPriority", priority.getLevel());
+        variables.put("bpm_workflowDueDate", dateTime.toString());
+        body.put("variables", variables);
+        body.put("items", items);
+        post.setEntity(client.setMessageBody(body));
+        try
+        {
+            HttpResponse response = client.execute(userName, password, post);
+            logger.info("Response code: " + response.getStatusLine().getStatusCode());
+            switch (response.getStatusLine().getStatusCode())
+            {
+                case HttpStatus.SC_CREATED:
+                    if (logger.isTraceEnabled())
+                    {
+                        logger.trace("Successfuly started workflow: " + message);
+                    }
+                    return client.getParameterFromJSON(response, "id", "entry");
+                default:
+                    logger.error("Unable to start workflow " + response.toString());
+            }
+        }
+        finally
+        {
+            client.close();
+            post.releaseConnection();
+        }
+        return "";
+    }
+    
     /**
      * Start a new task with items added from a site
      * 
@@ -213,6 +290,39 @@ public class WorkflowService extends CMISUtil
         List<String> assignedUser = new ArrayList<String>();
         assignedUser.add(assignee);
         return startWorkflow(userName, password, WorkflowType.NewTask, message, dueDate, priority,
+                assignedUser, null, false, documentsSite, documents, null, 0, sendEmail);
+    }
+    
+    /**
+     * Start a new task with items added based on process definition id
+     * Note: The process definition id is dynamic in case of an environment with tenants
+     * 
+     * @param processDefId String process definition id
+     * @param userName String user name
+     * @param password String password
+     * @param message String message
+     * @param dueDate Date due date
+     * @param assignee String assignee
+     * @param priority Priority
+     * @param documentsSite String site containing the items
+     * @param documents List<String> documents to add to the task
+     * @param sendEmail boolean send email
+     * @return String workflow id
+     */
+    public String startProcessWithDefinitionId(final String processDefId,
+                               final String userName,
+                               final String password,
+                               final String message,
+                               final Date dueDate,
+                               final String assignee,
+                               final Priority priority,
+                               final String documentsSite,
+                               final List<String> documents,
+                               final boolean sendEmail)
+    {
+        List<String> assignedUser = new ArrayList<String>();
+        assignedUser.add(assignee);
+        return startProcessWithId(processDefId, userName, password, message, dueDate, priority,
                 assignedUser, null, false, documentsSite, documents, null, 0, sendEmail);
     }
     
@@ -500,7 +610,7 @@ public class WorkflowService extends CMISUtil
                     String assignee = (String) entry.get("assignee");
                     if(!StringUtils.isEmpty(assignee))
                     {
-                        if(assignee.equals(assignedUser))
+                        if(assignee.equalsIgnoreCase(assignedUser))
                         {
                             return (String) entry.get("id");
                         }
