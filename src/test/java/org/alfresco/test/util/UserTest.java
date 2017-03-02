@@ -120,31 +120,6 @@ public class UserTest extends AbstractTest
         Assert.assertTrue(userService.delete(ADMIN, ADMIN, userNameWithSpecialCharacters));
         Assert.assertFalse(userService.userExists(ADMIN, ADMIN, userNameWithSpecialCharacters));
     }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void inviteUserInvalidinvitingUser()
-    {
-        userService.inviteUserToSiteAndAccept(null, password, "userToInvite", "site", "SiteConsumer");
-    }
-    
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void inviteUserInvalidSite()
-    {
-        userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", null , "SiteConsumer");
-    }
-    
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void inviteUserInvalidRole()
-    {
-        userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", "site", null);
-    }
-    
-    @Test
-    public void inviteUserToNonExistentSite()
-    {
-        String userToInvite = "inviteUser" + System.currentTimeMillis();
-        Assert.assertFalse(userService.inviteUserToSiteAndAccept(globalUser, password, userToInvite, "whatSite", "SiteConsumer"));
-    }
   
     @Test
     public void requestSiteMembership()

@@ -337,6 +337,7 @@ public class UserService extends CMISUtil
      * @param siteName site identifier which invite user.
      * @param role user role
      * @return true if invite is successful
+     * @deprecated
      */
     public boolean inviteUserToSiteAndAccept(final String invitingUserName,
                                              final String invitingUserPassword,

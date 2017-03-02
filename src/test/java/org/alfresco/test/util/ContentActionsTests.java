@@ -73,7 +73,7 @@ public class ContentActionsTests extends AbstractTest
         userService.create(ADMIN, ADMIN, userToInvite, password, userToInvite, "invited", "user");
         userService.create(ADMIN, ADMIN, permissionUser, password, permissionUser + "@test.com","permission","man");
         groupService.createGroup(ADMIN, ADMIN, group);
-        userService.inviteUserToSiteAndAccept(userName, password, userToInvite, siteName, "SiteConsumer");
+        userService.createSiteMember(userName, password, userToInvite, siteName, "SiteConsumer");
     }
     
     @Test
