@@ -143,6 +143,16 @@ public class AlfrescoHttpClient
         }
         return "";
     }
+    
+    /**
+     * Get the alfresco version
+     * 
+     * @return double version of alfresco
+     */
+    public double getAlfVersion()
+    {
+        return Double.valueOf(StringUtils.substring(getAlfrescoVersion(), 0, 3));
+    }
 
     /**
      * Populate HTTP message call with given content.

@@ -104,6 +104,37 @@ public class SiteService
         create(username, password, domain, siteId, siteId, description, visibility);
     }
     
+    @SuppressWarnings("unchecked")
+    private boolean createSiteV1Api(final String username,
+                                    final String password,
+                                    final String siteId,
+                                    final String title,
+                                    final String description,
+                                    final Visibility visibility)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String reqUrl = client.getApiVersionUrl() + "sites";
+        HttpPost post  = new HttpPost(reqUrl);
+        JSONObject body = new JSONObject();;
+        body.put("id", siteId);
+        body.put("title", title);
+        body.put("description", description);
+        body.put("visibility", visibility.toString());
+        
+        HttpResponse response = client.executeRequest(username, password, body, post);
+        if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
+        {
+            logger.info(String.format("Successfuly created site with id '%s' ", siteId));
+            return true;
+        }
+        else
+        {
+            logger.error(client.getParameterFromJSON(response,"briefSummary", "error"));
+        }
+        return false;
+        
+    }
+    
     /**
     * Create site using Alfresco public API.
     * 
@@ -124,20 +155,28 @@ public class SiteService
                       final Visibility visibility)
    {
        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
-       try
+       AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+       if(client.getAlfVersion() >= 5.2)
        {
-           publicApi.createSite(domain,
-                                siteId,
-                                "site-dashboard",
-                                title,
-                                description,
-                                visibility);
+           createSiteV1Api(username, password, siteId, siteId, description, visibility);
        }
-       catch (IOException e)
+       else
        {
-           throw new RuntimeException("Failed to create site:" + siteId);
+           try
+           {
+               publicApi.createSite(domain,
+                                    siteId,
+                                    "site-dashboard",
+                                    title,
+                                    description,
+                                    visibility);
+           }
+           catch (IOException e)
+           {
+               throw new RuntimeException("Failed to create site:" + siteId);
+           }
+           logger.info("Site created successfully: " + title);
        }
-       logger.info("Site created successfully: " + title);
    }
    
     /**

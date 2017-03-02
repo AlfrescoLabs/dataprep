@@ -328,7 +328,8 @@ public class UserService extends CMISUtil
     }
     
     /**
-     * Utility to invite a enterprise user to Site and accept the invitation
+     * Utility to invite a enterprise user to Site and accept the invitation.
+     * This will not work on Alfresco with version above 5.2!
      * 
      * @param invitingUserName user identifier
      * @param invitingUserPassword user password
@@ -373,9 +374,7 @@ public class UserService extends CMISUtil
                     {
                         logger.trace("User successfully invited: " + userToInvite);
                     }
-                    String alfVersion = client.getAlfrescoVersion();
-                    double v = Double.valueOf(StringUtils.substring(alfVersion, 0, 3));
-                    if(v >= 5.1)
+                    if(client.getAlfVersion() >= 5.1)
                     {
                         return true;
                     }

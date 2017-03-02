@@ -24,7 +24,6 @@ import org.alfresco.dataprep.SiteService;
 import org.alfresco.dataprep.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.alfresco.api.entities.Site.Visibility;
-import org.springframework.social.alfresco.connect.exception.AlfrescoException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -101,18 +100,6 @@ public class SiteTest extends AbstractTest
     {
         boolean exists = site.exists("bs-site",ADMIN, ADMIN);
         Assert.assertFalse(exists);
-    }
-    
-    @Test(expectedExceptions=AlfrescoException.class)
-    public void createSiteWithInvalidDetails()
-    {
-        String siteId = "michael" + System.currentTimeMillis();
-        site.create(ADMIN,
-                    "fake",
-                    MY_DOMAIN,
-                    siteId, 
-                    "my site description", 
-                    Visibility.PUBLIC);
     }
     
     @Test(dependsOnMethods="exists")
@@ -223,16 +210,18 @@ public class SiteTest extends AbstractTest
         Assert.assertTrue(site.getFavoriteSites(theUser, password).isEmpty());
     }
     
-    @Test(dependsOnMethods="getFavSiteEmpty")
+    @Test
     public void getFavSite()
     {
+        String favUser =  "favuser" + System.currentTimeMillis();
+        user.create(ADMIN, ADMIN, favUser, password, favUser + domain, favUser, favUser);
         String site1 = "site-1" + System.currentTimeMillis();
         String site2 = "site-2" + System.currentTimeMillis();
-        site.create(theUser, password, MY_DOMAIN, site1, "site-1", Visibility.PUBLIC);
-        site.create(theUser, password, MY_DOMAIN, site2, "site-2", Visibility.PUBLIC);
-        Assert.assertTrue(site.setFavorite(theUser, password, site1));
-        Assert.assertTrue(site.setFavorite(theUser, password, site2));
-        List<String> favorites = site.getFavoriteSites(theUser, password);
+        site.create(favUser, password, MY_DOMAIN, site1, "site-1", Visibility.PUBLIC);
+        site.create(favUser, password, MY_DOMAIN, site2, "site-2", Visibility.PUBLIC);
+        Assert.assertTrue(site.setFavorite(favUser, password, site1));
+        Assert.assertTrue(site.setFavorite(favUser, password, site2));
+        List<String> favorites = site.getFavoriteSites(favUser, password);
         Assert.assertTrue(favorites.get(0).equals(site1));
         Assert.assertTrue(favorites.get(1).equals(site2));
     }
