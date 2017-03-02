@@ -407,7 +407,7 @@ public class SitePagesActionTests extends AbstractTest
         String userConsumer = "userCons-" + System.currentTimeMillis();
         String draftBlog = "draftConsumer" + System.currentTimeMillis(); 
         userService.create(ADMIN, ADMIN, userConsumer, userConsumer, userConsumer + domain, "fistN", "lastN");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userConsumer, theSite, "SiteConsumer"));
+        Assert.assertTrue(userService.createSiteMember(user, password, userConsumer, theSite, "SiteConsumer"));
         Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
         Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
         Assert.assertFalse(pageService.commentBlog(userConsumer, userConsumer, theSite, draftBlog, true, "comment1"));
@@ -419,7 +419,7 @@ public class SitePagesActionTests extends AbstractTest
         String userContributor = "userContrib-" + System.currentTimeMillis();
         String draftBlog = "draftContrib" + System.currentTimeMillis(); 
         userService.create(ADMIN, ADMIN, userContributor, userContributor, userContributor + "@test", "first", "last");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userContributor, theSite, "SiteContributor"));
+        Assert.assertTrue(userService.createSiteMember(user, password, userContributor, theSite, "SiteContributor"));
         Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
         Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
         Assert.assertTrue(pageService.commentBlog(userContributor, userContributor, theSite, draftBlog, true, "comment1"));
@@ -431,7 +431,7 @@ public class SitePagesActionTests extends AbstractTest
         String userCollaborator = "userCollab" + System.currentTimeMillis();
         String draftBlog = "draftCollab" + System.currentTimeMillis(); 
         userService.create(ADMIN, ADMIN, userCollaborator, userCollaborator, userCollaborator + "@test", "ff", "ll");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userCollaborator, theSite, "SiteCollaborator"));
+        Assert.assertTrue(userService.createSiteMember(user, password, userCollaborator, theSite, "SiteCollaborator"));
         Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
         Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
         Assert.assertTrue(pageService.commentBlog(userCollaborator, userCollaborator, theSite, draftBlog, true, "comment1"));
@@ -443,7 +443,7 @@ public class SitePagesActionTests extends AbstractTest
         String userContributor = "userContrib-" + System.currentTimeMillis();
         String draftBlog = "draftContrib" + System.currentTimeMillis(); 
         userService.create(ADMIN, ADMIN, userContributor, userContributor, userContributor + "@test", "fff", "lll");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(user, password, userContributor, theSite, "SiteContributor"));
+        Assert.assertTrue(userService.createSiteMember(user, password, userContributor, theSite, "SiteContributor"));
         Assert.assertTrue(pageService.createBlogPost(user, password, theSite, draftBlog, draftBlog, false, null));
         Assert.assertTrue(pageService.blogExists(user, password, theSite, draftBlog, false));
         Assert.assertTrue(pageService.commentBlog(user, password, theSite, draftBlog, true, "comment1"));

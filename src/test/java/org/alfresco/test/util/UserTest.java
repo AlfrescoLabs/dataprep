@@ -138,15 +138,6 @@ public class UserTest extends AbstractTest
     {
         userService.inviteUserToSiteAndAccept("userSiteManager", password, "userToInvite", "site", null);
     }
-
-    @Test
-    public void inviteUserToSiteAndAccept()
-    {
-        String userToInvite = "inviteUser" + System.currentTimeMillis();
-        String emailUserInvited = userToInvite + "@test.com";
-        userService.create(ADMIN, ADMIN, userToInvite, password, emailUserInvited, "z" + firstName, lastName);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(globalUser, password, userToInvite, globalSite, "SiteConsumer"));
-    }
     
     @Test
     public void inviteUserToNonExistentSite()
@@ -271,7 +262,7 @@ public class UserTest extends AbstractTest
         userService.create(ADMIN, ADMIN, userManager, password, emailUserManager, firstName, lastName);
         userService.create(ADMIN, ADMIN, userToInvite, password, emailUserToInvite, firstName, lastName);
         site.create(userManager, password, "mydomain", siteName, siteName, Visibility.PUBLIC);
-        userService.inviteUserToSiteAndAccept(userManager, password, userToInvite, siteName, "SiteConsumer");
+        Assert.assertTrue(userService.createSiteMember(userManager, password, userToInvite, siteName, "SiteConsumer"));
         int noOfSiteMembers=userService.countSiteMembers(userManager, password, siteName);
         Assert.assertEquals(noOfSiteMembers, 2);
     }
@@ -312,7 +303,7 @@ public class UserTest extends AbstractTest
     {
         String userName = "userRole-" + System.currentTimeMillis();
         userService.create(ADMIN, ADMIN, userName, password, userName + domain, firstName, lastName);
-        userService.inviteUserToSiteAndAccept(globalUser, password, userName, globalSite, "SiteConsumer");
+        Assert.assertTrue(userService.createSiteMember(globalUser, password, userName, globalSite, "SiteConsumer"));
         Assert.assertTrue(userService.changeUserRole(globalUser, password, globalSite, userName, "SiteCollaborator"));
     }
     

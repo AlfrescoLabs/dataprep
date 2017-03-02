@@ -132,7 +132,6 @@ public class SiteService
             logger.error(client.getParameterFromJSON(response,"briefSummary", "error"));
         }
         return false;
-        
     }
     
     /**

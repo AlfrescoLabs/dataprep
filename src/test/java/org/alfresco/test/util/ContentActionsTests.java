@@ -527,7 +527,7 @@ public class ContentActionsTests extends AbstractTest
         String inviteUser = "invite" + System.currentTimeMillis();
         String commentConsumer = "comment consumer";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteConsumer"));
+        Assert.assertTrue(userService.createSiteMember(userName, password, inviteUser, siteName, "SiteConsumer"));
         contentAction.addComment(inviteUser, password, siteName, commentDoc, commentConsumer);
     }
     
@@ -540,7 +540,7 @@ public class ContentActionsTests extends AbstractTest
         String commentContributor = "comment contributor";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
         content.createDocument(userName, password, siteName, DocumentType.TEXT_PLAIN, commentDoc, commentDoc);
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteContributor"));
+        Assert.assertTrue(userService.createSiteMember(userName, password, inviteUser, siteName, "SiteContributor"));
         Assert.assertTrue(contentAction.addComment(inviteUser, password, siteName, commentDoc, commentContributor));
         List<String> comments = contentAction.getComments(inviteUser, password, siteName, commentDoc);
         Assert.assertEquals(comments.get(0), commentContributor);
@@ -552,7 +552,7 @@ public class ContentActionsTests extends AbstractTest
         String inviteUser = "invite" + System.currentTimeMillis();
         String commentCollaborator = "comment collaborator";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteCollaborator"));
+        Assert.assertTrue(userService.createSiteMember(userName, password, inviteUser, siteName, "SiteCollaborator"));
         Assert.assertTrue(contentAction.addComment(inviteUser, password, siteName, commentDoc, commentCollaborator));
         List<String> comments = contentAction.getComments(inviteUser, password, siteName, commentDoc);
         Assert.assertEquals(comments.get(0), commentCollaborator);
@@ -564,7 +564,7 @@ public class ContentActionsTests extends AbstractTest
         String inviteUser = "invite" + System.currentTimeMillis();
         String commentCollaborator = "delete comment collaborator";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteCollaborator"));
+        Assert.assertTrue(userService.createSiteMember(userName, password, inviteUser, siteName, "SiteCollaborator"));
         Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentCollaborator));
         contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentCollaborator);
     }
@@ -575,7 +575,7 @@ public class ContentActionsTests extends AbstractTest
         String inviteUser = "invite" + System.currentTimeMillis();
         String commentContributor = "delete comment Contributor";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteContributor"));
+        Assert.assertTrue(userService.createSiteMember(userName, password, inviteUser, siteName, "SiteContributor"));
         Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentContributor));
         contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentContributor);
     }
@@ -586,7 +586,7 @@ public class ContentActionsTests extends AbstractTest
         String inviteUser = "invite" + System.currentTimeMillis();
         String commentManager = "delete comment manager";
         userService.create(ADMIN, ADMIN, inviteUser, password, inviteUser + "@test.com","firstname","lastname");
-        Assert.assertTrue(userService.inviteUserToSiteAndAccept(userName, password, inviteUser, siteName, "SiteManager"));
+        Assert.assertTrue(userService.createSiteMember(userName, password, inviteUser, siteName, "SiteManager"));
         Assert.assertTrue(contentAction.addComment(userName, password, siteName, commentDoc, commentManager));
         Assert.assertTrue(contentAction.removeComment(inviteUser, password, siteName, commentDoc, commentManager));
     }
