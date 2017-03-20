@@ -927,7 +927,7 @@ public class ContentService extends CMISUtil
                 {
                     pathInRepo = "/" + pathInRepo;
                 }
-                Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + "/" + pathInRepo);
+                Folder repository = (Folder) session.getObjectByPath(session.getRootFolder().getPath() + pathInRepo);
                 d = repository.createDocument(properties, contentStream, VersioningState.MAJOR);
             }
             return d;
