@@ -109,7 +109,7 @@ public class CMISUtil
         GEOGRAPHIC("Geographic", "P:cm:geographic"),
         EXIF("EXIF", "P:exif:exif"),
         RESTRICTABLE("Restrictable", "P:dp:restrictable"),
-        SYSTEM_SMART_FOLDER("System Smart Folder", "smf:systemConfigSmartFolder");
+        SYSTEM_SMART_FOLDER("System Smart Folder", "P:smf:systemConfigSmartFolder");
         private String value;
         private String property;
         private DocumentAspect(String value, String property)
