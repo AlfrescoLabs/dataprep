@@ -241,6 +241,31 @@ public class UserService extends CMISUtil
         }
         return false;
     }
+
+    public boolean deauthorizeUser(final String adminUserName,
+                               final String admisPassword,
+                               final String userToDeauthorize)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "deauthorize";
+        JSONObject userBody = new JSONObject();
+        userBody.put("username", userToDeauthorize);
+        HttpPost post = new HttpPost(url);
+        post.setEntity(client.setMessageBody(userBody));
+        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, post);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                logger.info(String.format("User %s deauthorize successfully", userToDeauthorize));
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                logger.error(String.format("User %s doesn't exist", userToDeauthorize));
+                return false;
+            default:
+                logger.error(String.format("Unable to deauthorize user %s. Error: %s" , userToDeauthorize, response.getStatusLine().toString()));
+                return false;
+        }
+    }
     
     /**
      * Set user quota in MB
