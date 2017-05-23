@@ -242,9 +242,10 @@ public class UserService extends CMISUtil
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean deauthorizeUser(final String adminUserName,
-                               final String admisPassword,
-                               final String userToDeauthorize)
+                                   final String admisPassword,
+                                   final String userToDeauthorize)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "deauthorize";
@@ -265,6 +266,35 @@ public class UserService extends CMISUtil
                 logger.error(String.format("Unable to deauthorize user %s. Error: %s" , userToDeauthorize, response.getStatusLine().toString()));
                 return false;
         }
+    }
+    /**
+     * Change user password by admin user
+     * 
+     * @param adminUserName Admin username
+     * @param admisPassword Admin password
+     * @param userName user to be updated
+     * @param newPassword new password to set
+     * @return true if successful
+     */
+    @SuppressWarnings("unchecked")
+    public boolean changeUserPasswordByAdmin(final String adminUserName,
+                                             final String admisPassword,
+                                             final String userName,
+                                             final String newPassword)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = client.getApiUrl() + "person/changepassword/" + encodeUserName(userName);
+        JSONObject userBody = new JSONObject();
+        userBody.put("newpw", newPassword);
+        HttpPost post = new HttpPost(url);
+        post.setEntity(client.setMessageBody(userBody));
+        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, post);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+        {
+            logger.info(String.format("Password changed successfully for %s", userName));
+            return true;
+        }
+        return false;
     }
     
     /**

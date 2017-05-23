@@ -569,4 +569,14 @@ public class UserTest extends AbstractTest
                     Visibility.MODERATED);
         Assert.assertTrue(userService.isUserAuthorized(ADMIN, ADMIN, userToVerify));
     }
+    
+    @Test
+    public void changeUserPassword()
+    {
+        String userToUpdate = "passwordUser" + System.currentTimeMillis();
+        userService.create(ADMIN, ADMIN, userToUpdate, password, userToUpdate + domain, firstName, lastName);
+        Assert.assertTrue(userService.changeUserPasswordByAdmin(ADMIN, ADMIN, userToUpdate, "new-password"));
+        // check if new password works
+        Assert.assertTrue(userService.followUser(userToUpdate, "new-password", ADMIN));
+    }
 }
