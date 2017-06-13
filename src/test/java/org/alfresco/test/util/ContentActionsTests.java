@@ -598,9 +598,11 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
-    public void setPermissionForDocumen2()
+    public void setInheritePermissions()
     {
-        Assert.assertTrue(contentAction.setPermissionForUser(userName, password, siteName, permissionDoc, "", "", false));
+        String inheritDoc = "inheritDoc" + System.currentTimeMillis();
+        content.createDocumentInRepository(userName, password, "/Shared", DocumentType.PDF, inheritDoc, inheritDoc);
+        Assert.assertTrue(contentAction.setInheritPermissions(userName, password, "/Shared/" + inheritDoc, false));
     }
     
     @Test

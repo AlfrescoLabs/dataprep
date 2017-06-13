@@ -1664,7 +1664,43 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Set permission for a user
+     * Set inherit permissions for content
+     * 
+     * @param siteManager String site manager
+     * @param password String password
+     * @param siteName String site name
+     * @param contentName String content
+     * @param isInherited boolean is inherited
+     * @return true (200 OK) if permission is set
+     */
+    public boolean setInheritPermissions(final String siteManager,
+                                         final String password,
+                                         final String siteName,
+                                         final String contentName,
+                                         final boolean isInherited)
+    {
+        return managePermission(siteManager, password, siteName, contentName, false, null, false, null, null, null, isInherited, false);
+    }
+    
+    /**
+     * Set inherit permissions for content
+     * 
+     * @param userName String site manager
+     * @param password String password
+     * @param pathToContent String path to content
+     * @param isInherited boolean is inherited
+     * @return true (200 OK) if permission is set
+     */
+    public boolean setInheritPermissions(final String userName,
+                                         final String password,
+                                         final String pathToContent,
+                                         final boolean isInherited)
+    {
+        return managePermission(userName, password, null, null, true, pathToContent, false, null, null, null, isInherited, false);
+    }
+    
+    /**
+     * Set permission for user
      * 
      * @param userName String user name
      * @param password String password
@@ -1687,7 +1723,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Set permission for a user
+     * Set permission for user
      * 
      * @param userName String user name
      * @param password String password
@@ -1708,7 +1744,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Set permission for a group
+     * Set permission for group
      * 
      * @param userName String user name
      * @param password String password
@@ -1731,7 +1767,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Set permission for a group
+     * Set permission for group
      * 
      * @param userName String user name
      * @param password String password
@@ -1752,7 +1788,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Remove permission from a user
+     * Remove permission from user
      * 
      * @param userName String user name
      * @param password String password
@@ -1775,7 +1811,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Remove permission from a user
+     * Remove permission from user
      * 
      * @param userName String user name
      * @param password String password
@@ -1796,7 +1832,7 @@ public class ContentActions extends CMISUtil
     }
 
     /**
-     * Remove permission from a group
+     * Remove permission from group
      * 
      * @param userName String user name
      * @param password String password
@@ -1819,7 +1855,7 @@ public class ContentActions extends CMISUtil
     }
     
     /**
-     * Remove permission from a group
+     * Remove permission from group
      * 
      * @param userName String user name
      * @param password String password
