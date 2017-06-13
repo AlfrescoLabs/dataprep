@@ -598,6 +598,12 @@ public class ContentActionsTests extends AbstractTest
     }
     
     @Test
+    public void setPermissionForDocumen2()
+    {
+        Assert.assertTrue(contentAction.setPermissionForUser(userName, password, siteName, permissionDoc, "", "", false));
+    }
+    
+    @Test
     public void setPermissionForFolder()
     {
         Assert.assertTrue(contentAction.setPermissionForUser(userName, password, siteName, folder, permissionUser, "SiteManager", true));

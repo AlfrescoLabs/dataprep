@@ -1604,6 +1604,8 @@ public class ContentActions extends CMISUtil
                                      final String password,
                                      final String siteName,
                                      final String contentName,
+                                     final boolean byPath,
+                                     final String pathToContent,
                                      final boolean isUser,
                                      final String userToAdd,
                                      final String groupName,
@@ -1612,7 +1614,15 @@ public class ContentActions extends CMISUtil
                                      final boolean remove)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String node = getNodeRef(userName, password, siteName, contentName);
+        String node;
+        if(byPath)
+        {
+            node = getNodeRefByPath(userName, password, pathToContent);
+        }
+        else
+        {
+            node = getNodeRef(userName, password, siteName, contentName);
+        }
         if(StringUtils.isEmpty(node))
         {
             throw new RuntimeException("Invalid content " + contentName);
@@ -1620,21 +1630,24 @@ public class ContentActions extends CMISUtil
         String api = client.getAlfrescoUrl() + "alfresco/s/slingshot/doclib/permissions/workspace/SpacesStore/" + node;
         HttpPost post = new HttpPost(api);
         JSONObject permission = new JSONObject();
-        if(isUser)
-        {
-            permission.put("authority", userToAdd);
-        }
-        else
-        {
-            permission.put("authority", "GROUP_" + groupName);
-        }
-        permission.put("role", role);
-        if(remove)
-        {
-            permission.put("remove", true);
-        }
         JSONArray array = new JSONArray();
-        array.add(permission);
+        if(!StringUtils.isEmpty(userToAdd) || !StringUtils.isEmpty(groupName))
+        {
+            if(isUser)
+            {
+                permission.put("authority", userToAdd);
+            }
+            else
+            {
+                permission.put("authority", "GROUP_" + groupName);
+            }
+            permission.put("role", role);
+            if(remove)
+            {
+                permission.put("remove", true);
+            }
+            array.add(permission);
+        }
         JSONObject body = new JSONObject();
         body.put("permissions", array);
         body.put("isInherited", isInherited);
@@ -1670,7 +1683,28 @@ public class ContentActions extends CMISUtil
                                         final String role,
                                         final boolean isInherited)
     {
-        return managePermission(userName, password, siteName, contentName, true, userToAdd, null, role, isInherited, false);
+        return managePermission(userName, password, siteName, contentName, false, "", true, userToAdd, null, role, isInherited, false);
+    }
+    
+    /**
+     * Set permission for a user
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param pathToContent String path to content
+     * @param userToAdd user to set the permission
+     * @param role String role
+     * @param isInherited boolean is inherited
+     * @return true (200 OK) if permission is set
+     */
+    public boolean setPermissionForUser(final String userName,
+                                        final String password,
+                                        final String pathToContent,
+                                        final String userToAdd,
+                                        final String role,
+                                        final boolean isInherited)
+    {
+        return managePermission(userName, password, "", "", true, pathToContent, true, userToAdd, null, role, isInherited, false);
     }
     
     /**
@@ -1693,7 +1727,28 @@ public class ContentActions extends CMISUtil
                                          final String role,
                                          final boolean isInherited)
     {
-        return managePermission(userName, password, siteName, contentName, false, null, groupName, role, isInherited, false);
+        return managePermission(userName, password, siteName, contentName, false, "", false, null, groupName, role, isInherited, false);
+    }
+    
+    /**
+     * Set permission for a group
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param pathToContent String path to content
+     * @param groupName group to set the permission
+     * @param role String role
+     * @param isInherited boolean is inherited
+     * @return true (200 OK) if permission is set
+     */
+    public boolean setPermissionForGroup(final String userName,
+                                         final String password,
+                                         final String pathToContent,
+                                         final String groupName,
+                                         final String role,
+                                         final boolean isInherited)
+    {
+        return managePermission(userName, password, "", "", true, pathToContent, false, null, groupName, role, isInherited, false);
     }
     
     /**
@@ -1716,7 +1771,28 @@ public class ContentActions extends CMISUtil
                                            final String role,
                                            final boolean isInherited)
     {
-        return managePermission(userName, password, siteName, contentName, true, userToRemove, null, role, isInherited, true);
+        return managePermission(userName, password, siteName, contentName, false, "", true, userToRemove, null, role, isInherited, true);
+    }
+    
+    /**
+     * Remove permission from a user
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param pathToContent String path to content
+     * @param userToAdd user to set the permission
+     * @param role String role
+     * @param isInherited boolean is inherited
+     * @return true (200 OK) if permission is set
+     */
+    public boolean removePermissionForUser(final String userName,
+                                           final String password,
+                                           final String pathToContent,
+                                           final String userToRemove,
+                                           final String role,
+                                           final boolean isInherited)
+    {
+        return managePermission(userName, password, "", "", true, pathToContent, true, userToRemove, null, role, isInherited, true);
     }
 
     /**
@@ -1739,7 +1815,28 @@ public class ContentActions extends CMISUtil
                                             final String role,
                                             final boolean isInherited)
     {
-        return managePermission(userName, password, siteName, contentName, false, null, groupToRemove, role, isInherited, true);
+        return managePermission(userName, password, siteName, contentName, false, "", false, null, groupToRemove, role, isInherited, true);
+    }
+    
+    /**
+     * Remove permission from a group
+     * 
+     * @param userName String user name
+     * @param password String password
+     * @param pathToContent String pathToContent
+     * @param groupName group to set the permission
+     * @param role String role
+     * @param isInherited boolean is inherited
+     * @return true (200 OK) if permission is set
+     */
+    public boolean removePermissionForGroup(final String userName,
+                                            final String password,
+                                            final String pathToContent,
+                                            final String groupToRemove,
+                                            final String role,
+                                            final boolean isInherited)
+    {
+        return managePermission(userName, password, "", "", true, pathToContent, false, null, groupToRemove, role, isInherited, true);
     }
     
     /**
