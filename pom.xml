@@ -35,7 +35,7 @@
         <spring.version>4.1.7.RELEASE</spring.version>
         <testNG.version>6.9.10</testNG.version>
         <chemistry-opencmis-commons-api>1.1.0</chemistry-opencmis-commons-api>
-        <apache.commons>3.6</apache.commons>
+        <apache.commons>3.5</apache.commons>
         <apache.httpcomponents.httpclient>4.5.3</apache.httpcomponents.httpclient>
         <commons-httpclient>3.1</commons-httpclient>
         <com.googlecode.json-simple>1.1.1</com.googlecode.json-simple>
