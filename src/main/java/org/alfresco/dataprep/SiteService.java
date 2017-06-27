@@ -20,6 +20,7 @@ package org.alfresco.dataprep;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -49,10 +50,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.social.alfresco.api.Alfresco;
-import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.springframework.stereotype.Service;
-@Service
+
 /**
  * Site utility helper that performs crud operation on Site.
  * <ul>
@@ -67,11 +66,13 @@ import org.springframework.stereotype.Service;
  * @author Bogdan Bocancea
  *
  */
+@Service
 public class SiteService
 {
     private static Log logger = LogFactory.getLog(SiteService.class);
-    @Autowired private PublicApiFactory publicApiFactory;
-    @Autowired private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    
+    @Autowired 
+    private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     
     public enum RMSiteCompliance
     {
@@ -83,6 +84,11 @@ public class SiteService
             this.compliance = compliance;
         }
     }
+    
+    public enum Visibility
+    {
+        PRIVATE, PUBLIC, MODERATED
+    };
     
     /**
      * Create site using Alfresco public API.
@@ -153,7 +159,6 @@ public class SiteService
                       final String description,
                       final Visibility visibility)
    {
-       Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
        if(client.getAlfVersion() >= 5.2)
        {
@@ -161,21 +166,76 @@ public class SiteService
        }
        else
        {
-           try
-           {
-               publicApi.createSite(domain,
-                                    siteId,
-                                    "site-dashboard",
-                                    title,
-                                    description,
-                                    visibility);
-           }
-           catch (IOException e)
-           {
-               throw new RuntimeException("Failed to create site:" + siteId);
-           }
-           logger.info("Site created successfully: " + title);
+           createSiteOldApi(username, password, siteId, title, description, visibility);
        }
+   }
+   
+   @SuppressWarnings("unchecked")
+   private boolean createSiteOldApi(final String userName,
+                                    final String password,
+                                    final String siteId,
+                                    final String title,
+                                    final String description,
+                                    final Visibility visibility)
+   {
+       AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+       String reqUrl = client.getApiUrl() + "sites";
+       HttpPost post  = new HttpPost(reqUrl);
+       JSONObject body = new JSONObject();
+       body.put("visibility", visibility);
+       body.put("title", title);
+       body.put("shortName", siteId);
+       body.put("description", description);
+       body.put("sitePreset", "site-dashboard");
+       post.setEntity(client.setMessageBody(body));
+       HttpClient clientWithAuth = client.getHttpClientWithBasicAuth(userName, password);
+       try
+       {
+           HttpResponse response = clientWithAuth.execute(post);
+           switch (response.getStatusLine().getStatusCode())
+           {
+               case HttpStatus.SC_OK:
+                   String secondPostUrl = client.getAlfrescoUrl() + "alfresco/service/remoteadm/createmulti?s=sitestore";
+                   HttpPost secondPost  = new HttpPost(secondPostUrl);
+                   secondPost.setHeader("Content-Type", "application/xml;charset=UTF-8");
+                   String xmlSiteContent = readSitePageContent("site-page-content.xml").replaceAll("&lt;shortName&gt;", siteId);
+                   StringEntity xmlEntity = new StringEntity(xmlSiteContent, "UTF-8");
+                   xmlEntity.setContentType("application/xml");
+                   secondPost.setEntity(xmlEntity);
+                   response = clientWithAuth.execute(secondPost);
+                   secondPost.releaseConnection();
+                   String url = String.format(client.getAlfrescoUrl() + "alfresco/service/slingshot/doclib2/doclist/all/site/%s/documentLibrary/", siteId);
+                   HttpGet get = new HttpGet(url);
+                   response = clientWithAuth.execute(get); 
+                   if(200 == response.getStatusLine().getStatusCode())
+                   {
+                       logger.info(String.format("Successfully created %s site", siteId));
+                       return true;
+                   }
+                   else
+                   {
+                       logger.error(String.format("Failed to open %s site", siteId));
+                       return false;
+                   }
+               case HttpStatus.SC_BAD_REQUEST:
+                   throw new RuntimeException(String.format("%s site already created", siteId));
+               case HttpStatus.SC_UNAUTHORIZED:
+                   throw new RuntimeException("Invalid credentials");
+               default:
+                   logger.error(String.format("Unable to create %s site. Reason: %s", siteId, response.toString()));
+                   break;
+           }
+       }
+       catch (IOException e)
+       {
+           throw new RuntimeException("Failed to execute create site POST request");
+       }
+       finally
+       {
+           post.releaseConnection();
+           client.close();
+       } 
+       return false;
    }
    
     /**
@@ -218,13 +278,54 @@ public class SiteService
      * @param domain user details 
      * @param siteId site identifier
      */
+    @Deprecated
     public void delete(final String username,
                        final String password,
                        final String domain,
                        final String siteId)
     {
-        Alfresco publicApi = publicApiFactory.getPublicApi(username,password);
-        publicApi.removeSite(domain, siteId);
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = String.format(client.getApiUrl() + "sites/%s", siteId);
+        HttpDelete httpDelete = new HttpDelete(url);
+        HttpResponse response = client.executeRequest(username, password, httpDelete);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+        {
+            logger.info(String.format("Site deleted successfully: ", siteId));
+        }
+        else
+        {
+            logger.error(String.format("Unable to delete site %s. Reason: %s ", siteId, response.toString()));
+        }
+    }
+    
+    /**
+     * Delete site.
+     * 
+     * @param username user details
+     * @param password user details
+     * @param siteId site identifier
+     */
+    public boolean delete(final String username,
+                          final String password,
+                          final String siteId)
+    {
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String url = String.format(client.getApiUrl() + "sites/%s", siteId);
+        HttpDelete httpDelete = new HttpDelete(url);
+        HttpResponse response = client.executeRequest(username, password, httpDelete);
+        switch (response.getStatusLine().getStatusCode())
+        {
+            case HttpStatus.SC_OK:
+                logger.info(String.format("Site deleted successfully %s", siteId));
+                return true;
+            case HttpStatus.SC_NOT_FOUND:
+                logger.error(String.format("Site %s does not exist", siteId));
+                return false;
+            default:
+                logger.error(String.format("Unable to delete site %s. Reason: %s ", siteId, response.toString()));
+                break;
+        }
+        return false;
     }
     
     /**
@@ -639,10 +740,6 @@ public class SiteService
                                 final String description,
                                 final RMSiteCompliance compliance)
     {
-        if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password) || StringUtils.isEmpty(title))
-        {
-            throw new IllegalArgumentException("Parameter missing");
-        }
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiUrl() + "sites";
         HttpPost post  = new HttpPost(reqUrl);
@@ -665,7 +762,7 @@ public class SiteService
                     String secondPostUrl = client.getAlfrescoUrl() + "alfresco/service/remoteadm/createmulti?s=sitestore";
                     HttpPost secondPost  = new HttpPost(secondPostUrl);
                     secondPost.setHeader("Content-Type", "application/xml;charset=UTF-8");
-                    StringEntity xmlEntity = new StringEntity(readContentRmSite(), "UTF-8");
+                    StringEntity xmlEntity = new StringEntity(readSitePageContent("rm-site-page-content.xml"), "UTF-8");
                     xmlEntity.setContentType("application/xml");
                     secondPost.setEntity(xmlEntity);
                     response = clientWithAuth.execute(secondPost);
@@ -710,13 +807,13 @@ public class SiteService
         return false;
     }
     
-    private String readContentRmSite()
+    private String readSitePageContent(String xmlResourceName)
     {
         ClassLoader classLoader = getClass().getClassLoader();
-        InputStream input = classLoader.getResourceAsStream("contentRMSite.xml");
+        InputStream input = classLoader.getResourceAsStream(xmlResourceName);
         try 
         {
-            return IOUtils.toString(input);
+            return IOUtils.toString(input, StandardCharsets.UTF_8);
         } 
         catch (IOException e) 
         {

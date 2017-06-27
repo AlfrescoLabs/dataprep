@@ -744,6 +744,11 @@ public class CMISUtil
             {
                 pathToItem = StringUtils.removeEnd(pathToItem, "/");
             }
+            if(pathToItem.isEmpty())
+            {
+                // set root folder
+                pathToItem = "/";
+            }
             return session.getObjectByPath(pathToItem);
         }
         catch(CmisObjectNotFoundException nf)

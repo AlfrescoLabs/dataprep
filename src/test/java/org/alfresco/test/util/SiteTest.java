@@ -21,9 +21,9 @@ import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
 import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.SiteService.Visibility;
 import org.alfresco.dataprep.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -81,7 +81,6 @@ public class SiteTest extends AbstractTest
     {
         site.create(ADMIN,
                     ADMIN,
-                    MY_DOMAIN,
                     secondSite, 
                     secondSite,
                     "my site description",
@@ -197,7 +196,7 @@ public class SiteTest extends AbstractTest
     {
         List<String> sites= site.getSites(ADMIN, ADMIN);
         Assert.assertTrue(sites.contains(siteId));
-        site.delete(ADMIN, ADMIN, MY_DOMAIN, siteId);
+        site.delete(ADMIN, ADMIN, siteId);
         boolean exists = site.exists(siteId, ADMIN, ADMIN);
         Assert.assertFalse(exists);
         sites= site.getSites(ADMIN, ADMIN);

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<master>
+   <document path="/alfresco/site-data/components/page.title.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.title.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>title</region-id>
+         <source-id>site/&lt;shortName&gt;/dashboard</source-id>
+         <url>/components/title/collaboration-title</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.navigation.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.navigation.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>navigation</region-id>
+         <source-id>site/&lt;shortName&gt;/dashboard</source-id>
+         <url>/components/navigation/collaboration-navigation</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-1-1.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-1-1.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-1-1</region-id>
+         <source-id>site/&lt;shortName&gt;/dashboard</source-id>
+         <url>/components/dashlets/colleagues</url>
+         <properties>
+            <height>504</height>
+         </properties>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-1-3.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-1-3.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-1-3</region-id>
+         <source-id>user/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/most-active-users-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-2-3.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-2-3.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-1-3</region-id>
+         <source-id>user/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/my-activities-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-3-1.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-3-1.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-3-1</region-id>
+         <source-id>user/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/assignee-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-3-2.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-3-2.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-3-2</region-id>
+         <source-id>user/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/process-duration-trend-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-1-2.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-1-2.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-1-2</region-id>
+         <source-id>site/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/site-user-activity-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-2-3.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-2-3.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-2-3</region-id>
+         <source-id>site/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/site-hot-content-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-2-4.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-2-4.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-2-4</region-id>
+         <source-id>site/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/site-activity-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-2-5.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-2-5.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-2-5</region-id>
+         <source-id>site/${userid}/dashboard</source-id>
+         <url>/pentaho/components/dashlets/site-content-creation-report</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-2-1.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-2-1.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-2-1</region-id>
+         <source-id>site/&lt;shortName&gt;/dashboard</source-id>
+         <url>/components/dashlets/docsummary</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/components/page.component-2-2.site~&lt;shortName&gt;~dashboard.xml">
+      <component>
+         <guid>page.component-2-2.site~&lt;shortName&gt;~dashboard</guid>
+         <scope>page</scope>
+         <region-id>component-2-2</region-id>
+         <source-id>site/&lt;shortName&gt;/dashboard</source-id>
+         <url>/components/dashlets/activityfeed</url>
+      </component>
+   </document>
+   <document path="/alfresco/site-data/pages/site/&lt;shortName&gt;/dashboard.xml">
+      <page>
+         <title>Collaboration Site Dashboard</title>
+         <title-id>page.siteDashboard.title</title-id>
+         <description>Collaboration site's dashboard page</description>
+         <description-id>page.siteDashboard.description</description-id>
+         <authentication>user</authentication>
+         <template-instance>dashboard-2-columns-wide-right</template-instance>
+         <properties>
+            <sitePages>[{"pageId":"documentlibrary"}]</sitePages>
+         </properties>
+      </page>
+   </document>
+</master>

@@ -1,34 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util 
         http://www.springframework.org/schema/util/spring-util.xsd">
-    
-    <context:property-placeholder location="dataprep.properties" ignore-unresolvable="true" />
+
+    <context:property-placeholder location="dataprep.properties"
+        ignore-unresolvable="true" />
     <context:component-scan base-package="org.alfresco.dataprep" />
-    <bean id="alfrescoHttpClientFactory" class="org.alfresco.dataprep.AlfrescoHttpClientFactory" >
-        <property name="host" value="${alfresco.server}"/>
-        <property name="port" value="${alfresco.port}"/>
-        <property name="scheme" value="${alfresco.scheme}"/>
-        <property name="sharePort" value="${share.port}"/>
-    </bean>
-    
-    <bean id="publicApiFactory" class="org.alfresco.dataprep.BasicAuthPublicApiFactory" >
-        <property name="scheme" value="${alfresco.scheme}"/>
-        <property name="port" value="${alfresco.port}"/>
-        <property name="host" value="${alfresco.server}"/>
-        <property name="maxNumberOfConnections" value="${http.connection.max}"/>
-        <property name="connectionTimeoutMs" value="${http.connection.timeoutMs}"/>
-        <property name="socketTimeoutMs" value="${http.socket.timeoutMs}"/>
-        <property name="socketTtlMs" value="${http.socket.ttlMs}"/>
-        <property name="context" value="${alfresco.context}"/>
-        <property name="publicApiServletName" value="${alfresco.public.api.servlet.name}"/>
-        <property name="serviceServletName" value="${alfresco.service.servlet.name}"/>
+    <bean id="alfrescoHttpClientFactory" class="org.alfresco.dataprep.AlfrescoHttpClientFactory">
+        <property name="host" value="${alfresco.server}" />
+        <property name="port" value="${alfresco.port}" />
+        <property name="scheme" value="${alfresco.scheme}" />
+        <property name="sharePort" value="${share.port}" />
     </bean>
 </beans>

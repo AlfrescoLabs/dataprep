@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.SiteService.Visibility;
 import org.alfresco.dataprep.UserService;
 import org.alfresco.dataprep.CMISUtil.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Document;
@@ -29,7 +30,6 @@ import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -419,7 +419,7 @@ public class ContentTest extends AbstractTest
     public void createFolderInRepository()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "/");
         Assert.assertFalse(newFolder.getId().isEmpty());
         Assert.assertEquals(newFolder.getFolderParent().getName(), "Company Home");
         Assert.assertFalse(content.getNodeRefByPath(ADMIN, ADMIN, "/" + folder).isEmpty());
@@ -473,7 +473,7 @@ public class ContentTest extends AbstractTest
     public void deleteFolderFromRepo()
     {
         String folder = "newFolder" + System.currentTimeMillis();
-        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, null);
+        Folder newFolder = content.createFolderInRepository(ADMIN, ADMIN, folder, "/");
         Assert.assertFalse(newFolder.getId().isEmpty());
         content.deleteContentByPath(ADMIN, ADMIN, folder);
         Assert.assertTrue(content.getNodeRefByPath(ADMIN, ADMIN, "/" + folder).isEmpty());
@@ -492,7 +492,7 @@ public class ContentTest extends AbstractTest
     public void createDocInRepository()
     {
         String doc = "repoDoc-" + System.currentTimeMillis();
-        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, null, DocumentType.TEXT_PLAIN, doc, "doc content");
+        Document theDoc = content.createDocumentInRepository(ADMIN, ADMIN, "/", DocumentType.TEXT_PLAIN, doc, "doc content");
         Assert.assertFalse(theDoc.getId().isEmpty());
     }
 

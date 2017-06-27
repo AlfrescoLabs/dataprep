@@ -30,12 +30,13 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentExcep
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-@Service
+
 /**
  * Class to add aspects to documents and folders
  * 
  * @author Bocancea Bogdan
  */
+@Service
 public class ContentAspects extends CMISUtil
 {
     /**

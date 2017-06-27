@@ -201,7 +201,7 @@ public class ContentService extends CMISUtil
                                            final String folderName,
                                            final String path)
     {
-        if(StringUtils.isEmpty(userName))
+        if(StringUtils.isEmpty(path))
         {
             throw new IllegalArgumentException("Please provide a path!");
         }

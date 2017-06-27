@@ -10,14 +10,14 @@ import org.alfresco.dataprep.CMISUtil.Priority;
 import org.alfresco.dataprep.CMISUtil.Status;
 import org.alfresco.dataprep.ContentService;
 import org.alfresco.dataprep.DataListsService;
-import org.alfresco.dataprep.UserService;
 import org.alfresco.dataprep.DataListsService.DataList;
 import org.alfresco.dataprep.SiteService;
+import org.alfresco.dataprep.SiteService.Visibility;
+import org.alfresco.dataprep.UserService;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.social.alfresco.api.entities.Site.Visibility;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
