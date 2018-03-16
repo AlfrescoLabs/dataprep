@@ -187,7 +187,7 @@ public class SitePagesService
         {
             body.put("allday", "on");
         }
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -337,7 +337,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getAlfrescoUrl() + "alfresco/s/calendar/event/" + siteName + "/" + eventName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(userName, password, request);
+        HttpResponse response = client.executeAndRelease(userName, password, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -463,7 +463,7 @@ public class SitePagesService
         {
             body.put("allday", "on");
         }
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -551,7 +551,7 @@ public class SitePagesService
         body.put("pageTitle", wikiTitle);
         body.put("pagecontent", content);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -589,7 +589,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(userName, password, get);
+        HttpResponse response = client.executeAndRelease(userName, password, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -617,7 +617,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getAlfrescoUrl() + "alfresco/s/slingshot/wiki/page/" + siteName + "/" + wikiTitle;
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(userName, password, delete);
+        HttpResponse response = client.executeAndRelease(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -664,7 +664,7 @@ public class SitePagesService
         body.put("currentVersion", "1.0");
         body.put("pagecontent", newContent);
         body.put("tags", createTagsArray(newTags));
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
         {
             throw new RuntimeException("Unable to update content and tags of wiki page.");
@@ -674,7 +674,7 @@ public class SitePagesService
         body = new JSONObject();
         body.put("page", "wiki-page");
         body.put("name", newWikiTitle);
-        response = client.executeRequest(userName, password, body, post);
+        response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -721,7 +721,7 @@ public class SitePagesService
         body.put("content", content);
         body.put("draft", draft);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -817,7 +817,7 @@ public class SitePagesService
         JSONObject body = new JSONObject();
         body.put("title", newBlogTitle);
         body.put("content", newBlogText);
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -851,7 +851,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "blog/post/site/" + siteName + "/blog/" + blogName + "?page=blog-postlist";
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(userName, password, delete);
+        HttpResponse response = client.executeAndRelease(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -905,7 +905,7 @@ public class SitePagesService
             body.put("internal", internal);
         }
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1100,7 +1100,7 @@ public class SitePagesService
         JSONArray array = new JSONArray();
         array.add(linkName);
         body.put("items", array);
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1151,7 +1151,7 @@ public class SitePagesService
             body.put("internal", newInternal);
         }
         body.put("tags", createTagsArray(newTags));
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1196,7 +1196,7 @@ public class SitePagesService
         body.put("title", discussionTitle);
         body.put("content", text);
         body.put("tags", createTagsArray(tags));
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1289,7 +1289,7 @@ public class SitePagesService
         body.put("title", newDiscussionTitle);
         body.put("content", newText);
         body.put("tags", createTagsArray(newTags));
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1320,7 +1320,7 @@ public class SitePagesService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "forum/post/site/" + siteName + "/discussions/" + discussionName + "?page=discussions-topicview";
         HttpDelete delete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(userName, password, delete);
+        HttpResponse response = client.executeAndRelease(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1449,7 +1449,7 @@ public class SitePagesService
         body.put("page", page.pageId);
         body.put("itemTitle", itemTitle);
         body.put("content", comment);
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -1597,7 +1597,7 @@ public class SitePagesService
        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
        String url = client.getApiUrl() + "comment/node/" + nodeRef.replaceFirst(":/", "");
        HttpDelete delete = new HttpDelete(url);
-       HttpResponse response = client.executeRequest(userName, password, delete);
+       HttpResponse response = client.executeAndRelease(userName, password, delete);
        switch (response.getStatusLine().getStatusCode())
        {
            case HttpStatus.SC_OK:

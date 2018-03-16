@@ -1273,7 +1273,7 @@ public class ContentService extends CMISUtil
         waitInSeconds(1);
         try
         {
-            HttpResponse response = client.executeRequest(userName, password, request);
+            HttpResponse response = client.executeAndRelease(userName, password, request);
             if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
             {
                 return true;

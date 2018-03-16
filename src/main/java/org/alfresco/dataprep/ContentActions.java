@@ -117,7 +117,7 @@ public class ContentActions extends CMISUtil
         {
             body.put("myRating", true);
         }
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -181,7 +181,7 @@ public class ContentActions extends CMISUtil
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpResponse response = client.executeRequest(userName, password, post);
+        HttpResponse response = client.executeAndRelease(userName, password, post);
         if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
         {      
             return true;
@@ -263,7 +263,7 @@ public class ContentActions extends CMISUtil
             reqUrl = client.getApiVersionUrl() + "nodes/" + nodeRef + "/ratings/likes";
         }
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(userName, password, delete);
+        HttpResponse response = client.executeAndRelease(userName, password, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -389,7 +389,7 @@ public class ContentActions extends CMISUtil
             reqUrl = reqUrl + "/likes";
         }
         HttpGet get = new HttpGet(reqUrl);
-        return client.executeRequest(userName, password, get);
+        return client.executeAndRelease(userName, password, get);
     }
 
     /**
@@ -889,7 +889,7 @@ public class ContentActions extends CMISUtil
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpResponse response = client.executeRequest(userName, password, post);
+        HttpResponse response = client.executeAndRelease(userName, password, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -964,7 +964,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(userName, password, delete);
+        HttpResponse response = client.executeAndRelease(userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -1003,7 +1003,7 @@ public class ContentActions extends CMISUtil
         }
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + contentNodeRef;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(userName, password, get);
+        HttpResponse response = client.executeAndRelease(userName, password, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -1651,7 +1651,7 @@ public class ContentActions extends CMISUtil
         JSONObject body = new JSONObject();
         body.put("permissions", array);
         body.put("isInherited", isInherited);
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         if(200 == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())

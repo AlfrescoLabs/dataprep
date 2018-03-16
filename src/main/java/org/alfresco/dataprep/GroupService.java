@@ -63,7 +63,7 @@ public class GroupService
         group.put("fullName", "GROUP_" + groupName);
         body.put("role", role);
         body.put("group", group);
-        HttpResponse response = client.executeRequest(siteManager, passwordManager, body, post);
+        HttpResponse response = client.executeAndRelease(siteManager, passwordManager, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -100,7 +100,7 @@ public class GroupService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName;
         HttpGet request = new HttpGet(reqURL);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -134,7 +134,7 @@ public class GroupService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("displayName", groupName);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, body, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, body, request);
         if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -170,7 +170,7 @@ public class GroupService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
-        HttpResponse response = client.executeRequest(adminUser, adminPass, body, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, body, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -215,7 +215,7 @@ public class GroupService
         HttpPost request = new HttpPost(reqURL);
         JSONObject body = new JSONObject();
         body.put("", "");
-        HttpResponse response = client.executeRequest(adminUser, adminPass, body, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, body, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -263,7 +263,7 @@ public class GroupService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/" + userName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -296,7 +296,7 @@ public class GroupService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "groups/" + groupName + "/children/GROUP_" + subGroup;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -327,7 +327,7 @@ public class GroupService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqURL = client.getApiUrl() + "rootgroups/" + groupName;
         HttpDelete request = new HttpDelete(reqURL);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, request);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, request);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -456,7 +456,7 @@ public class GroupService
         HttpPut put = new HttpPut(reqUrl);
         HttpResponse response = null;
         put.setEntity(client.setMessageBody(grpBody));
-        response = client.executeRequest(siteManager, passwordManager, grpBody, put);
+        response = client.executeAndRelease(siteManager, passwordManager, grpBody, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:

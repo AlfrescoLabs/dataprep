@@ -18,9 +18,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -175,12 +177,11 @@ public class AlfrescoHttpClient
     }
 
     /**
-    * @deprecated
     * Execute HttpClient request.
     * @param request to send 
     * @return {@link HttpResponse} response
     */
-    public HttpResponse executeRequest(HttpRequestBase request)
+    private HttpResponse execute(HttpRequestBase request)
     {
         HttpResponse response = null;
         try
@@ -190,9 +191,13 @@ public class AlfrescoHttpClient
             {
                 logger.trace("Status Received:" + response.getStatusLine());
             }
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
+            {
+                throw new RuntimeException("Invalid user name or password");
+            }
             return response;
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             logger.error(response);
             throw new RuntimeException("Error while executing request", e);
@@ -210,25 +215,12 @@ public class AlfrescoHttpClient
                                 final String password,
                                 HttpRequestBase request)
     {
-        HttpResponse response = null;
         if(!StringUtils.isEmpty(userName) || !StringUtils.isEmpty(password))
         {
             client = getHttpClientWithBasicAuth(userName, password);
+            setBasicAuthorization(userName, password, request);
         }
-        try
-        {
-            response = client.execute(request);
-            if(logger.isTraceEnabled())
-            {
-                logger.trace("Status Received:" + response.getStatusLine());
-            }
-            return response;
-        }
-        catch (IOException e)
-        {
-            logger.error(response);
-            throw new RuntimeException("Error while executing request", e);
-        }
+        return execute(request);
     }
     
     /**
@@ -238,24 +230,16 @@ public class AlfrescoHttpClient
      * @param request HttpRequestBase the request
      * @return {@link HttpResponse} response
      */
-    public HttpResponse executeRequest(final String userName,
-                                       final String password,
-                                       HttpRequestBase request)
+    public HttpResponse executeAndRelease(final String userName,
+                                          final String password,
+                                          HttpRequestBase request)
     {
-        HttpResponse response = null;
+        HttpResponse response;
         client = getHttpClientWithBasicAuth(userName, password);
+        setBasicAuthorization(userName, password, request);
         try
         {
-            response = client.execute(request);
-            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
-            {
-                throw new RuntimeException("Invalid user name or password");
-            }
-        }
-        catch (IOException e)
-        {
-            logger.error(response);
-            throw new RuntimeException("Error while executing request", e);
+            response = execute(request);
         }
         finally
         {
@@ -273,26 +257,18 @@ public class AlfrescoHttpClient
      * @param request HttpEntityEnclosingRequestBase the request
      * @return {@link HttpResponse} response
      */
-    public HttpResponse executeRequest(final String userName,
-                                       final String password,
-                                       final JSONObject body,
-                                       HttpEntityEnclosingRequestBase request)
+    public HttpResponse executeAndRelease(final String userName,
+                                          final String password,
+                                          final JSONObject body,
+                                          HttpEntityEnclosingRequestBase request)
     {
-        HttpResponse response = null;
+        HttpResponse response;
         client = getHttpClientWithBasicAuth(userName, password);
         request.setEntity(setMessageBody(body));
+        setBasicAuthorization(userName, password, request);
         try
-        {   
-            response = client.execute(request);
-            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
-            {
-                throw new RuntimeException("Invalid user name or password");
-            }
-        } 
-        catch(IOException e)
         {
-            logger.error(response);
-            throw new RuntimeException("Error while executing request", e);
+            response = execute(request);
         }
         finally
         {
@@ -317,6 +293,13 @@ public class AlfrescoHttpClient
         CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
         return client;
     }
+
+    private HttpRequestBase setBasicAuthorization(String userName, String password, HttpRequestBase request)
+    {
+        byte[] credentials = Base64.encodeBase64((userName + ":" + password).getBytes(StandardCharsets.UTF_8));
+        request.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+        return request;
+    }
     
     /**
      * Parses http response stream into a {@link JSONObject}.
@@ -325,7 +308,7 @@ public class AlfrescoHttpClient
      */
     public JSONObject readStream(final HttpEntity entity)
     {
-        String rsp = null;
+        String rsp;
         try
         {
             rsp = EntityUtils.toString(entity, UTF_8_ENCODING);
@@ -356,8 +339,8 @@ public class AlfrescoHttpClient
                                         String parameter,
                                         String... jsonObjs)
     {
-        String strResponse = "";
-        Object obj = null;
+        String strResponse;
+        Object obj;
         if(httpResp)
         {
             strResponse = readStream(response.getEntity()).toJSONString();
@@ -370,18 +353,16 @@ public class AlfrescoHttpClient
         JSONObject jObj = (JSONObject) obj;
         if(!StringUtils.isEmpty(jsonObjs[0]))
         {
-            //JSONObject entry = null;
             for(int i=0; i<jsonObjs.length;i++)
             {
                 jObj = (JSONObject) jObj.get(jsonObjs[i]);
             }
-            return (String) jObj.get(parameter).toString();
+            return jObj.get(parameter).toString();
         }
         else
         {
             return (String) jObj.get(parameter);
         }
-        
     }
     
     /**
@@ -428,7 +409,7 @@ public class AlfrescoHttpClient
     {
         List<String>elements = new ArrayList<String>();
         HttpEntity entity = response.getEntity();
-        String responseString = "";
+        String responseString;
         try
         {
             responseString = EntityUtils.toString(entity , "UTF-8");
@@ -488,7 +469,7 @@ public class AlfrescoHttpClient
                                   String arrayName)
     {
         HttpEntity entity = response.getEntity();
-        String responseString = "";
+        String responseString;
         try
         {
             responseString = EntityUtils.toString(entity , "UTF-8");

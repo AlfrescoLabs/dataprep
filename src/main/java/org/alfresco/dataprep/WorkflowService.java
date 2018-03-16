@@ -599,7 +599,7 @@ public class WorkflowService extends CMISUtil
         HttpGet get = new HttpGet(api);
         try
         {
-            HttpResponse response = client.executeRequest(assignedUser, password, get);
+            HttpResponse response = client.executeAndRelease(assignedUser, password, get);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 JSONArray jArray = client.getJSONArray(response, "list", "entries");
@@ -665,7 +665,7 @@ public class WorkflowService extends CMISUtil
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpResponse response = client.executeRequest(assignedUser, password, post);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -705,7 +705,7 @@ public class WorkflowService extends CMISUtil
         JSONObject body = new JSONObject();
         body.put("state", "delegated");
         body.put("assignee", reassignTo);
-        HttpResponse response = client.executeRequest(assignedUser, password, body, put);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -761,7 +761,7 @@ public class WorkflowService extends CMISUtil
             variables.add(jComment);
         }
         body.put("variables", variables);
-        HttpResponse response = client.executeRequest(assignedUser, password, body, put);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -798,7 +798,7 @@ public class WorkflowService extends CMISUtil
         {
             body.put("state", "unclaimed");
         }
-        HttpResponse response = client.executeRequest(assignedUser, password, body, put);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -881,7 +881,7 @@ public class WorkflowService extends CMISUtil
         data.put("prop_transitions", "Next");
         data.put("prop_bpm_status", status.getStatus());
         data.put("prop_bpm_comment", comment);
-        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, data, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -930,7 +930,7 @@ public class WorkflowService extends CMISUtil
         }
         data.put("prop_transitions", "Next");
         data.put("prop_bpm_comment", comment);
-        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, data, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -963,7 +963,7 @@ public class WorkflowService extends CMISUtil
          AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
          String api = client.getApiUrl() + "workflow-instances/activiti$" + workflowId;
          HttpDelete delete = new HttpDelete(api);
-         HttpResponse response = client.executeRequest(owner, password, delete);
+         HttpResponse response = client.executeAndRelease(owner, password, delete);
          switch (response.getStatusLine().getStatusCode())
          {
              case HttpStatus.SC_OK:
@@ -996,7 +996,7 @@ public class WorkflowService extends CMISUtil
          AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
          String api = client.getApiUrl() + "workflow-instances/activiti$" + workflowID + "?forced=true";
          HttpDelete delete = new HttpDelete(api);
-         HttpResponse response = client.executeRequest(owner, password, delete);
+         HttpResponse response = client.executeAndRelease(owner, password, delete);
          switch (response.getStatusLine().getStatusCode())
          {
              case HttpStatus.SC_OK:
@@ -1036,7 +1036,7 @@ public class WorkflowService extends CMISUtil
         {
             data.put("id", getNodeRefByPath(assignedUser, password, pathToItem));
         }
-        HttpResponse response = client.executeRequest(assignedUser, password, data, post);
+        HttpResponse response = client.executeAndRelease(assignedUser, password, data, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:

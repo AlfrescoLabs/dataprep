@@ -127,7 +127,7 @@ public class SiteService
         body.put("description", description);
         body.put("visibility", visibility.toString());
         
-        HttpResponse response = client.executeRequest(username, password, body, post);
+        HttpResponse response = client.executeAndRelease(username, password, body, post);
         if(HttpStatus.SC_CREATED == response.getStatusLine().getStatusCode())
         {
             logger.info(String.format("Successfuly created site with id '%s' ", siteId));
@@ -287,7 +287,7 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = String.format(client.getApiUrl() + "sites/%s", siteId);
         HttpDelete httpDelete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(username, password, httpDelete);
+        HttpResponse response = client.executeAndRelease(username, password, httpDelete);
         if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
         {
             logger.info(String.format("Site deleted successfully: ", siteId));
@@ -312,7 +312,7 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = String.format(client.getApiUrl() + "sites/%s", siteId);
         HttpDelete httpDelete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(username, password, httpDelete);
+        HttpResponse response = client.executeAndRelease(username, password, httpDelete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -437,7 +437,7 @@ public class SiteService
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpResponse response = client.executeRequest(userName, password, post);
+        HttpResponse response = client.executeAndRelease(userName, password, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -471,7 +471,7 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + nodeRef;
         HttpGet get = new HttpGet(reqUrl);
-        HttpResponse response = client.executeRequest(userName, password, get);
+        HttpResponse response = client.executeAndRelease(userName, password, get);
         if( HttpStatus.SC_OK  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -537,7 +537,7 @@ public class SiteService
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/favorites/" + siteNodeRef;
         HttpDelete delete = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(userName, password, delete);
+        HttpResponse response = client.executeAndRelease(userName, password, delete);
         if( HttpStatus.SC_NO_CONTENT  == response.getStatusLine().getStatusCode())
         {
             if(logger.isTraceEnabled())
@@ -600,7 +600,7 @@ public class SiteService
         body.put("pages", array);
         body.put("themeId", "");
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(!multiplePages)
@@ -710,7 +710,7 @@ public class SiteService
         array.add(newDashlet);
         body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);
@@ -850,7 +850,7 @@ public class SiteService
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpResponse response = client.executeRequest(userName, password, post);
+        HttpResponse response = client.executeAndRelease(userName, password, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -889,7 +889,7 @@ public class SiteService
         StringEntity se = new StringEntity(jsonInput.toString(), AlfrescoHttpClient.UTF_8_ENCODING);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, AlfrescoHttpClient.MIME_TYPE_JSON));
         post.setEntity(se);
-        HttpResponse response = client.executeRequest(userName, password, post);
+        HttpResponse response = client.executeAndRelease(userName, password, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -923,7 +923,7 @@ public class SiteService
         HttpPut put = new HttpPut(reqUrl);
         JSONObject body = new JSONObject();
         body.put("visibility", newVisibility.toString());
-        HttpResponse response = client.executeRequest(userName, password, body, put);
+        HttpResponse response = client.executeAndRelease(userName, password, body, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:

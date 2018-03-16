@@ -96,7 +96,7 @@ public class UserService extends CMISUtil
             logger.trace("Create user using Url - " + reqURL);
         }
         HttpPost post = new HttpPost(reqURL);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, body, post);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -156,7 +156,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "people/" + encodeUserName(username);
         HttpGet get = new HttpGet(url);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, get);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, get);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             return true;
@@ -219,7 +219,7 @@ public class UserService extends CMISUtil
         userBody.put("disableAccount", disable);
         HttpPut put = new HttpPut(url);
         put.setEntity(client.setMessageBody(userBody));
-        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, put);
+        HttpResponse response = client.executeAndRelease(adminUserName, admisPassword, userBody, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -253,7 +253,7 @@ public class UserService extends CMISUtil
         userBody.put("username", userToDeauthorize);
         HttpPost post = new HttpPost(url);
         post.setEntity(client.setMessageBody(userBody));
-        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, post);
+        HttpResponse response = client.executeAndRelease(adminUserName, admisPassword, userBody, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -288,7 +288,7 @@ public class UserService extends CMISUtil
         userBody.put("newpw", newPassword);
         HttpPost post = new HttpPost(url);
         post.setEntity(client.setMessageBody(userBody));
-        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, post);
+        HttpResponse response = client.executeAndRelease(adminUserName, admisPassword, userBody, post);
         if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
         {
             logger.info(String.format("Password changed successfully for %s", userName));
@@ -303,7 +303,7 @@ public class UserService extends CMISUtil
      * @param adminUserName String admin user
      * @param admisPassword String admin password
      * @param userToSet String set quota for user
-     * @param quota int size in MB
+     * @param quotaMb int size in MB
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -320,7 +320,7 @@ public class UserService extends CMISUtil
         userBody.put("quota", bytes);
         HttpPut put = new HttpPut(url);
         put.setEntity(client.setMessageBody(userBody));
-        HttpResponse response = client.executeRequest(adminUserName, admisPassword, userBody, put);
+        HttpResponse response = client.executeAndRelease(adminUserName, admisPassword, userBody, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -355,7 +355,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "people/" + encodeUserName(userName);
         HttpDelete httpDelete = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, httpDelete);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, httpDelete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -518,13 +518,13 @@ public class UserService extends CMISUtil
         HttpPost post  = new HttpPost(reqUrl);
         JSONObject body = new JSONObject();
         body.put("id", siteId);
-        HttpResponse response = client.executeRequest(userName, password, body, post);
+        HttpResponse response = client.executeAndRelease(userName, password, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
                 if (logger.isTraceEnabled())
                 {
-                    logger.trace("Successfuly requested membership to site " + siteId);
+                    logger.trace("Successfully requested membership to site " + siteId);
                 }
                 return true;
             case HttpStatus.SC_NOT_FOUND:
@@ -567,7 +567,7 @@ public class UserService extends CMISUtil
         JSONObject body = new JSONObject();
         body.put("id", userName);
         body.put("role", role);
-        HttpResponse response = client.executeRequest(siteManager, passwordManager, body, post);
+        HttpResponse response = client.executeAndRelease(siteManager, passwordManager, body, post);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_CREATED:
@@ -612,7 +612,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String reqUrl = client.getApiVersionUrl() + "people/" + userName + "/site-membership-requests/" + siteId;
         HttpDelete delete  = new HttpDelete(reqUrl);
-        HttpResponse response = client.executeRequest(siteManager, passwordManager, delete);
+        HttpResponse response = client.executeAndRelease(siteManager, passwordManager, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -648,7 +648,7 @@ public class UserService extends CMISUtil
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "sites/" + siteId.toLowerCase() + "/memberships/" + userName;
         HttpDelete delete  = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(siteManager, passwordManager, delete);
+        HttpResponse response = client.executeAndRelease(siteManager, passwordManager, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -685,9 +685,8 @@ public class UserService extends CMISUtil
         reqUrl = client.getApiUrl().replace("/service", "") + "-default-/public/alfresco/versions/1/sites/" + siteName + "/members/" + userName;
         userBody.put("role", role);
         HttpPut put = new HttpPut(reqUrl);
-        HttpResponse response = null;
         put.setEntity(client.setMessageBody(userBody));
-        response = client.executeRequest(siteManager, passwordManager, userBody, put);
+        HttpResponse response = client.executeAndRelease(siteManager, passwordManager, userBody, put);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -887,7 +886,6 @@ public class UserService extends CMISUtil
     public HttpState logout()
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        HttpState state = null;
         org.apache.commons.httpclient.HttpClient theClient = new org.apache.commons.httpclient.HttpClient();
         String reqURL = client.getShareUrl() + "share/page/dologout";
         org.apache.commons.httpclient.methods.PostMethod post = new org.apache.commons.httpclient.methods.PostMethod(reqURL);
@@ -899,8 +897,7 @@ public class UserService extends CMISUtil
         {
             throw new RuntimeException("Failed to execute the request");
         }
-        state = theClient.getState();
-        return state;
+        return theClient.getState();
     }
     
     /**
@@ -908,7 +905,7 @@ public class UserService extends CMISUtil
      * 
      * @param userName String user name
      * @param password String password
-     * @param userToFollow String user to be followed
+     * @param userToFollowOrNot String user to be followed
      * @return true if user is followed successfully
      */
     @SuppressWarnings("unchecked")
@@ -942,7 +939,7 @@ public class UserService extends CMISUtil
         {
             throw new RuntimeException("Failed to process the request body" + requestBody);
         }
-        HttpResponse response = client.executeRequest(userName, password, request);
+        HttpResponse response = client.executeAndRelease(userName, password, request);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_NO_CONTENT:
@@ -1083,7 +1080,7 @@ public class UserService extends CMISUtil
         HttpPost post  = new HttpPost(url);
         JSONObject body = new JSONObject();
         body.put("name", categoryName);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, body, post);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, body, post);
         if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -1120,7 +1117,7 @@ public class UserService extends CMISUtil
         HttpPost post  = new HttpPost(url);
         JSONObject body = new JSONObject();
         body.put("name", subCategory);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, body, post);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, body, post);
         if( HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if (logger.isTraceEnabled())
@@ -1156,7 +1153,7 @@ public class UserService extends CMISUtil
         }
         String url = client.getApiUrl() + "category/workspace/SpacesStore/" + categNodeRef;
         HttpDelete delete  = new HttpDelete(url);
-        HttpResponse response = client.executeRequest(adminUser, adminPass, delete);
+        HttpResponse response = client.executeAndRelease(adminUser, adminPass, delete);
         switch (response.getStatusLine().getStatusCode())
         {
             case HttpStatus.SC_OK:
@@ -1214,12 +1211,12 @@ public class UserService extends CMISUtil
         {
             // recover item
             HttpPut put = new HttpPut(url);
-            response = client.executeRequest(userName, password, put);
+            response = client.executeAndRelease(userName, password, put);
         }
         else
         {
             HttpDelete delete  = new HttpDelete(url);
-            response = client.executeRequest(userName, password, delete);
+            response = client.executeAndRelease(userName, password, delete);
         }
         if(200 == response.getStatusLine().getStatusCode())
         {
