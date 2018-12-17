@@ -356,5 +356,58 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>acs-deployment</id>
+            <build>
+                <plugins>                                	                   
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>docker-compose-up</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>Starting ACS in docker-compose...</echo>                                                                                
+                                       <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
+                                            <arg line="config" />
+                                        </exec>
+                                        <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
+                                            <arg line="up -d" />
+                                        </exec>
+                                        <chmod file="target/classes/docker/wait-service-to-start.sh" perm="a+x" verbose="true" />
+                                        <exec dir="target/classes/docker" executable="bash" failonerror="true">
+                                            <arg line="wait-service-to-start.sh http://localhost:8081/alfresco" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-compose-down</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>Starting ACS in docker-compose...</echo>
+                                        <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
+                                            <arg value="kill" />
+                                        </exec>
+                                        <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
+                                            <arg value="rm -fv" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>                        
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>
