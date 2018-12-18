@@ -34,5 +34,5 @@ public class AbstractTest extends AbstractTestNGSpringContextTests
     protected static final String ADMIN = "admin";
     protected static final String domain = "@test";
     protected final String password = "password";
-    @Autowired protected static ApplicationContext ctx;
+    @Autowired protected ApplicationContext ctx;
 }
