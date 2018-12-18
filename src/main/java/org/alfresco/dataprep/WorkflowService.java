@@ -599,7 +599,7 @@ public class WorkflowService extends CMISUtil
         HttpGet get = new HttpGet(api);
         try
         {
-            HttpResponse response = client.executeAndRelease(assignedUser, password, get);
+            HttpResponse response = client.execute(assignedUser, password, get);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 JSONArray jArray = client.getJSONArray(response, "list", "entries");
