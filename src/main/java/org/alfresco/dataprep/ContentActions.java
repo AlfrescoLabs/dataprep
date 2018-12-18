@@ -389,7 +389,7 @@ public class ContentActions extends CMISUtil
             reqUrl = reqUrl + "/likes";
         }
         HttpGet get = new HttpGet(reqUrl);
-        return client.executeAndRelease(userName, password, get);
+        return client.execute(userName, password, get);
     }
 
     /**
