@@ -5,7 +5,7 @@
     <name>Alfresco Dataprep</name>
     <description>Alfresco dataprep, collection of helpers to prepare and load Alfresco test data</description>
     <groupId>org.alfresco.test</groupId>
-    <version>2.1-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <organization>
         <name>Alfresco Software</name>
         <url>http://www.alfresco.com/</url>
@@ -230,9 +230,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
+                <version>3.0.1</version>
                 <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <additionalOptions>
+                    	<additionalOption>-Xdoclint:none</additionalOption>
+                	</additionalOptions>
                 </configuration>
             </plugin>
             <plugin>
