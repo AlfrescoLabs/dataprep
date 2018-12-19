@@ -385,7 +385,7 @@
             </build>
         </profile>
         <profile>
-            <id>acs-deployment</id>
+            <id>docker-compose</id>
             <build>
                 <plugins>                                	                   
                     <plugin>
@@ -393,14 +393,14 @@
                         <version>1.8</version>
                         <executions>
                             <execution>
-                                <id>docker-compose-up</id>
+                                <id>acs-up</id>
                                 <phase>process-resources</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <echo>Starting ACS in docker-compose...</echo>                                                                                
+                                        <echo>Starting ACS with docker-compose!...</echo>                                                                                
                                        <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
                                             <arg line="config" />
                                         </exec>
@@ -415,20 +415,17 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>docker-compose-down</id>
-                                <phase>post-integration-test</phase>
+                                <id>acs-down</id>
+                                <phase>pre-clean</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <echo>Starting ACS in docker-compose...</echo>
+                                        <echo>Stopping ACS from docker-compose!...</echo>
                                         <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
                                             <arg value="kill" />
-                                        </exec>
-                                        <exec dir="target/classes/docker" executable="docker-compose" failonerror="true">
-                                            <arg value="rm -fv" />
-                                        </exec>
+                                        </exec>                                                                               
                                     </target>
                                 </configuration>
                             </execution>

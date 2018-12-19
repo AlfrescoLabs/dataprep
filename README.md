@@ -1,24 +1,25 @@
 ### Dataprep
 The project aims to provide a collection of helper classes that prepares and loads test data, using Alfresco's API.
 
-### Get the code
+### Usage
 
-Git:
-    git clone https://github.com/AlfrescoTestAutomation/dataprep.git
+### a) clone the repository
 
-### Use Maven
-'''
-        <dependency>
-            <groupId>org.alfresco.test</groupId>
-            <artifactId>dataprep</artifactId>
-            <version>1.8</version>
-        </dependency>
-'''
+```shell
+   $ git clone https://github.com/AlfrescoTestAutomation/dataprep.git   
+```    
 
+### b) run the tests using [Makefile](./Makefile)
 
-Open a terminal, change in to the root of the project directory and run:
+```shell
+   $ make test
+```    
+* this will install ACS using docker-compose according to [pom](./pom.xml) profile selected
+* and run the API tests over it
 
-    mvn clean install
+### c) cleanup and kill the ACS instance 
 
-        This builds the artifact that enables data loading via Alfresco API.
-
+```shell
+   $ make clean
+```    
+* this will clean the target folder and kill all docker-compose servicess according to pom profile selected
