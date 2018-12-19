@@ -11,6 +11,11 @@ ifeq ($(MVN),)
 	endif	
 endif
 
+export GIT_AUTHOR_NAME=alfresco-build
+export GIT_AUTHOR_EMAIL=build@alfresco.com
+export GIT_COMMITTER_NAME=alfresco-build
+export GIT_COMMITTER_EMAIL=build@alfresco.com
+
 compile:
 	$(MVN) --version && $(MVN) --batch-mode compile -U -DskipTests
 
@@ -23,12 +28,8 @@ environment: ## will install ACS with docker-compose according to profile
 clean:	## will stop ACS docker-compose according to profile
 	$(MVN) --batch-mode pre-clean -Pdocker-compose
 
-release: ## perform the release, automatically increase the version 		
-	export GIT_AUTHOR_NAME=alfresco-build && \
-	export GIT_AUTHOR_EMAIL=build@alfresco.com && \
-	export GIT_COMMITTER_NAME=alfresco-build && \
-	export GIT_COMMITTER_EMAIL=build@alfresco.com; 	
+release: ## perform the release, automatically increase the version 				
 	$(MVN) --batch-mode release:prepare release:perform \
-	-Dusername=$$GIT_COMMITTER_NAME \
+	-Dusername=$(GIT_COMMITTER_NAME) \
 	-Dpassword=${bamboo_git_password} \
 	"-Darguments=-Dmaven.test.skip=true"
