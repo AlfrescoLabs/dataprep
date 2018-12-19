@@ -31,6 +31,7 @@ clean:	## will stop ACS docker-compose according to profile
 release: ## perform the release, automatically increase the version 				
 	$(MVN) --batch-mode release:prepare release:perform \
 	-Dmaven.javadoc.skip=true \
+	-Dresume=false \
 	-Dusername=$(GIT_COMMITTER_NAME) \
 	-Dpassword=${bamboo_git_password} \
-	"-Darguments=-Dmaven.test.skip=true"
+	"-Darguments=-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"
