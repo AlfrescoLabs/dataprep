@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 bamboo_JAVA_HOME 	?= /opt/jdk-11 # default to java11 if not set
 
 ifeq ($(MVN),)
