@@ -23,3 +23,10 @@ The project aims to provide a collection of helper classes that prepares and loa
    $ make clean
 ```    
 * this will clean the target folder and kill all docker-compose servicess according to pom profile selected
+
+### release
+
+```shell
+   $ make release
+``` 
+* this will auto-increase the version in `pom.xml` and prepare it for next development iteration.
