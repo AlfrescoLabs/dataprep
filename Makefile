@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 bamboo_JAVA_HOME 	?= /opt/jdk-11 # default to java11 if not set
 
 ifeq ($(MVN),)
@@ -25,10 +24,10 @@ clean:	## will stop ACS docker-compose according to profile
 	$(MVN) --batch-mode pre-clean -Pdocker-compose
 
 release: ## perform the release, automatically increase the version 		
-	export GIT_AUTHOR_NAME=alfresco-build;					\
-	export GIT_AUTHOR_EMAIL=build@alfresco.com;			\
-	export GIT_COMMITTER_NAME=alfresco-build;				\
-	export GIT_COMMITTER_EMAIL=build@alfresco.com;	\	
+	export GIT_AUTHOR_NAME=alfresco-build && \
+	export GIT_AUTHOR_EMAIL=build@alfresco.com && \
+	export GIT_COMMITTER_NAME=alfresco-build && \
+	export GIT_COMMITTER_EMAIL=build@alfresco.com; 	
 	$(MVN) --batch-mode release:prepare release:perform \
 	-Dusername=$$GIT_COMMITTER_NAME \
 	-Dpassword=${bamboo_git_password} \
