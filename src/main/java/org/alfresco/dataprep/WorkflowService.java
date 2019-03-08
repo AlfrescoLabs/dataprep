@@ -17,6 +17,7 @@ package org.alfresco.dataprep;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 /**
  *  Class to create new workflow processes.
@@ -43,23 +45,31 @@ import org.springframework.stereotype.Service;
  * @author Bogdan Bocancea
  */
 @Service
-public class WorkflowService extends CMISUtil
+public class WorkflowService extends CMISUtil implements InitializingBean
 {
     private static Log logger = LogFactory.getLog(WorkflowService.class);
-    private String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
+    private static String version = AlfrescoHttpClient.ALFRESCO_API_VERSION.replace("alfresco", "workflow");
+    private static HashMap<String,String> workflowIds;
+
+    private static final String ADHOC = "activitiAdhoc";
+    private static final String PARALLELGROUPREVIEW = "activitiParallelGroupReview";
+    private static final String PARALLELREVIEW = "activitiParallelReview";
+    private static final String REVIEW = "activitiReview";
+    private static final String REVIEWPOOLED = "activitiReviewPooled";
+
     public enum WorkflowType
     {
-        NewTask("New Task","activitiAdhoc:1:4"),
-        GroupReview("Review and Approve (group review)","activitiParallelGroupReview:1:20"),
-        MultipleReviewers("Review and Approve (one or more reviewers)","activitiParallelReview:1:16"),
-        SingleReviewer("Review And Approve (single reviewer)", "activitiReview:1:8"),
-        PooledReview("Review and Approve (pooled review)", "activitiReviewPooled:1:12");
+        NewTask("New Task", ADHOC),
+        GroupReview("Review and Approve (group review)", PARALLELGROUPREVIEW),
+        MultipleReviewers("Review and Approve (one or more reviewers)", PARALLELREVIEW),
+        SingleReviewer("Review And Approve (single reviewer)", REVIEW),
+        PooledReview("Review and Approve (pooled review)", REVIEWPOOLED);
         private String title;
         private String id;
-        private WorkflowType(String title, String id)
+        private WorkflowType(String title, String key)
         {
             this.title = title;
-            this.id = id;
+            this.id = workflowIds.get(key);
         }
         public String getTitle()
         {
@@ -67,14 +77,15 @@ public class WorkflowService extends CMISUtil
         }
         public String getId()
         {
-            return this.id;
+            return id;
         }
         public String getProcessDefinitionKey()
         {
             return this.id.substring(0, this.id.indexOf(":"));
         }
+        
     }
-    
+
     public enum TaskStatus
     {
         NOT_STARTED("Not Yet Started"),
@@ -92,6 +103,45 @@ public class WorkflowService extends CMISUtil
             return this.status;
         }
         
+    }
+
+    private HashMap<String,String> getWorkflowSystemIdsAndKeys()
+    {
+        HashMap<String,String> workflows = new HashMap<String,String>();
+        AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
+        String api = client.getAlfrescoUrl() + "alfresco/api/" + version + "process-definitions";
+        HttpGet get = new HttpGet(api);
+
+        try
+        {
+            HttpResponse response = client.executeAsAdmin(get);
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
+            {
+                JSONArray jArray = client.getJSONArray(response, "list", "entries");
+                for (Object item : jArray)
+                {
+                    JSONObject jobject = (JSONObject) item;
+                    JSONObject entry = (JSONObject) jobject.get("entry");
+                    String key = (String) entry.get("key");
+                    String id = (String) entry.get("id");
+                    if (!workflows.containsKey(key))
+                    {
+                        workflows.put(key, id);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            client.close();
+            get.releaseConnection();
+        }
+
+        if (workflows.isEmpty())
+        {
+            throw new RuntimeException("Could not find workflows in system");
+        }
+        return workflows;
     }
 
     @SuppressWarnings("unchecked")
@@ -1131,5 +1181,11 @@ public class WorkflowService extends CMISUtil
         }
         return "";
     }
+
+        @Override
+        public void afterPropertiesSet() throws Exception
+        {
+            workflowIds = getWorkflowSystemIdsAndKeys();
+        }
 }
 
