@@ -72,6 +72,11 @@ public class AlfrescoHttpClient
     private String adminUser;
     private String adminPassword;
 
+    public AlfrescoHttpClient(final String scheme, final String host, final int port, final int sharePort)
+    {
+        this(scheme, host, port, sharePort, null, null);
+    }
+
     public AlfrescoHttpClient(final String scheme, final String host, final int port, final int sharePort, final String adminUser, final String adminPassword)
     {
         this.scheme = scheme;
@@ -311,26 +316,6 @@ public class AlfrescoHttpClient
         provider.setCredentials(AuthScope.ANY, credentials);
         CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
         return client;
-    }
-
-    public String getAdminUser()
-    {
-        return adminUser;
-    }
-
-    public void setAdminUser(String adminUser)
-    {
-        this.adminUser = adminUser;
-    }
-
-    public String getAdminPassword()
-    {
-        return adminPassword;
-    }
-
-    public void setAdminPassword(String adminPassword)
-    {
-        this.adminPassword = adminPassword;
     }
 
     private HttpRequestBase setBasicAuthorization(String userName, String password, HttpRequestBase request)
