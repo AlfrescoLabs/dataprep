@@ -28,7 +28,29 @@ public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient
     private String scheme;
     private int port;
     private int sharePort;
+    private String adminUser;
+    private String adminPassword;
     
+    public String getAdminUser()
+    {
+        return adminUser;
+    }
+
+    public void setAdminUser(String adminUser)
+    {
+        this.adminUser = adminUser;
+    }
+
+    public String getAdminPassword()
+    {
+        return adminPassword;
+    }
+
+    public void setAdminPassword(String adminPassword)
+    {
+        this.adminPassword = adminPassword;
+    }
+
     public int getSharePort()
     {
         return sharePort;
@@ -42,7 +64,7 @@ public class AlfrescoHttpClientFactory implements FactoryBean<AlfrescoHttpClient
     @Scope("prototype")
     public AlfrescoHttpClient getObject()
     {
-        return new AlfrescoHttpClient(scheme, host, port, sharePort);
+        return new AlfrescoHttpClient(scheme, host, port, sharePort, adminUser, adminPassword);
     }
 
     public Class<?> getObjectType()

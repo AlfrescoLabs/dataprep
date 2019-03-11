@@ -17,5 +17,7 @@
         <property name="port" value="${alfresco.port}" />
         <property name="scheme" value="${alfresco.scheme}" />
         <property name="sharePort" value="${share.port}" />
+        <property name="adminUser" value="${admin.user}" />
+        <property name="adminPassword" value="${admin.password}" />
     </bean>
 </beans>
