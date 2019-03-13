@@ -69,13 +69,22 @@ public class AlfrescoHttpClient
     private int sharePort;
     private String apiUrl;
     private String alfrescoUrl;
+    private String adminUser;
+    private String adminPassword;
 
     public AlfrescoHttpClient(final String scheme, final String host, final int port, final int sharePort)
+    {
+        this(scheme, host, port, sharePort, null, null);
+    }
+
+    public AlfrescoHttpClient(final String scheme, final String host, final int port, final int sharePort, final String adminUser, final String adminPassword)
     {
         this.scheme = scheme;
         this.host = host;
         this.port = port;
         this.sharePort = sharePort;
+        this.adminUser = adminUser;
+        this.adminPassword = adminPassword;
         apiUrl = String.format("%s://%s:%d/%s", scheme, host, port,ALFRESCO_API_PATH);
         client = HttpClientBuilder.create().build();
     }
@@ -222,7 +231,22 @@ public class AlfrescoHttpClient
         }
         return execute(request);
     }
-    
+
+    /**
+     * Execute HttpClient request as admin user without releasing the connection
+     * @param request to send 
+     * @return {@link HttpResponse} response
+     */
+    public HttpResponse executeAsAdmin(HttpRequestBase request)
+    {
+        if(!StringUtils.isEmpty(this.adminUser) || !StringUtils.isEmpty(this.adminPassword))
+        {
+            client = getHttpClientWithBasicAuth(this.adminUser, this.adminPassword);
+            setBasicAuthorization(this.adminUser, this.adminPassword, request);
+        }
+        return execute(request);
+    }
+
     /**
      * Execute HttpClient request.
      * @param userName String user name 

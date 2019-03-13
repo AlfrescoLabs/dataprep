@@ -34,7 +34,7 @@ public class AlfrescoHttpClientTest
     @BeforeMethod
     public void init()
     {
-        client = new AlfrescoHttpClient("http","localhost",8081, 8082);
+        client = new AlfrescoHttpClient("http","localhost",8081, 8082, "admin", "admin");
     }
     @AfterMethod
     public void tearDown() throws IOException

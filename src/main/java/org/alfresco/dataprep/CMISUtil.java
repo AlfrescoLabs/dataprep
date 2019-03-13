@@ -160,7 +160,7 @@ public class CMISUtil
         }
     }
     
-    @Autowired protected  AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+    @Autowired protected AlfrescoHttpClientFactory alfrescoHttpClientFactory;
     Map<String, String> contents = new HashMap<String,String>();
 
     /**
