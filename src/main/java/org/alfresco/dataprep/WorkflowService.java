@@ -131,6 +131,10 @@ public class WorkflowService extends CMISUtil implements InitializingBean
                 }
             }
         }
+        catch (Exception e) {
+			// nothing to do
+        	logger.error(e);
+		}
         finally
         {
             client.close();
