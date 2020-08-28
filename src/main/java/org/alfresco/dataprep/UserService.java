@@ -1178,7 +1178,7 @@ public class UserService extends CMISUtil
                                   final String adminPass,
                                   final String categoryName)
     {
-        if(!getCategoryNodeRef(adminPass, adminPass, categoryName).isEmpty())
+        if(!getCategoryNodeRef(adminUser, adminPass, categoryName).isEmpty())
         {
             return true;
         }
