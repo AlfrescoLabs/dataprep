@@ -1111,7 +1111,7 @@ public class UserService extends CMISUtil
                                      final String parentCategory,
                                      final String subCategory)
     {
-        String rootCategNodeRef = getCategoryNodeRef(adminPass, adminPass, parentCategory);
+        String rootCategNodeRef = getCategoryNodeRef(adminUser, adminPass, parentCategory);
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getApiUrl() + "category/workspace/SpacesStore/" + rootCategNodeRef;
         HttpPost post  = new HttpPost(url);
@@ -1146,7 +1146,7 @@ public class UserService extends CMISUtil
                                   final String categoryName)
     {
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
-        String categNodeRef = getCategoryNodeRef(adminPass, adminPass, categoryName);
+        String categNodeRef = getCategoryNodeRef(adminUser, adminPass, categoryName);
         if(StringUtils.isEmpty(categNodeRef))
         {
             throw new RuntimeException("Category doesn't exists " + categoryName);
