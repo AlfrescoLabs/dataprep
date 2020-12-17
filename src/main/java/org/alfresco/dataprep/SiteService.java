@@ -18,18 +18,10 @@
  */
 package org.alfresco.dataprep;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.alfresco.dataprep.DashboardCustomization.DashletLayout;
 import org.alfresco.dataprep.DashboardCustomization.Page;
 import org.alfresco.dataprep.DashboardCustomization.SiteDashlet;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -52,6 +44,11 @@ import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
 /**
  * Site utility helper that performs crud operation on Site.
  * <ul>
@@ -73,6 +70,9 @@ public class SiteService
     
     @Autowired 
     private AlfrescoHttpClientFactory alfrescoHttpClientFactory;
+
+    @Autowired
+    private UserService userService;
     
     public enum RMSiteCompliance
     {
@@ -331,7 +331,7 @@ public class SiteService
     /**
      * Gets all existing sites
      * 
-     * @param username site user
+     * @param userName site user
      * @param password user password
      * @return List<String> list of sites
      */
@@ -575,12 +575,16 @@ public class SiteService
         {
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
+
+        HttpState httpState = userService.login(userName, password);
+
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getShareUrl() + DashboardCustomization.SITE_PAGES_URL;
         JSONObject body = new JSONObject();
         JSONArray array = new JSONArray();
         body.put("siteId", siteName);
-        // set the default page (Document Library)
+        // set the default page (Document Library and Site Dashboard)
+        array.add(new org.json.JSONObject().put("pageId", Page.DASHBOARD.pageId));
         array.add(new org.json.JSONObject().put("pageId", Page.DOCLIB.pageId));
         if(pages != null)
         {
@@ -600,7 +604,9 @@ public class SiteService
         body.put("pages", array);
         body.put("themeId", "");
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeAndRelease(userName, password, body, post);
+        post.setEntity(client.setMessageBody(body));
+        client.setRequestWithCSRFToken(post, httpState);
+        HttpResponse response = client.executeAndReleaseWithoutBasicAuthHeader(userName, password, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             if(!multiplePages)
@@ -639,6 +645,14 @@ public class SiteService
                                  final List<Page> oldPages)
     {
         return addPages(userName, password, siteName, false, page, oldPages);
+    }
+
+    public boolean addPageToSite(final String userName,
+                                 final String password,
+                                 final String siteName,
+                                 final Page page)
+    {
+        return addPages(userName, password, siteName, false, page, null);
     }
     
     /**
@@ -683,6 +697,9 @@ public class SiteService
         {
             throw new RuntimeException("Site doesn't exists " + siteName);
         }
+
+        HttpState httpState = userService.login(userName, password);
+
         AlfrescoHttpClient client = alfrescoHttpClientFactory.getObject();
         String url = client.getShareUrl() + DashboardCustomization.ADD_DASHLET_URL;
         JSONObject body = new JSONObject();
@@ -710,7 +727,9 @@ public class SiteService
         array.add(newDashlet);
         body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
-        HttpResponse response = client.executeAndRelease(userName, password, body, post);
+        post.setEntity(client.setMessageBody(body));
+        client.setRequestWithCSRFToken(post, httpState);
+        HttpResponse response = client.executeAndReleaseWithoutBasicAuthHeader(userName, password, post);
         if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
         {
             logger.trace("Dashlet " + dashlet.name + " was added to site " + siteName);

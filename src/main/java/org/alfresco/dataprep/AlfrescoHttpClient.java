@@ -16,14 +16,20 @@ package org.alfresco.dataprep;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.httpclient.Cookie;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -62,6 +68,10 @@ public class AlfrescoHttpClient
     public static final String MIME_TYPE_JSON = "application/json";
     public static String ALFRESCO_API_PATH = "alfresco/service/api/";
     public static String ALFRESCO_API_VERSION = "-default-/public/alfresco/versions/1/";
+
+    public static final String ALFRESCO_CSRF_TOKEN = "Alfresco-CSRFToken";
+    public static final String COOKIE = "Cookie";
+
     private CloseableHttpClient client;
     private String scheme;
     private String host;
@@ -300,6 +310,57 @@ public class AlfrescoHttpClient
             close();
         }
         return response;
+    }
+
+    public HttpResponse executeAndReleaseWithoutBasicAuthHeader(final String userName,
+                                                                final String password,
+                                                                HttpRequestBase request)
+    {
+        HttpResponse response;
+        client = getHttpClientWithBasicAuth(userName, password);
+        try
+        {
+            response = execute(request);
+        }
+        finally
+        {
+            request.releaseConnection();
+            close();
+        }
+        return response;
+    }
+
+    public void setRequestWithCSRFToken(HttpRequestBase httpRequestBase, HttpState httpState)
+    {
+        String token = "";
+        try
+        {
+            token = URLDecoder.decode(getCsrfToken(httpState), "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            logger.error("Unable to decode CSRFToken");
+        }
+        String cookieValue = "";
+        for(Cookie cookie : httpState.getCookies())
+        {
+            cookieValue = cookieValue
+                .concat(cookie.getName())
+                .concat("=")
+                .concat(cookie.getValue()
+                .concat("; "));
+        }
+        httpRequestBase.setHeader(ALFRESCO_CSRF_TOKEN, token);
+        httpRequestBase.setHeader(COOKIE, cookieValue);
+        httpRequestBase.setHeader("Content-Type", MIME_TYPE_JSON);
+    }
+
+    private String getCsrfToken(HttpState state)
+    {
+        Cookie[] cookies = state.getCookies();
+        return Arrays.stream(cookies).filter(
+            cookie -> cookie.getName().equals(ALFRESCO_CSRF_TOKEN))
+                .findFirst().map(NameValuePair::getValue).orElse("");
     }
     
     /**

@@ -27,6 +27,7 @@ public class DashboardCustomization
     
     public enum Page
     {
+        DASHBOARD("dashboard"),
         BLOG("blog-postlist"),
         WIKI("wiki-page"),
         LINKS("links"),

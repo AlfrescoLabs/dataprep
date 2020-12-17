@@ -35,10 +35,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -47,6 +44,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.stereotype.Service;
+
 @Service
 /**
  * Create user helper class, creates an Alfresco user using public API.
@@ -816,7 +814,7 @@ public class UserService extends CMISUtil
                               final int column,
                               final int position)
     {
-        login(userName, password);
+        HttpState httpState = login(userName, password);
         if(column > 4 || column < 1)
         {
             throw new RuntimeException("Maximum number of columns must be at between 1 and 4");
@@ -857,9 +855,10 @@ public class UserService extends CMISUtil
         body.put("dashlets", array);
         HttpPost post  = new HttpPost(url);
         post.setEntity(client.setMessageBody(body));
+        client.setRequestWithCSRFToken(post, httpState);
         try
         {
-            HttpResponse response = client.execute(userName, password, post);
+            HttpResponse response = client.executeAndReleaseWithoutBasicAuthHeader(userName, password, post);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode())
             {
                 logger.info("Dashlet " + dashlet.name + " was added on user: " + userName + " dashboard");
