@@ -39,7 +39,7 @@
         <commons-httpclient>3.1</commons-httpclient>
         <com.googlecode.json-simple>1.1.1</com.googlecode.json-simple>
         <org.json>20170516</org.json>
-        <commons-io>2.5</commons-io>
+        <commons-io>2.7</commons-io>
         <joda-time>2.9.9</joda-time>
         <enterprise.installer.path>/data/bamboo/artifacts/${enterprise.build.plan}/ALL/alfresco-enterprise-*-installer-linux-x64.???</enterprise.installer.path>
     </properties>
