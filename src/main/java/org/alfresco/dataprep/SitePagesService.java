@@ -552,21 +552,20 @@ public class SitePagesService
         body.put("pagecontent", content);
         body.put("tags", createTagsArray(tags));
         HttpResponse response = client.executeAndRelease(userName, password, body, put);
-        switch (response.getStatusLine().getStatusCode())
+
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
         {
-            case HttpStatus.SC_OK:
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("Wiki page " + wikiTitle + " is created successfuly");
-                }
-                return true;
-            case HttpStatus.SC_NOT_FOUND:
-                throw new RuntimeException("Invalid site " + siteName);
-            default:
-                logger.error("Unable to create wiki page: " + response.toString());
-                break;
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("Wiki page " + wikiTitle + " is created successfuly");
+            }
+            return true;
         }
-        return false;
+        else
+        {
+            logger.error("Unable to create wiki page: " + response.toString());
+            throw new RuntimeException("Something went wrong while creating wiki page. Response status code: " + response.getStatusLine().getStatusCode());
+        }
     }
 
     /**
