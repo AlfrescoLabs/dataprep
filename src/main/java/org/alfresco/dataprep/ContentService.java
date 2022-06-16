@@ -51,6 +51,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 @Service
 /**
@@ -61,6 +63,9 @@ import org.springframework.stereotype.Service;
  */
 public class ContentService extends CMISUtil
 {
+    /** Logger for this class. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContentService.class);
+
     /**
      * Create a new folder
      * 
@@ -795,6 +800,7 @@ public class ContentService extends CMISUtil
         }
         catch(CmisInvalidArgumentException nf)
         {
+            LOGGER.error("Error deleting folder: inRepository {}, siteName {}, pathToFolder {}, folderName {}", inRepository, siteName, pathToFolder, folderName);
             throw new CmisRuntimeException("Invalid folder " + folderName, nf);
         }
         return false;
