@@ -35,7 +35,7 @@
         <testNG.version>6.9.10</testNG.version>
         <chemistry-opencmis-commons-api>1.1.0</chemistry-opencmis-commons-api>
         <apache.commons>3.5</apache.commons>
-        <apache.httpcomponents.httpclient>4.5.6</apache.httpcomponents.httpclient>
+        <apache.httpcomponents.httpclient>4.5.13</apache.httpcomponents.httpclient>
         <commons-httpclient>3.1</commons-httpclient>
         <com.googlecode.json-simple>1.1.1</com.googlecode.json-simple>
         <org.json>20170516</org.json>
