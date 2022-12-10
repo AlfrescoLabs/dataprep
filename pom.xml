@@ -31,7 +31,7 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
-        <spring.version>4.1.7.RELEASE</spring.version>
+        <spring.version>6.0.0</spring.version>
         <testNG.version>6.9.10</testNG.version>
         <chemistry-opencmis-commons-api>1.1.0</chemistry-opencmis-commons-api>
         <apache.commons>3.5</apache.commons>
