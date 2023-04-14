@@ -38,7 +38,7 @@
         <apache.httpcomponents.httpclient>4.5.6</apache.httpcomponents.httpclient>
         <commons-httpclient>3.1</commons-httpclient>
         <com.googlecode.json-simple>1.1.1</com.googlecode.json-simple>
-        <org.json>20170516</org.json>
+        <org.json>20230227</org.json>
         <commons-io>2.5</commons-io>
         <joda-time>2.9.9</joda-time>
         <java.version>11</java.version>
